@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![WearVerse Banner](frontend/public/assets/cyber_tiger_tee.jpg)
+![WearVerse Banner](wearverse_banner.jpg)
 
 ### *"Design what you want to wear."*
 
