@@ -29,10 +29,9 @@ const AppContent: React.FC = () => {
   const renderActivePage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage />;
       case 'create':
       case 'editor':
-        return <ChatbotStudio />;
+        return <HomePage />;
       case 'explore':
       case 'shop':
         return <ExplorePage />;
@@ -49,16 +48,16 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const isStudioOnly = currentPage === 'create' || currentPage === 'editor';
+  const isStudioOnly = false;
 
   return (
     <div className={`flex flex-col font-['Plus_Jakarta_Sans',sans-serif] transition-colors duration-200 ${
       theme === 'dark' 
         ? 'bg-[#07090e] text-slate-100' 
         : 'bg-[#f8fafc] text-slate-900'
-    } ${isStudioOnly ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'}`}>
-      {/* Top Main Navigation (Rendered on secondary pages & desktop home; mobile home has in-page header) */}
-      {!isStudioOnly && currentPage !== 'home' && <Navbar />}
+    } min-h-screen`}>
+      {/* Top Main Navigation (Rendered on secondary pages; HomePage has its own master header with history drawer) */}
+      {currentPage !== 'home' && currentPage !== 'create' && currentPage !== 'editor' && <Navbar />}
 
       {/* Main View Area */}
       <main className="flex-1 w-full overflow-hidden">
@@ -66,10 +65,10 @@ const AppContent: React.FC = () => {
       </main>
 
       {/* Footer (Rendered only on standard secondary subpages) */}
-      {!isStudioOnly && currentPage !== 'home' && <Footer />}
+      {currentPage !== 'home' && currentPage !== 'create' && currentPage !== 'editor' && <Footer />}
 
       {/* Mobile Bottom Navigation (Shown on mobile views matching Image 4) */}
-      {!isStudioOnly && <MobileNav />}
+      <MobileNav />
 
       {/* Dynamic Modals */}
       {activeModal?.type === 'tryon' && (

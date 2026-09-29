@@ -1,30 +1,60 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Sparkles, 
   Send, 
-  Search, 
   Bell, 
   Heart, 
   MessageCircle, 
-  MoreVertical, 
   ArrowRight, 
   Camera, 
   Palette, 
   Type, 
   Zap, 
-  Layers,
-  Sun,
-  Moon,
-  X,
-  ShoppingBag,
-  Eye,
-  CheckCircle2,
-  Flame,
-  Shirt
+  Sun, 
+  Moon, 
+  X, 
+  ShoppingBag, 
+  Eye, 
+  CheckCircle2, 
+  Flame, 
+  Shirt, 
+  Menu,
+  Terminal,
+  Code,
+  Coffee,
+  Plus,
+  Trash2,
+  RefreshCw,
+  Maximize2,
+  Lock,
+  ShieldCheck,
+  Cpu
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { WearVerseLogo } from '../components/WearVerseLogo';
-import { Design } from '../types';
+import { Design, AIVariation, TShirtSize } from '../types';
+import { aiService } from '../services/aiService';
+
+interface ChatMessage {
+  id: string;
+  sender: 'user' | 'ai';
+  text: string;
+  timestamp: string;
+  variations?: AIVariation[];
+  isGenerating?: boolean;
+  stepText?: string;
+}
+
+interface ChatSession {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: ChatMessage[];
+  lastThumbnail?: string;
+}
+
+const SESSIONS_STORAGE_KEY = 'wearverse_chat_sessions_v4';
 
 export const HomePage: React.FC = () => {
   const { 
@@ -32,54 +62,463 @@ export const HomePage: React.FC = () => {
     isLoggedIn, 
     openAuthModal, 
     setCurrentPage, 
-    designs, 
     toggleLikeDesign, 
     openTryOnModal, 
     openOrderModal, 
     openDetailModal,
     theme, 
     toggleTheme,
-    showToast 
+    showToast,
+    creditsRemaining,
+    hasUnlimitedPass,
+    consumeCredit,
+    openUpgradeCreditsModal
   } = useApp();
 
+  // Navigation & Drawer
+  const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
   const [promptInput, setPromptInput] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [showNotificationToast, setShowNotificationToast] = useState(false);
-  const [showSearchModal, setShowSearchModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
-  const categories = [
-    'All',
-    'Minimal',
-    'Anime',
-    'Streetwear',
-    'Quotes',
-    'Indian',
-    'Abstract'
+  // In-Page AI Design Generation State (NO REDIRECTION — Stays on same screen!)
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStep, setGenerationStep] = useState('');
+  const [activeVariations, setActiveVariations] = useState<AIVariation[]>([]);
+  const [activeVariationIndex, setActiveVariationIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<string>('#0f0f11');
+  const [selectedSize, setSelectedSize] = useState<TShirtSize>('L');
+  const [geminiDialogue, setGeminiDialogue] = useState<string>('');
+  const [refinementInput, setRefinementInput] = useState('');
+  const [inPageMessages, setInPageMessages] = useState<ChatMessage[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+
+  // Sessions from localStorage
+  const [sessions, setSessions] = useState<ChatSession[]>(() => {
+    try {
+      const data = localStorage.getItem(SESSIONS_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const studioResultRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Color options for DTG t-shirt customizer
+  const garmentColors = [
+    { name: 'Obsidian Black', hex: '#0f0f11', border: 'border-slate-700' },
+    { name: 'Washed Charcoal', hex: '#282c37', border: 'border-slate-600' },
+    { name: 'Chalk White', hex: '#ffffff', border: 'border-slate-300' },
+    { name: 'Midnight Navy', hex: '#1e1b4b', border: 'border-indigo-900' },
   ];
 
-  const handleStartGeneration = (customPrompt?: string) => {
-    const finalPrompt = customPrompt || promptInput.trim();
-    if (!finalPrompt) {
-      showToast('info', 'Type an idea first', 'Describe any design (e.g. "Cyberpunk dragon oversized tee") to generate!');
+  const tshirtSizes: TShirtSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
+
+  // Categories targeted at Gen-Z, Coders, Competitive Programmers, College Students
+  const categories = [
+    'All',
+    '💻 Dev & Coders',
+    '⚡ Competitive Prog',
+    '🎓 College Drip',
+    '🎌 Anime Techwear',
+    '🔥 Gen-Z Streetwear',
+    '✨ Minimalist',
+    '👾 Cyber Glitch'
+  ];
+
+  // Helper to convert variation to Design object
+  const varToDesign = (v: AIVariation, colorHex?: string): Design => ({
+    id: `synth-${v.id}`,
+    title: v.name || 'WearVerse Bespoke Tee',
+    slug: (v.name || 'bespoke-tee').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    creator: {
+      id: user?.id || 'usr_creator',
+      name: user?.name && user.name !== 'Guest User' ? user.name : 'WearVerse Creator',
+      username: user?.username && user.username !== 'guest' ? user.username : 'creator',
+      avatar: user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      isVerified: true,
+    },
+    description: `Custom synthesized 240 GSM heavy combed cotton streetwear tee: "${v.prompt}". Direct-to-Garment 1200 DPI vector graphic with drop-shoulder boxy drape.`,
+    tags: v.tags || ['#streetwear', '#dev', '#coder', '#techwear'],
+    fabric: {
+      gsm: 240,
+      material: '100% Combed Compact Cotton',
+      fit: 'Oversized Boxy Drop-Shoulder',
+      wash: 'Bio-Silicon Pre-Shrunk Wash',
+    },
+    colors: ['#0f0f11', '#282c37', '#ffffff', '#1e1b4b'],
+    defaultColor: colorHex || selectedColor || '#0f0f11',
+    price: 1499,
+    originalPrice: 2299,
+    rating: 4.95,
+    reviewsCount: 1,
+    likesCount: 1,
+    viewsCount: 1,
+    isLiked: false,
+    isSaved: false,
+    frontImage: v.mockupUrl,
+    backImage: '/assets/tryon_black_back.jpg',
+    graphicImage: v.graphicUrl || v.mockupUrl,
+    prompt: v.prompt,
+    style: 'Generative Techwear',
+    category: 'Streetwear',
+    isTrending: true,
+    createdAt: new Date().toISOString(),
+  });
+
+  // Save sessions to storage
+  const saveSessions = (updated: ChatSession[]) => {
+    setSessions(updated);
+    try {
+      localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // IN-PAGE GENERATION (NO REDIRECTION!)
+  const handleGenerateInPage = async (customPrompt?: string) => {
+    const query = (customPrompt || promptInput).trim();
+    if (!query) {
+      showToast('info', 'Type a streetwear idea first', 'e.g. "Git commit neon terminal boxy tee" or "LeetCode binary search tree graphic"');
       return;
     }
 
-    // Save prompt to session storage so AI Chat Studio picks it up immediately
-    sessionStorage.setItem('wearverse_initial_prompt', finalPrompt);
-    setCurrentPage('create');
-  };
+    // Credits guard
+    if (creditsRemaining <= 0 && user?.role !== 'admin' && !hasUnlimitedPass) {
+      showToast('warning', 'Generation Limit Reached (3/3)', 'You have used all 3 free generations. Refill tokens or sign in as Founder to continue.');
+      openUpgradeCreditsModal();
+      return;
+    }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleStartGeneration();
+    consumeCredit();
+    setIsGenerating(true);
+    setGenerationStep('🧠 Analyzing developer techwear concept...');
+
+    const userMsg: ChatMessage = {
+      id: `usr-${Date.now()}`,
+      sender: 'user',
+      text: query,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    const aiMsgId = `ai-${Date.now()}`;
+    const aiLoadingMsg: ChatMessage = {
+      id: aiMsgId,
+      sender: 'ai',
+      text: `Synthesizing custom 240 GSM streetwear design for "${query}"...`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isGenerating: true,
+      stepText: '🧠 Analyzing developer concept & vector print geometry...',
+    };
+
+    const nextMessages = [...inPageMessages, userMsg, aiLoadingMsg];
+    setInPageMessages(nextMessages);
+
+    // Scroll to active generation preview smoothly
+    setTimeout(() => {
+      studioResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+
+    try {
+      // Parallel execution: AI Graphic Generation + Google Gemini Fashion Dialogue
+      const [variations, geminiText] = await Promise.all([
+        aiService.generateDesign({
+          prompt: query,
+          garmentColor: selectedColor || '#0f0f11',
+        }, (step) => setGenerationStep(step)),
+        aiService.generateFashionDialogue(query, [
+          ...inPageMessages.slice(-4).map(m => ({
+            role: m.sender === 'user' ? ('user' as const) : ('model' as const),
+            text: m.text,
+          }))
+        ]).catch(err => {
+          console.warn('Gemini dialogue fallback:', err);
+          return `⚡ Synthesized bespoke 240 GSM streetwear design for "${query}":`;
+        })
+      ]);
+
+      setActiveVariations(variations);
+      setActiveVariationIndex(0);
+      setGeminiDialogue(geminiText || `⚡ Synthesized bespoke 240 GSM streetwear design for "${query}":`);
+
+      const finalizedMessages: ChatMessage[] = nextMessages.map(m => {
+        if (m.id === aiMsgId) {
+          return {
+            ...m,
+            text: geminiText,
+            isGenerating: false,
+            variations,
+          };
+        }
+        return m;
+      });
+
+      setInPageMessages(finalizedMessages);
+
+      // Save or update session
+      const sessionTitle = query.length > 32 ? query.substring(0, 30) + '...' : query;
+      const lastThumb = variations[0]?.mockupUrl;
+
+      if (!activeSessionId) {
+        const newId = `sess-${Date.now()}`;
+        const newSession: ChatSession = {
+          id: newId,
+          title: sessionTitle,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          messages: finalizedMessages,
+          lastThumbnail: lastThumb,
+        };
+        const allSessions = [newSession, ...sessions];
+        saveSessions(allSessions);
+        setActiveSessionId(newId);
+      } else {
+        const allSessions = sessions.map(s => {
+          if (s.id === activeSessionId) {
+            return {
+              ...s,
+              updatedAt: new Date().toISOString(),
+              messages: finalizedMessages,
+              lastThumbnail: lastThumb || s.lastThumbnail,
+            };
+          }
+          return s;
+        });
+        saveSessions(allSessions);
+      }
+
+      showToast('success', 'Design Synthesized! ⚡', 'Direct-to-Garment print preview generated on the page.');
+
+    } catch (err) {
+      console.error(err);
+      setInPageMessages(prev => prev.map(m => {
+        if (m.id === aiMsgId) {
+          return {
+            ...m,
+            text: `Finished processing "${query}".`,
+            isGenerating: false,
+          };
+        }
+        return m;
+      }));
+    } finally {
+      setIsGenerating(false);
+      setGenerationStep('');
     }
   };
 
-  // Trending designs curated for the hero section matching Image 4
+  // IN-PAGE CONVERSATIONAL REFINEMENT
+  const handleRefineInPage = async () => {
+    const tweak = refinementInput.trim();
+    if (!tweak || isGenerating || activeVariations.length === 0) return;
+
+    setRefinementInput('');
+    setIsGenerating(true);
+    setGenerationStep('Interpreting design tweak...');
+
+    const userMsg: ChatMessage = {
+      id: `usr-${Date.now()}`,
+      sender: 'user',
+      text: tweak,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    const aiMsgId = `ai-${Date.now()}`;
+    const aiLoadingMsg: ChatMessage = {
+      id: aiMsgId,
+      sender: 'ai',
+      text: `Refining T-shirt design with: "${tweak}"...`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isGenerating: true,
+      stepText: 'Regenerating graphic vectors and garment wash...',
+    };
+
+    const updated = [...inPageMessages, userMsg, aiLoadingMsg];
+    setInPageMessages(updated);
+
+    try {
+      const [result, geminiCritique] = await Promise.all([
+        aiService.refineDesign({
+          instruction: tweak,
+          currentVariations: activeVariations,
+          activeVariationId: activeVariations[activeVariationIndex]?.id || '1',
+          hasProPass: hasUnlimitedPass,
+        }, (step) => setGenerationStep(step)),
+        aiService.generateFashionDialogue(
+          `Customer requested tweak: "${tweak}". Give a 1-sentence senior streetwear stylist approval.`,
+          []
+        ).catch(() => null)
+      ]);
+
+      if (result.updatedVariations && result.updatedVariations.length > 0) {
+        setActiveVariations(result.updatedVariations);
+      }
+
+      const responseText = result.message + (geminiCritique ? `\n\n✨ Stylist Note: ${geminiCritique}` : '');
+      setGeminiDialogue(responseText);
+
+      const finalized: ChatMessage[] = updated.map(m => {
+        if (m.id === aiMsgId) {
+          return {
+            ...m,
+            text: responseText,
+            isGenerating: false,
+            variations: result.updatedVariations,
+          };
+        }
+        return m;
+      });
+
+      setInPageMessages(finalized);
+
+      if (activeSessionId) {
+        const allSessions = sessions.map(s => {
+          if (s.id === activeSessionId) {
+            return {
+              ...s,
+              updatedAt: new Date().toISOString(),
+              messages: finalized,
+            };
+          }
+          return s;
+        });
+        saveSessions(allSessions);
+      }
+
+      showToast('success', 'Design Refined! ✨', tweak);
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGenerating(false);
+      setGenerationStep('');
+    }
+  };
+
+  // Start fresh in-page chat
+  const handleStartNewChat = () => {
+    setActiveSessionId(null);
+    setInPageMessages([]);
+    setActiveVariations([]);
+    setGeminiDialogue('');
+    setPromptInput('');
+    setRefinementInput('');
+    setIsHistoryDrawerOpen(false);
+    showToast('info', 'New Canvas Ready', 'Describe any concept to synthesize a fresh custom tee.');
+    inputRef.current?.focus();
+  };
+
+  // Load past session
+  const handleLoadSession = (session: ChatSession) => {
+    setActiveSessionId(session.id);
+    setInPageMessages(session.messages);
+    const lastWithVars = [...session.messages].reverse().find(m => m.variations && m.variations.length > 0);
+    if (lastWithVars?.variations) {
+      setActiveVariations(lastWithVars.variations);
+      setActiveVariationIndex(0);
+      setGeminiDialogue(lastWithVars.text);
+    } else {
+      setActiveVariations([]);
+      setGeminiDialogue('');
+    }
+    setIsHistoryDrawerOpen(false);
+    showToast('success', 'Chat Session Loaded', session.title);
+    setTimeout(() => {
+      studioResultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+  };
+
+  // Delete session
+  const handleDeleteSession = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = sessions.filter(s => s.id !== id);
+    saveSessions(updated);
+    if (activeSessionId === id) {
+      handleStartNewChat();
+    }
+    showToast('info', 'Deleted', 'Chat session removed.');
+  };
+
+  // Curated Developer & Coder Grails
+  const coderGrailsList = [
+    {
+      id: 'coder-001',
+      title: 'Git Commit --force',
+      badge: 'DEV EDITION',
+      creator: { name: 'Linux Daemon', username: 'linux.daemon', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' },
+      likesCount: 3420,
+      commentsCount: 412,
+      image: '/assets/broken_reality.jpg',
+      price: 1499,
+      tags: ['#git', '#10xdev', '#terminal', '#boxy'],
+      category: '💻 Dev & Coders',
+    },
+    {
+      id: 'coder-002',
+      title: 'Algorithm Overlord',
+      badge: 'CP KNIGHT',
+      creator: { name: 'LeetCode Knight', username: 'leetcode.knight', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150' },
+      likesCount: 4210,
+      commentsCount: 520,
+      image: '/assets/cyber_tiger.jpg',
+      price: 1599,
+      tags: ['#dsa', '#competitiveprog', '#dp', '#neon'],
+      category: '⚡ Competitive Prog',
+    },
+    {
+      id: 'coder-003',
+      title: '404 Sleep Not Found',
+      badge: 'COLLEGE ALL-NIGHTER',
+      creator: { name: 'Terminal Neo', username: 'terminal_neo', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150' },
+      likesCount: 2890,
+      commentsCount: 315,
+      image: '/assets/need_my_space.jpg',
+      price: 1299,
+      tags: ['#allnighter', '#coffee', '#glitch', '#caffeine'],
+      category: '🎓 College Drip',
+    },
+    {
+      id: 'coder-004',
+      title: 'Binary Samurai',
+      badge: 'ANIME TECHWEAR',
+      creator: { name: 'Ronin Dev', username: 'ronin_dev', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 5120,
+      commentsCount: 680,
+      image: '/assets/samurai.jpg',
+      price: 1699,
+      tags: ['#hacker', '#samurai', '#techwear', '#katana'],
+      category: '🎌 Anime Techwear',
+    },
+    {
+      id: 'coder-005',
+      title: 'Sudo rm -rf /',
+      badge: 'ROOT PRIVILEGE',
+      creator: { name: 'Sysadmin Core', username: 'sysadmin_core', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
+      likesCount: 2150,
+      commentsCount: 198,
+      image: '/assets/void.jpg',
+      price: 1399,
+      tags: ['#linux', '#root', '#minimal', '#matrix'],
+      category: '💻 Dev & Coders',
+    },
+    {
+      id: 'coder-006',
+      title: 'Infinite Recursion',
+      badge: 'FRACTAL CS',
+      creator: { name: 'Fibonacci AI', username: 'fibonacci.ai', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150' },
+      likesCount: 3180,
+      commentsCount: 270,
+      image: '/assets/minimal_wave.jpg',
+      price: 1499,
+      tags: ['#recursion', '#math', '#csmajor', '#spiral'],
+      category: '🎓 College Drip',
+    },
+  ];
+
+  // Curated Gen-Z & College Streetwear Drops
   const trendingList = [
     {
       id: 'wv-001',
@@ -89,123 +528,132 @@ export const HomePage: React.FC = () => {
       commentsCount: 236,
       image: '/assets/dragon_legacy.jpg',
       price: 1499,
-      category: 'Anime',
-    },
-    {
-      id: 'wv-002',
-      title: 'Mountain Vibes',
-      creator: { name: 'Nature Studio', username: 'nature.studio', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-      likesCount: 1800,
-      commentsCount: 120,
-      image: '/assets/mountain_vibes.jpg',
-      price: 1299,
-      category: 'Minimal',
-    },
-    {
-      id: 'wv-005',
-      title: 'Lost Soul',
-      creator: { name: 'Ryan Ink', username: 'ryan.ink', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
-      likesCount: 3100,
-      commentsCount: 410,
-      image: '/assets/void.jpg',
-      price: 1599,
-      category: 'Streetwear',
+      category: '🔥 Gen-Z Streetwear',
     },
     {
       id: 'wv-003',
-      title: 'Tokyo Drift 1982',
-      creator: { name: 'Kenji Sato', username: 'tokyodrift', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150' },
-      likesCount: 2900,
-      commentsCount: 194,
+      title: 'Speed Demon 1982',
+      creator: { name: 'Apex Club', username: 'apex_drift', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150' },
+      likesCount: 3120,
+      commentsCount: 284,
+      image: '/assets/speed_demon.jpg',
+      price: 1599,
+      category: '🔥 Gen-Z Streetwear',
+    },
+    {
+      id: 'wv-004',
+      title: 'Tokyo Drift Midnight',
+      creator: { name: 'Neo Tokyo Studio', username: 'neotokyo', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
+      likesCount: 2950,
+      commentsCount: 312,
       image: '/assets/tokyo_drift.jpg',
       price: 1599,
-      category: 'Streetwear',
+      category: '🎌 Anime Techwear',
     },
-  ];
-
-  const communityList = [
+    {
+      id: 'wv-005',
+      title: 'Sakura Ronin',
+      creator: { name: 'Kenshin Neo', username: 'kenshin_art', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150' },
+      likesCount: 3680,
+      commentsCount: 420,
+      image: '/assets/sakura_ronin.jpg',
+      price: 1499,
+      category: '🎌 Anime Techwear',
+    },
     {
       id: 'wv-006',
-      title: 'Good Days Ahead',
-      creator: { name: 'Vibe Creator', username: 'goodvibes', avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150' },
-      likesCount: 1450,
-      commentsCount: 98,
-      image: '/assets/broken_reality.jpg',
-      price: 1399,
-    },
-    {
-      id: 'wv-008',
-      title: 'Mountain Sun',
-      creator: { name: 'Devanagari Neo', username: 'urban_desi', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150' },
-      likesCount: 2150,
-      commentsCount: 142,
-      image: '/assets/mountain_vibes.jpg',
-      price: 1399,
+      title: 'Evolution of Beer',
+      creator: { name: 'College Hangover', username: 'campus_vibe', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' },
+      likesCount: 1980,
+      commentsCount: 165,
+      image: '/assets/evolution_beer.jpg',
+      price: 1199,
+      category: '🎓 College Drip',
     },
     {
       id: 'wv-007',
-      title: 'Cyber Tiger 2026',
-      creator: { name: 'Neo Tokyo', username: 'neotokyo', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-      likesCount: 3890,
-      commentsCount: 312,
-      image: '/assets/cyber_tiger.jpg',
-      price: 1699,
+      title: 'Cosmic Event Horizon',
+      creator: { name: 'Astro Punk', username: 'astropunk', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150' },
+      likesCount: 2640,
+      commentsCount: 210,
+      image: '/assets/cosmic_portal.jpg',
+      price: 1399,
+      category: '👾 Cyber Glitch',
     },
   ];
 
-  // Filtered designs based on active category
-  const filteredTrending = activeCategory === 'All' 
-    ? trendingList 
-    : trendingList.filter(d => d.category.toLowerCase() === activeCategory.toLowerCase());
+  // Active variation currently shown
+  const activeVar = activeVariations[activeVariationIndex] || null;
 
   return (
     <div className={`min-h-screen pb-28 md:pb-16 font-['Plus_Jakarta_Sans',sans-serif] transition-colors duration-200 ${
       theme === 'dark' ? 'bg-[#07090e] text-slate-100' : 'bg-[#f8fafc] text-slate-900'
     }`}>
 
-      {/* TOP MOBILE APP BAR (Matching Image 4) */}
-      <header className={`sticky top-0 z-40 px-4 py-3 backdrop-blur-xl border-b transition-colors ${
+      {/* 1. TOP HEADER: HAMBURGER ON TOP LEFT, BEST GOOD LOOKING LOGO, NO SEARCH ICON */}
+      <header className={`sticky top-0 z-40 px-3 sm:px-6 py-3 backdrop-blur-xl border-b transition-colors ${
         theme === 'dark' 
-          ? 'bg-[#07090e]/90 border-slate-800/80 text-white' 
-          : 'bg-white/95 border-slate-200 text-slate-900 shadow-xs'
+          ? 'bg-[#07090e]/92 border-slate-800/80 text-white shadow-xl shadow-black/40' 
+          : 'bg-white/95 border-slate-200 text-slate-900 shadow-sm shadow-slate-200/50'
       }`}>
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          {/* Brand Logo */}
-          <div 
-            onClick={() => setCurrentPage('home')}
-            className="flex items-center gap-2 cursor-pointer active:scale-95 transition-transform"
-          >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-md shadow-indigo-600/30">
-              <span className="text-white font-black text-sm tracking-wider font-['Outfit']">W</span>
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+          
+          {/* LEFT: HAMBURGER MENU (Chat History) + BEST GOOD LOOKING LOGO */}
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            {/* Hamburger Menu Button */}
+            <button
+              type="button"
+              onClick={() => setIsHistoryDrawerOpen(true)}
+              className={`p-2 rounded-2xl border transition-all active:scale-90 flex items-center gap-1.5 shadow-sm ${
+                theme === 'dark'
+                  ? 'bg-slate-900/90 border-slate-700/80 text-slate-200 hover:text-white hover:border-indigo-400'
+                  : 'bg-slate-100 border-slate-200 text-slate-800 hover:text-slate-950 hover:bg-slate-200'
+              }`}
+              title="Open Chat History (Past Design Sessions)"
+              aria-label="Open Chat History"
+            >
+              <Menu className="w-5 h-5 text-indigo-500" />
+              <span className="text-xs font-bold hidden sm:inline">Chats</span>
+              {sessions.length > 0 && (
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse hidden sm:inline" />
+              )}
+            </button>
+
+            {/* Elevated WearVerse Logo */}
+            <div 
+              onClick={() => {
+                setActiveSessionId(null);
+                setInPageMessages([]);
+                setActiveVariations([]);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="cursor-pointer active:scale-95 transition-transform"
+            >
+              <WearVerseLogo size="md" showStudioBadge={true} />
             </div>
-            <span className={`text-lg font-black tracking-tight font-['Outfit'] ${
-              theme === 'dark' ? 'text-white' : 'text-slate-950'
-            }`}>
-              WearVerse
-            </span>
           </div>
 
-          {/* Desktop Navigation Links */}
+          {/* CENTER: DESKTOP PILLS (Explore, Wardrobe) */}
           <nav className={`hidden md:flex items-center gap-1.5 p-1 rounded-2xl border transition-colors ${
             theme === 'dark' ? 'bg-[#121622]/80 border-slate-800/80' : 'bg-slate-100/90 border-slate-200'
           }`}>
             <button
               type="button"
-              onClick={() => setCurrentPage('create')}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 shadow-md shadow-indigo-600/30 flex items-center gap-1.5 active:scale-95 transition"
+              onClick={() => inputRef.current?.focus()}
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 shadow-md shadow-indigo-600/30 flex items-center gap-1.5 active:scale-95 transition"
             >
               <Sparkles className="w-3.5 h-3.5 text-indigo-200" />
-              <span>AI Chat Studio</span>
+              <span>Synthesize Studio</span>
             </button>
             <button
               type="button"
               onClick={() => setCurrentPage('explore')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
                 theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
               }`}
             >
               <Flame className="w-3.5 h-3.5 text-rose-500" />
-              <span>Explore</span>
+              <span>Explore Grails</span>
             </button>
             <button
               type="button"
@@ -216,7 +664,7 @@ export const HomePage: React.FC = () => {
                 }
                 setCurrentPage('my-designs');
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
                 theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
               }`}
             >
@@ -225,43 +673,29 @@ export const HomePage: React.FC = () => {
             </button>
           </nav>
 
-          {/* Right Header Icons */}
+          {/* RIGHT HEADER ICONS: THEME TOGGLE, NOTIFICATIONS, USER AVATAR (NO SEARCH ICON!) */}
           <div className="flex items-center gap-2">
-            {/* Theme Toggle */}
+            {/* Theme Toggle Button */}
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-2 rounded-full border transition active:scale-90 ${
+              className={`p-2 rounded-xl border transition active:scale-90 shadow-sm ${
                 theme === 'dark'
-                  ? 'bg-slate-900 border-slate-700/80 text-amber-300'
-                  : 'bg-slate-100 border-slate-200 text-indigo-600'
+                  ? 'bg-slate-900 border-slate-700/80 text-amber-300 hover:bg-slate-850'
+                  : 'bg-slate-100 border-slate-200 text-indigo-600 hover:bg-slate-200'
               }`}
               title="Toggle Dark / Light Theme"
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* Search Icon */}
-            <button
-              type="button"
-              onClick={() => setCurrentPage('explore')}
-              className={`p-2 rounded-full border transition active:scale-90 ${
-                theme === 'dark'
-                  ? 'bg-slate-900 border-slate-700/80 text-slate-300 hover:text-white'
-                  : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-950'
-              }`}
-              title="Search drops"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-
-            {/* Notification Bell with Red Badge */}
+            {/* Notification Bell */}
             <button
               type="button"
               onClick={() => {
-                showToast('info', '🔥 New Drop Alert', 'Dragon Legacy 240 GSM Boxy Tee is the featured drop of the week!');
+                showToast('info', '🔥 Coder Drop Alert', 'Git Commit --force 240 GSM Boxy Tee is live with DTG glow print!');
               }}
-              className={`relative p-2 rounded-full border transition active:scale-90 ${
+              className={`relative p-2 rounded-xl border transition active:scale-90 shadow-sm ${
                 theme === 'dark'
                   ? 'bg-slate-900 border-slate-700/80 text-slate-300 hover:text-white'
                   : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-950'
@@ -272,13 +706,13 @@ export const HomePage: React.FC = () => {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
             </button>
 
-            {/* User Profile Avatar */}
+            {/* User Profile Avatar / Sign In */}
             {isLoggedIn ? (
               <button
                 type="button"
                 onClick={() => setCurrentPage('profile')}
                 className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-indigo-500/50 active:scale-95 transition"
-                title="View Profile"
+                title="View Profile & Orders"
               >
                 <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
               </button>
@@ -286,25 +720,150 @@ export const HomePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => openAuthModal('login')}
-                className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 !text-white text-white-force text-xs font-bold shadow-md shadow-indigo-600/30 active:scale-95 transition"
+                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 !text-white text-white-force text-xs font-bold shadow-md shadow-indigo-600/30 active:scale-95 transition"
               >
                 Sign In
               </button>
             )}
           </div>
+
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
+      {/* 2. CHAT HISTORY SLIDING DRAWER (ACCESSED VIA TOP-LEFT HAMBURGER) */}
+      {isHistoryDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div 
+            onClick={() => setIsHistoryDrawerOpen(false)}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+          />
+
+          {/* Drawer Sidebar */}
+          <div className={`relative z-10 w-80 max-w-[85vw] h-full flex flex-col border-r shadow-2xl transition-colors duration-200 animate-in slide-in-from-left duration-250 ${
+            theme === 'dark' ? 'bg-[#0c101d] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            {/* Drawer Top Header */}
+            <div className={`p-4 border-b flex items-center justify-between ${
+              theme === 'dark' ? 'border-slate-800' : 'border-slate-200'
+            }`}>
+              <div className="flex items-center gap-2">
+                <WearVerseLogo size="sm" showStudioBadge={false} />
+                <span className="font-extrabold text-xs uppercase tracking-wider text-indigo-500">History</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsHistoryDrawerOpen(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* New Design Chat Button */}
+            <div className="p-3">
+              <button
+                type="button"
+                onClick={handleStartNewChat}
+                className="w-full py-2.5 px-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 active:scale-95 transition"
+              >
+                <Plus className="w-4 h-4" />
+                <span>New T-Shirt Design</span>
+              </button>
+            </div>
+
+            {/* Session List */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-1.5 scrollbar-none">
+              <p className={`text-[10px] font-bold uppercase tracking-wider px-2 pb-1 ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-700'
+              }`}>
+                Recent Design Chats ({sessions.length})
+              </p>
+
+              {sessions.length === 0 ? (
+                <div className="py-12 text-center text-xs space-y-2 text-slate-400">
+                  <Terminal className="w-7 h-7 mx-auto opacity-40 text-indigo-400" />
+                  <p className="font-semibold">No design sessions yet.</p>
+                  <p className="text-[11px] max-w-[200px] mx-auto text-slate-400">Type any prompt on the home screen to synthesize your first T-shirt!</p>
+                </div>
+              ) : (
+                sessions.map((sess) => {
+                  const isCurrent = activeSessionId === sess.id;
+                  return (
+                    <div
+                      key={sess.id}
+                      onClick={() => handleLoadSession(sess)}
+                      className={`group w-full p-2.5 rounded-2xl cursor-pointer transition flex items-center gap-2.5 border ${
+                        isCurrent 
+                          ? (theme === 'dark' ? 'bg-[#181f33] text-white border-indigo-500/60 shadow-md' : 'bg-indigo-50 text-indigo-950 border-indigo-300 shadow-sm')
+                          : (theme === 'dark' ? 'bg-[#101424]/60 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/80' : 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-100')
+                      }`}
+                    >
+                      {sess.lastThumbnail ? (
+                        <img 
+                          src={sess.lastThumbnail} 
+                          alt="Thumbnail" 
+                          className="w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-indigo-500/30"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center flex-shrink-0">
+                          <Shirt className="w-4 h-4" />
+                        </div>
+                      )}
+                      
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-xs font-bold truncate">{sess.title}</p>
+                        <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                          {new Date(sess.updatedAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteSession(sess.id, e)}
+                        title="Delete chat"
+                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-400 transition"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Drawer Footer Quota Pill */}
+            <div className={`p-3 border-t text-[11px] flex items-center justify-between ${
+              theme === 'dark' ? 'border-slate-800 bg-[#080b14]' : 'border-slate-200 bg-slate-50'
+            }`}>
+              <div className="flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                <span className="font-bold">
+                  {user?.role === 'admin' || hasUnlimitedPass ? '👑 Unlimited AI' : `${creditsRemaining} / 3 Free Left`}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={openUpgradeCreditsModal}
+                className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+              >
+                Refill
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. MAIN HOMEPAGE CONTAINER */}
       <div className="max-w-5xl mx-auto px-4 pt-4 sm:pt-6 space-y-6">
 
-        {/* HERO SECTION MATCHING IMAGE 4 */}
+        {/* HERO SECTION: TARGETED AT GEN-Z, CODERS, DEVELOPERS, COLLEGE STUDENTS */}
         <div className={`relative rounded-3xl overflow-hidden p-6 sm:p-8 border shadow-xl transition-all ${
           theme === 'dark'
             ? 'bg-gradient-to-br from-[#121626] via-[#0d101c] to-[#07090e] border-indigo-500/30'
             : 'bg-gradient-to-br from-indigo-50/90 via-white to-purple-50/60 border-indigo-100 shadow-indigo-100/50'
         }`}>
-          {/* Fashion Model Background Graphic (Right Side Image 4) */}
+          {/* Fashion Model Background Graphic */}
           <div className="absolute right-0 top-0 bottom-0 w-1/2 sm:w-2/5 pointer-events-none opacity-40 sm:opacity-90 overflow-hidden flex items-center justify-end">
             <img 
               src="/assets/hero_model.jpg" 
@@ -320,21 +879,21 @@ export const HomePage: React.FC = () => {
 
           {/* Hero Content */}
           <div className="relative z-10 max-w-lg space-y-3">
-            {/* Small Glowing Pill */}
+            {/* Glowing Tag Pill */}
             <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
               theme === 'dark'
                 ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
                 : 'bg-indigo-100 border-indigo-200 text-indigo-700 shadow-xs'
             }`}>
               <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-              <span>AI Powered</span>
+              <span>Generative Techwear • Coder & Gen-Z Atelier • 240 GSM</span>
             </div>
 
-            {/* Big Headline */}
+            {/* Headline */}
             <h1 className={`text-2xl sm:text-4xl font-extrabold tracking-tight font-['Space_Grotesk'] leading-tight ${
               theme === 'dark' ? 'text-white' : 'text-slate-950'
             }`}>
-              Turn Your Ideas Into{' '}
+              Turn Your Code & Ideas Into{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
                 Wearable Art
               </span>
@@ -344,12 +903,12 @@ export const HomePage: React.FC = () => {
             <p className={`text-xs sm:text-sm leading-relaxed max-w-sm ${
               theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
             }`}>
-              Describe an idea, a mood, a graphic, or a style. We'll turn it into a T-shirt you can actually wear.
+              Heavyweight 240 GSM boxy streetwear engineered for developers, competitive programmers, college creators, and midnight hackers.
             </p>
           </div>
         </div>
 
-        {/* EMBEDDED IN-PAGE AI PROMPT COMPOSER CARD (Matching Image 4) */}
+        {/* EMBEDDED IN-PAGE AI PROMPT COMPOSER CARD (NO REDIRECTION!) */}
         <div className={`p-4 rounded-3xl border shadow-xl space-y-3 transition-colors ${
           theme === 'dark'
             ? 'bg-[#121626]/95 border-indigo-500/30 shadow-indigo-500/5'
@@ -360,101 +919,375 @@ export const HomePage: React.FC = () => {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
               theme === 'dark' ? 'bg-indigo-600/20 text-indigo-400' : 'bg-indigo-50 text-indigo-600'
             }`}>
-              <Sparkles className="w-4 h-4 text-indigo-500" />
+              <Code className="w-4 h-4 text-indigo-500" />
             </div>
 
             <input
+              ref={inputRef}
               type="text"
               value={promptInput}
               onChange={(e) => setPromptInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Describe your T-shirt design... e.g. A black oversized T-shirt with a minimal Japanese dragon"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleGenerateInPage();
+                }
+              }}
+              placeholder="Describe your streetwear idea... e.g. An oversized acid-wash tee with neon git commit matrix code"
               className={`flex-1 text-xs sm:text-sm bg-transparent outline-none placeholder:text-slate-400 leading-normal ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
+                theme === 'dark' ? 'text-white' : 'text-slate-900 font-medium'
               }`}
             />
 
-            {/* Vibrant Circular Send Button (Matching Image 4) */}
+            {/* Vibrant Circular Send Button */}
             <button
               type="button"
-              onClick={() => handleStartGeneration()}
-              className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 !text-white text-white-force flex items-center justify-center shadow-lg shadow-indigo-600/40 transition active:scale-90 flex-shrink-0"
-              title="Generate with AI"
+              onClick={() => handleGenerateInPage()}
+              disabled={isGenerating || !promptInput.trim()}
+              className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 !text-white text-white-force flex items-center justify-center shadow-lg shadow-indigo-600/40 transition active:scale-90 flex-shrink-0 disabled:opacity-40"
+              title="Synthesize In-Page"
             >
-              <Send className="w-4 h-4 !text-white text-white-force ml-0.5" />
+              {isGenerating ? (
+                <RefreshCw className="w-4 h-4 animate-spin !text-white text-white-force" />
+              ) : (
+                <Send className="w-4 h-4 !text-white text-white-force ml-0.5" />
+              )}
             </button>
           </div>
 
-          {/* Quick Helper Action Chips Below Input (Matching Image 4) */}
+          {/* Quick Helper Chips targeted at Coders, College & Gen-Z */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none text-xs">
             <button
               type="button"
-              onClick={() => handleStartGeneration('Cyberpunk Neo-Tokyo street art')}
+              onClick={() => {
+                setPromptInput('Acid-washed black tee with glowing neon green git commit terminal code and cyber matrix circuit');
+                handleGenerateInPage('Acid-washed black tee with glowing neon green git commit terminal code and cyber matrix circuit');
+              }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-slate-300 hover:text-white'
-                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-950 shadow-xs'
+                  ? 'bg-slate-900/80 border-slate-700/80 text-emerald-300 hover:border-emerald-400'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-800 shadow-xs'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Style</span>
+              <Terminal className="w-3.5 h-3.5 text-emerald-500" />
+              <span>💻 Git Push</span>
             </button>
 
             <button
               type="button"
-              onClick={() => handleStartGeneration('Onyx black heavy washed 240 GSM')}
+              onClick={() => {
+                setPromptInput('Glowing neon cyan dynamic programming graph and binary tree on 240 GSM heavy tee');
+                handleGenerateInPage('Glowing neon cyan dynamic programming graph and binary tree on 240 GSM heavy tee');
+              }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-slate-300 hover:text-white'
-                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-950 shadow-xs'
+                  ? 'bg-slate-900/80 border-slate-700/80 text-cyan-300 hover:border-cyan-400'
+                  : 'bg-cyan-50 border-cyan-200 text-cyan-800 shadow-xs'
               }`}
             >
-              <Palette className="w-3.5 h-3.5 text-violet-500" />
-              <span>Color</span>
+              <Cpu className="w-3.5 h-3.5 text-cyan-500" />
+              <span>⚡ Algo Overlord</span>
             </button>
 
             <button
               type="button"
-              onClick={() => handleStartGeneration('Vintage 80s motorsport analog drift')}
+              onClick={() => {
+                setPromptInput('Glitch typography 404 Sleep Not Found with pixel coffee cup on dark charcoal tee');
+                handleGenerateInPage('Glitch typography 404 Sleep Not Found with pixel coffee cup on dark charcoal tee');
+              }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-slate-300 hover:text-white'
-                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-950 shadow-xs'
+                  ? 'bg-slate-900/80 border-slate-700/80 text-amber-300 hover:border-amber-400'
+                  : 'bg-amber-50 border-amber-200 text-amber-800 shadow-xs'
               }`}
             >
-              <Zap className="w-3.5 h-3.5 text-amber-500" />
-              <span>Vibe</span>
+              <Coffee className="w-3.5 h-3.5 text-amber-500" />
+              <span>☕ 404 Sleep</span>
             </button>
 
             <button
               type="button"
-              onClick={() => handleStartGeneration('Tokyo Kanji Typography on heavy tee')}
+              onClick={() => {
+                setPromptInput('Anime cyber hacker with dual glowing katana and floating terminal syntax');
+                handleGenerateInPage('Anime cyber hacker with dual glowing katana and floating terminal syntax');
+              }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-slate-300 hover:text-white'
-                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-950 shadow-xs'
+                  ? 'bg-slate-900/80 border-slate-700/80 text-purple-300 hover:border-purple-400'
+                  : 'bg-purple-50 border-purple-200 text-purple-800 shadow-xs'
               }`}
             >
-              <Type className="w-3.5 h-3.5 text-pink-500" />
-              <span>Add Text</span>
+              <Zap className="w-3.5 h-3.5 text-purple-500" />
+              <span>⚔️ Binary Samurai</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setCurrentPage('create')}
+              onClick={() => {
+                setPromptInput('Retro 90s vintage boxy washed streetwear tee with cyber renaissance glitch statue');
+                handleGenerateInPage('Retro 90s vintage boxy washed streetwear tee with cyber renaissance glitch statue');
+              }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-slate-300 hover:text-white'
-                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:text-slate-950 shadow-xs'
+                  ? 'bg-slate-900/80 border-slate-700/80 text-pink-300 hover:border-pink-400'
+                  : 'bg-pink-50 border-pink-200 text-pink-800 shadow-xs'
               }`}
             >
-              <Camera className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Upload</span>
+              <Sparkles className="w-3.5 h-3.5 text-pink-500" />
+              <span>🎓 College Drip</span>
             </button>
           </div>
         </div>
 
-        {/* HORIZONTAL CATEGORY PILLS (Matching Image 4) */}
+        {/* 4. ACTIVE IN-PAGE AI GENERATION STREAM (STAYS ON SAME SCREEN!) */}
+        <div ref={studioResultRef}>
+          {/* Active Generation Progress Visualizer */}
+          {isGenerating && (
+            <div className={`p-5 rounded-3xl border space-y-3.5 shadow-xl backdrop-blur-md animate-in fade-in duration-300 ${
+              theme === 'dark'
+                ? 'bg-gradient-to-r from-indigo-950/80 via-purple-950/60 to-slate-900 border-indigo-500/40 text-slate-100'
+                : 'bg-gradient-to-r from-indigo-50/90 via-purple-50/70 to-white border-indigo-200 text-slate-900'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="relative w-5 h-5 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+                    <Sparkles className="w-2.5 h-2.5 text-indigo-500 animate-pulse" />
+                  </div>
+                  <span className="text-xs font-bold tracking-wide">
+                    WearVerse Neural DTG Studio
+                  </span>
+                </div>
+                <span className={`text-[10px] font-mono font-semibold uppercase px-2.5 py-0.5 rounded-full border ${
+                  theme === 'dark' ? 'text-indigo-300 bg-indigo-900/60 border-indigo-500/30' : 'text-indigo-700 bg-indigo-100 border-indigo-300'
+                }`}>
+                  Flux Diffusion Active
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-indigo-500 dark:text-indigo-300">
+                    {generationStep || 'Synthesizing live streetwear graphic...'}
+                  </span>
+                  <span className="text-indigo-500 font-bold text-[10px] animate-pulse">Live</span>
+                </div>
+                <div className={`w-full h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'}`}>
+                  <div className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-pulse w-full rounded-full transition-all duration-500" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 pt-1 text-[10px]">
+                <div className={`p-2 rounded-xl border text-center ${
+                  theme === 'dark' ? 'bg-slate-900/80 border-slate-800 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
+                }`}>
+                  <span className="font-bold block text-indigo-500">1200 DPI</span>
+                  <span>Vector DTG</span>
+                </div>
+                <div className={`p-2 rounded-xl border text-center ${
+                  theme === 'dark' ? 'bg-slate-900/80 border-slate-800 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
+                }`}>
+                  <span className="font-bold block text-indigo-500">240 GSM</span>
+                  <span>Combed Cotton</span>
+                </div>
+                <div className={`p-2 rounded-xl border text-center ${
+                  theme === 'dark' ? 'bg-slate-900/80 border-slate-800 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
+                }`}>
+                  <span className="font-bold block text-indigo-500">Boxy Fit</span>
+                  <span>Drop Shoulder</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Synthesized Design Result Card (Rendered directly in-page!) */}
+          {activeVar && (
+            <div className={`p-5 sm:p-6 rounded-3xl border shadow-2xl space-y-5 transition-all animate-in fade-in duration-300 ${
+              theme === 'dark' 
+                ? 'bg-[#121626] border-indigo-500/40 shadow-indigo-600/10' 
+                : 'bg-white border-indigo-200 shadow-xl shadow-indigo-100/50'
+            }`}>
+              
+              {/* Stylist & Gemini Dialogue Header */}
+              {geminiDialogue && (
+                <div className={`p-3.5 rounded-2xl border text-xs leading-relaxed space-y-1 ${
+                  theme === 'dark'
+                    ? 'bg-indigo-950/40 border-indigo-500/30 text-indigo-200'
+                    : 'bg-indigo-50 border-indigo-200 text-indigo-950'
+                }`}>
+                  <div className="flex items-center gap-1.5 font-bold text-indigo-500 dark:text-indigo-300">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>WearVerse AI Senior Fashion Director</span>
+                  </div>
+                  <p className="whitespace-pre-line text-xs font-medium">{geminiDialogue}</p>
+                </div>
+              )}
+
+              {/* Main Product Showcase Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+                {/* Left: High-Res T-Shirt Mockup */}
+                <div className="relative rounded-2xl overflow-hidden border border-slate-700/40 shadow-xl group aspect-square flex items-center justify-center bg-black/30">
+                  <img 
+                    src={activeVar.mockupUrl} 
+                    alt={activeVar.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-zoom-in"
+                    onClick={() => setLightboxImg(activeVar.mockupUrl)}
+                  />
+                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-wider">
+                    240 GSM HEAVY COTTON
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLightboxImg(activeVar.mockupUrl)}
+                    className="absolute bottom-3 right-3 p-2 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 text-white hover:text-indigo-400 transition"
+                    title="Inspect High-Res"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Right: Specifications & Direct Buy / Try-On Controls */}
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                      GENERATED ATELIER DROP
+                    </span>
+                    <h2 className={`text-xl sm:text-2xl font-black font-['Space_Grotesk'] mt-1 ${
+                      theme === 'dark' ? 'text-white' : 'text-slate-950'
+                    }`}>
+                      {activeVar.name}
+                    </h2>
+                    <p className={`text-xs mt-1 line-clamp-2 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {activeVar.prompt}
+                    </p>
+                  </div>
+
+                  {/* Pricing Badge */}
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-indigo-500">
+                      ₹1,499
+                    </span>
+                    <span className={`text-xs line-through ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>
+                      ₹2,299
+                    </span>
+                    <span className="text-xs font-bold text-emerald-500">
+                      Free Express Delivery
+                    </span>
+                  </div>
+
+                  {/* Garment Color Selector */}
+                  <div className="space-y-1.5">
+                    <label className={`text-xs font-bold flex items-center justify-between ${
+                      theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                    }`}>
+                      <span>Garment Color</span>
+                      <span className="text-[11px] text-indigo-500 font-semibold">
+                        {garmentColors.find(c => c.hex === selectedColor)?.name}
+                      </span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      {garmentColors.map(c => (
+                        <button
+                          key={c.hex}
+                          type="button"
+                          onClick={() => setSelectedColor(c.hex)}
+                          className={`w-7 h-7 rounded-full border-2 transition-all active:scale-90 ${
+                            selectedColor === c.hex ? 'ring-2 ring-indigo-500 ring-offset-2 scale-110' : 'opacity-80'
+                          } ${c.border}`}
+                          style={{ backgroundColor: c.hex }}
+                          title={c.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Size Selector */}
+                  <div className="space-y-1.5">
+                    <label className={`text-xs font-bold ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
+                      Select Boxy Fit Size
+                    </label>
+                    <div className="flex items-center gap-2">
+                      {tshirtSizes.map(size => (
+                        <button
+                          key={size}
+                          type="button"
+                          onClick={() => setSelectedSize(size)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition active:scale-95 border ${
+                            selectedSize === size
+                              ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/30'
+                              : theme === 'dark'
+                                ? 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white'
+                                : 'bg-slate-100 border-slate-300 text-slate-800 hover:text-slate-950'
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Direct Action Buttons: Try On Me & Order & Pay */}
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => openTryOnModal(varToDesign(activeVar, selectedColor))}
+                      className={`py-3 px-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition active:scale-95 border shadow-sm ${
+                        theme === 'dark'
+                          ? 'bg-slate-800/90 hover:bg-slate-750 text-slate-100 border-slate-700'
+                          : 'bg-slate-100 hover:bg-slate-200 text-slate-900 border-slate-300'
+                      }`}
+                    >
+                      <Eye className="w-4 h-4 text-indigo-400" />
+                      <span>Try On Me</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => openOrderModal(varToDesign(activeVar, selectedColor), selectedColor, selectedSize)}
+                      className="py-3 px-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-extrabold flex items-center justify-center gap-2 transition shadow-xl shadow-indigo-600/40 active:scale-95"
+                    >
+                      <ShoppingBag className="w-4 h-4" />
+                      <span>Order & Pay ₹1,499</span>
+                    </button>
+                  </div>
+
+                  {/* In-Place Conversational Refinement Input */}
+                  <div className={`p-2.5 rounded-2xl border flex items-center gap-2 ${
+                    theme === 'dark' ? 'bg-[#0a0d18] border-slate-800' : 'bg-slate-50 border-slate-200'
+                  }`}>
+                    <Sparkles className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                    <input
+                      type="text"
+                      value={refinementInput}
+                      onChange={(e) => setRefinementInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleRefineInPage();
+                        }
+                      }}
+                      placeholder="Refine this tee ('make it cyber matrix', 'smaller chest print')..."
+                      className={`flex-1 text-xs bg-transparent outline-none ${
+                        theme === 'dark' ? 'text-white placeholder:text-slate-500' : 'text-slate-900 placeholder:text-slate-400 font-medium'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRefineInPage}
+                      disabled={isGenerating || !refinementInput.trim()}
+                      className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition active:scale-95 disabled:opacity-40"
+                    >
+                      Refine
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
+        </div>
+
+        {/* 5. HORIZONTAL CATEGORY PILLS */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
           {categories.map((cat) => {
             const isActive = activeCategory === cat;
@@ -477,13 +1310,106 @@ export const HomePage: React.FC = () => {
           })}
         </div>
 
-        {/* SECTION 1: TRENDING DESIGNS (Matching Image 4) */}
+        {/* 6. SECTION 1: CODER & DEVELOPER GRAILS (TARGETING CODERS & CP STUDENTS) */}
         <div className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <h2 className={`text-lg sm:text-xl font-extrabold font-['Space_Grotesk'] ${
+                theme === 'dark' ? 'text-white' : 'text-slate-950'
+              }`}>
+                Coder & Developer Grails
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCurrentPage('explore')}
+              className="text-xs font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1 transition"
+            >
+              <span>See all</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Horizontal Scrolling Developer Carousel */}
+          <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
+            {coderGrailsList.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  setPromptInput(item.title);
+                  handleGenerateInPage(item.title);
+                }}
+                className={`w-64 sm:w-72 flex-shrink-0 rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer group ${
+                  theme === 'dark'
+                    ? 'bg-[#121624] border-slate-800 hover:border-emerald-500/50 hover:shadow-emerald-500/10'
+                    : 'bg-white border-slate-200 hover:border-emerald-500 shadow-md hover:shadow-emerald-100'
+                }`}
+              >
+                <div className="relative aspect-square overflow-hidden bg-slate-900">
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-950/80 backdrop-blur-md border border-emerald-500/40 text-emerald-300 text-[10px] font-black uppercase tracking-wider">
+                    {item.badge}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLikeDesign(item.id);
+                    }}
+                    className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-slate-700/60 text-white hover:text-rose-500 transition"
+                  >
+                    <Heart className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="p-3.5 space-y-2">
+                  <div>
+                    <h3 className={`font-bold text-sm truncate ${
+                      theme === 'dark' ? 'text-white' : 'text-slate-950'
+                    }`}>
+                      {item.title}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-0.5">
+                      <span>@{item.creator.username}</span>
+                      <span>•</span>
+                      <span>{item.likesCount.toLocaleString()} likes</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-700/40">
+                    <span className="font-black text-indigo-500 text-sm">
+                      ₹{item.price.toLocaleString()}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPromptInput(item.title);
+                        handleGenerateInPage(item.title);
+                      }}
+                      className="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition shadow-sm"
+                    >
+                      Remix in AI
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 7. SECTION 2: TRENDING GEN-Z & COLLEGE STREETWEAR */}
+        <div className="space-y-3 pt-4">
           <div className="flex items-center justify-between">
             <h2 className={`text-lg sm:text-xl font-extrabold font-['Space_Grotesk'] ${
               theme === 'dark' ? 'text-white' : 'text-slate-950'
             }`}>
-              Trending Designs
+              Trending Gen-Z & College Drops
             </h2>
             <button
               type="button"
@@ -497,127 +1423,20 @@ export const HomePage: React.FC = () => {
 
           {/* Horizontal Scrolling Card Carousel */}
           <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
-            {filteredTrending.map((item) => (
+            {trendingList.map((item) => (
               <div
                 key={item.id}
                 onClick={() => {
-                  const match = designs.find(d => d.id === item.id) || designs[0];
-                  openDetailModal(match);
+                  setPromptInput(item.title);
+                  handleGenerateInPage(item.title);
                 }}
-                className={`w-44 sm:w-56 rounded-3xl border shadow-lg overflow-hidden flex-shrink-0 cursor-pointer group transition-all duration-300 hover:scale-[1.02] ${
+                className={`w-60 sm:w-64 flex-shrink-0 rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer group ${
                   theme === 'dark'
-                    ? 'bg-[#141824] border-slate-800'
-                    : 'bg-white border-slate-200 shadow-slate-200/50'
+                    ? 'bg-[#121624] border-slate-800 hover:border-indigo-500/50'
+                    : 'bg-white border-slate-200 hover:border-indigo-400 shadow-sm'
                 }`}
               >
-                {/* Image & Heart Button */}
-                <div className="relative aspect-square w-full bg-slate-900 overflow-hidden">
-                  <img 
-                    src={item.image} 
-                    alt={item.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {/* Floating Like Heart */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLikeDesign(item.id);
-                    }}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-slate-700/60 text-white hover:text-rose-500 transition"
-                  >
-                    <Heart className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Card Details */}
-                <div className="p-3 space-y-1.5">
-                  <h3 className={`font-bold text-xs sm:text-sm truncate ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-950'
-                  }`}>
-                    {item.title}
-                  </h3>
-
-                  {/* Creator Tag with Avatar */}
-                  <div className="flex items-center gap-1.5">
-                    <img 
-                      src={item.creator.avatar} 
-                      alt={item.creator.name} 
-                      className="w-4 h-4 rounded-full object-cover"
-                    />
-                    <span className={`text-[11px] truncate ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                      @{item.creator.username}
-                    </span>
-                  </div>
-
-                  {/* Social Counters: Likes, Comments, More */}
-                  <div className={`flex items-center justify-between pt-1 text-[11px] border-t ${
-                    theme === 'dark' ? 'border-slate-800/80 text-slate-400' : 'border-slate-100 text-slate-500'
-                  }`}>
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-3 h-3 text-rose-500" />
-                        <span>{(item.likesCount / 1000).toFixed(1)}K</span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3 text-indigo-500" />
-                        <span>{item.commentsCount}</span>
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const match = designs.find(d => d.id === item.id) || designs[0];
-                        openOrderModal(match);
-                      }}
-                      className="p-1 hover:text-indigo-500 transition"
-                      title="Quick Order"
-                    >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* SECTION 2: TOP COMMUNITY DESIGNS (Matching Image 4) */}
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <h2 className={`text-lg sm:text-xl font-extrabold font-['Space_Grotesk'] ${
-              theme === 'dark' ? 'text-white' : 'text-slate-950'
-            }`}>
-              Top Community Designs
-            </h2>
-            <button
-              type="button"
-              onClick={() => setCurrentPage('community')}
-              className="text-xs font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1 transition"
-            >
-              <span>See all</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Horizontal Scrolling Community Carousel */}
-          <div className="flex gap-4 overflow-x-auto pb-4 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
-            {communityList.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => {
-                  const match = designs.find(d => d.id === item.id) || designs[0];
-                  openDetailModal(match);
-                }}
-                className={`w-44 sm:w-56 rounded-3xl border shadow-lg overflow-hidden flex-shrink-0 cursor-pointer group transition-all duration-300 hover:scale-[1.02] ${
-                  theme === 'dark'
-                    ? 'bg-[#141824] border-slate-800'
-                    : 'bg-white border-slate-200 shadow-slate-200/50'
-                }`}
-              >
-                <div className="relative aspect-square w-full bg-slate-900 overflow-hidden">
+                <div className="relative aspect-square overflow-hidden bg-slate-900">
                   <img 
                     src={item.image} 
                     alt={item.title} 
@@ -635,7 +1454,7 @@ export const HomePage: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="p-3 space-y-1">
+                <div className="p-3.5 space-y-1">
                   <h3 className={`font-bold text-xs sm:text-sm truncate ${
                     theme === 'dark' ? 'text-white' : 'text-slate-950'
                   }`}>
@@ -657,16 +1476,28 @@ export const HomePage: React.FC = () => {
 
       </div>
 
-      {/* FLOATING MOBILE AI CHAT SHORTCUT (Always visible on mobile) */}
-      <button
-        type="button"
-        onClick={() => setCurrentPage('create')}
-        className="fixed bottom-20 right-4 z-40 md:hidden flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 text-white shadow-2xl shadow-indigo-600/50 font-extrabold text-xs active:scale-95 border border-white/20 animate-bounce-subtle"
-        title="Open AI Chat Studio"
-      >
-        <Sparkles className="w-4 h-4 fill-white text-white" />
-        <span>AI Chat</span>
-      </button>
+      {/* 8. LIGHTBOX MODAL */}
+      {lightboxImg && (
+        <div 
+          onClick={() => setLightboxImg(null)}
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-2xl w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
+          >
+            <button
+              type="button"
+              onClick={() => setLightboxImg(null)}
+              className="absolute top-3.5 right-3.5 z-10 p-2 rounded-full bg-black/60 text-white hover:text-rose-400 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img src={lightboxImg} alt="High resolution preview" className="w-full h-auto object-cover max-h-[80vh]" />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

@@ -76,13 +76,13 @@ export const WearVerseLogo: React.FC<WearVerseLogoProps> = ({
 
       {/* Brand Wordmark */}
       {showText && (
-        <div className="flex items-center gap-1.5">
-          <span className={`${textDimensions} font-black tracking-tight text-white font-['Space_Grotesk'] leading-none`}>
-            Wear<span className="bg-gradient-to-r from-indigo-400 via-violet-300 to-fuchsia-400 bg-clip-text text-transparent">Verse</span>
+        <div className="flex items-center gap-2">
+          <span className={`${textDimensions} font-black tracking-tight text-slate-950 dark:text-white font-['Space_Grotesk'] leading-none`}>
+            Wear<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Verse</span>
           </span>
           {showStudioBadge && (
-            <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 tracking-wider">
-              Studio
+            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 tracking-widest font-mono shadow-xs">
+              STUDIO
             </span>
           )}
         </div>
