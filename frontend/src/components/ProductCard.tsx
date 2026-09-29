@@ -65,18 +65,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
 
         {/* Top Floating Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
-          {/* Streetwear Badge: Trending vs Category */}
-          {design.isTrending ? (
-            <span className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-indigo-600/90 text-white backdrop-blur-md border border-indigo-400/40 shadow-sm">
-              <Flame className="w-3 h-3 text-rose-400" />
-              <span>Trending Drop</span>
-            </span>
-          ) : (
-            <span className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-slate-900/90 text-indigo-300 backdrop-blur-md border border-indigo-500/30 shadow-sm">
-              <Sparkles className="w-3 h-3 text-indigo-400" />
-              <span>{design.category}</span>
-            </span>
-          )}
+          {/* Garment Type Badge */}
+          <span className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg bg-indigo-600/90 text-white backdrop-blur-md border border-indigo-400/40 shadow-sm">
+            {design.garmentType === 'Hoodie' ? (
+              <>
+                <span>🧥</span>
+                <span>450 GSM Hoodie</span>
+              </>
+            ) : design.garmentType === 'Sweatshirt' ? (
+              <>
+                <span>🧶</span>
+                <span>380 GSM Sweatshirt</span>
+              </>
+            ) : (
+              <>
+                <span>👕</span>
+                <span>240 GSM Boxy Tee</span>
+              </>
+            )}
+          </span>
 
           {/* Like Heart Button */}
           <button
@@ -99,9 +106,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
           </button>
         </div>
 
-        {/* Bottom Image Tag: GSM & Fabric */}
-        <div className="absolute bottom-3 left-3 bg-slate-950/85 backdrop-blur-md text-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md border border-slate-700/50 shadow-sm">
-          {design.fabric.gsm} GSM • {design.fabric.fit}
+        {/* Bottom Image Tag: Garment Type & GSM */}
+        <div className="absolute bottom-3 left-3 bg-slate-950/90 backdrop-blur-md text-slate-200 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-700/60 shadow-sm flex items-center gap-1.5">
+          <span className="text-indigo-400 font-black">{design.garmentType || 'T-Shirt'}</span>
+          <span className="text-slate-500">•</span>
+          <span>{design.fabric.gsm} GSM</span>
+          <span className="text-slate-500">•</span>
+          <span className="text-slate-300 font-medium">{design.fabric.fit}</span>
         </div>
       </div>
 

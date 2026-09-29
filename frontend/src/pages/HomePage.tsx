@@ -116,16 +116,15 @@ export const HomePage: React.FC = () => {
 
   const tshirtSizes: TShirtSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
 
-  // Categories targeted at Gen-Z, Coders, Competitive Programmers, College Students
+  // Categories targeted at Streetwear, Hoodies, Sweatshirts, and Graphic Tees
   const categories = [
-    'All',
-    '💻 Dev & Coders',
-    '⚡ Competitive Prog',
-    '🎓 College Drip',
-    '🎌 Anime Techwear',
-    '🔥 Gen-Z Streetwear',
-    '✨ Minimalist',
-    '👾 Cyber Glitch'
+    'All Drops',
+    '👕 T-Shirts',
+    '🧥 Hoodies',
+    '🧶 Sweatshirts',
+    '🛹 Streetwear',
+    '🐉 Anime & Kanji',
+    '⛰️ Minimalist'
   ];
 
   // Helper to convert variation to Design object
@@ -442,143 +441,131 @@ export const HomePage: React.FC = () => {
     showToast('info', 'Deleted', 'Chat session removed.');
   };
 
-  // Curated Developer & Coder Grails
-  const coderGrailsList = [
+  // Curated Luxury Heavyweight Hoodies & Sweatshirts
+  const hoodieAndSweatList = [
     {
-      id: 'coder-001',
-      title: 'Git Commit --force',
-      badge: 'DEV EDITION',
-      creator: { name: 'Linux Daemon', username: 'linux.daemon', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' },
-      likesCount: 3420,
-      commentsCount: 412,
-      image: '/assets/broken_reality.jpg',
-      price: 1499,
-      tags: ['#git', '#10xdev', '#terminal', '#boxy'],
-      category: '💻 Dev & Coders',
+      id: 'wv-hoodie-01',
+      title: 'Tokyo Cyber Heavyweight Hoodie',
+      badge: '450 GSM HOODIE',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 3820,
+      commentsCount: 168,
+      image: '/assets/cyber_hoodie.jpg',
+      price: 2499,
+      tags: ['#hoodie', '#cyberpunk', '#heavyweight', '#450gsm'],
+      garmentType: 'Hoodie',
     },
     {
-      id: 'coder-002',
-      title: 'Algorithm Overlord',
-      badge: 'CP KNIGHT',
-      creator: { name: 'LeetCode Knight', username: 'leetcode.knight', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150' },
-      likesCount: 4210,
-      commentsCount: 520,
-      image: '/assets/cyber_tiger.jpg',
-      price: 1599,
-      tags: ['#dsa', '#competitiveprog', '#dp', '#neon'],
-      category: '⚡ Competitive Prog',
+      id: 'wv-hoodie-02',
+      title: 'Neo-Tokyo Rebel Cyber Hoodie',
+      badge: '450 GSM HOODIE',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 3240,
+      commentsCount: 142,
+      image: '/assets/tokyo_rebel_hoodie.jpg',
+      price: 2599,
+      tags: ['#hoodie', '#neotokyo', '#anime', '#kanji'],
+      garmentType: 'Hoodie',
     },
     {
-      id: 'coder-003',
-      title: '404 Sleep Not Found',
-      badge: 'COLLEGE ALL-NIGHTER',
-      creator: { name: 'Terminal Neo', username: 'terminal_neo', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150' },
-      likesCount: 2890,
-      commentsCount: 315,
-      image: '/assets/need_my_space.jpg',
-      price: 1299,
-      tags: ['#allnighter', '#coffee', '#glitch', '#caffeine'],
-      category: '🎓 College Drip',
+      id: 'wv-sweat-01',
+      title: 'Celestial Sun French Terry Sweatshirt',
+      badge: '380 GSM SWEATSHIRT',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 2460,
+      commentsCount: 118,
+      image: '/assets/celestial_sweatshirt.jpg',
+      price: 2199,
+      tags: ['#sweatshirt', '#frenchterry', '#minimal', '#380gsm'],
+      garmentType: 'Sweatshirt',
     },
     {
-      id: 'coder-004',
-      title: 'Binary Samurai',
-      badge: 'ANIME TECHWEAR',
-      creator: { name: 'Ronin Dev', username: 'ronin_dev', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-      likesCount: 5120,
-      commentsCount: 680,
-      image: '/assets/samurai.jpg',
-      price: 1699,
-      tags: ['#hacker', '#samurai', '#techwear', '#katana'],
-      category: '🎌 Anime Techwear',
-    },
-    {
-      id: 'coder-005',
-      title: 'Sudo rm -rf /',
-      badge: 'ROOT PRIVILEGE',
-      creator: { name: 'Sysadmin Core', username: 'sysadmin_core', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-      likesCount: 2150,
-      commentsCount: 198,
-      image: '/assets/void.jpg',
-      price: 1399,
-      tags: ['#linux', '#root', '#minimal', '#matrix'],
-      category: '💻 Dev & Coders',
-    },
-    {
-      id: 'coder-006',
-      title: 'Infinite Recursion',
-      badge: 'FRACTAL CS',
-      creator: { name: 'Fibonacci AI', username: 'fibonacci.ai', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150' },
-      likesCount: 3180,
-      commentsCount: 270,
-      image: '/assets/minimal_wave.jpg',
-      price: 1499,
-      tags: ['#recursion', '#math', '#csmajor', '#spiral'],
-      category: '🎓 College Drip',
+      id: 'wv-sweat-02',
+      title: 'Urban Zen Botanical Crewneck',
+      badge: '380 GSM SWEATSHIRT',
+      creator: { name: 'Yuki Morita', username: 'yukimorita', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120' },
+      likesCount: 1980,
+      commentsCount: 94,
+      image: '/assets/urban_zen_sweatshirt.jpg',
+      price: 2199,
+      tags: ['#sweatshirt', '#botanical', '#zen', '#charcoal'],
+      garmentType: 'Sweatshirt',
     },
   ];
 
-  // Curated Gen-Z & College Streetwear Drops
+  // Curated Luxury Streetwear Graphic Tees (240 GSM)
   const trendingList = [
     {
-      id: 'wv-001',
-      title: 'Dragon Legacy',
-      creator: { name: 'Aryan Sharma', username: 'aryan_designs', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-      likesCount: 2400,
-      commentsCount: 236,
+      id: 'wv-tee-01',
+      title: 'Mecha Ronin Streetwear Tee',
+      badge: '240 GSM TEE',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 3950,
+      commentsCount: 184,
+      image: '/assets/cyber_samurai_tee.jpg',
+      price: 1599,
+      category: '🛹 Streetwear',
+      garmentType: 'T-Shirt',
+    },
+    {
+      id: 'wv-tee-02',
+      title: 'Dragon Legacy Graphic Tee',
+      badge: '240 GSM TEE',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 1890,
+      commentsCount: 142,
       image: '/assets/dragon_legacy.jpg',
       price: 1499,
-      category: '🔥 Gen-Z Streetwear',
+      category: '🛹 Streetwear',
+      garmentType: 'T-Shirt',
     },
     {
-      id: 'wv-003',
-      title: 'Speed Demon 1982',
-      creator: { name: 'Apex Club', username: 'apex_drift', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150' },
-      likesCount: 3120,
-      commentsCount: 284,
-      image: '/assets/speed_demon.jpg',
-      price: 1599,
-      category: '🔥 Gen-Z Streetwear',
-    },
-    {
-      id: 'wv-004',
-      title: 'Tokyo Drift Midnight',
-      creator: { name: 'Neo Tokyo Studio', username: 'neotokyo', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-      likesCount: 2950,
-      commentsCount: 312,
+      id: 'wv-tee-03',
+      title: 'Tokyo Drift Midnight Racer',
+      badge: '240 GSM TEE',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 1650,
+      commentsCount: 98,
       image: '/assets/tokyo_drift.jpg',
-      price: 1599,
-      category: '🎌 Anime Techwear',
+      price: 1549,
+      category: '🐉 Anime & Kanji',
+      garmentType: 'T-Shirt',
     },
     {
-      id: 'wv-005',
-      title: 'Sakura Ronin',
-      creator: { name: 'Kenshin Neo', username: 'kenshin_art', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150' },
-      likesCount: 3680,
-      commentsCount: 420,
-      image: '/assets/sakura_ronin.jpg',
+      id: 'wv-tee-04',
+      title: 'Speed Demon Turbo Racing',
+      badge: '240 GSM TEE',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 2100,
+      commentsCount: 138,
+      image: '/assets/speed_demon.jpg',
       price: 1499,
-      category: '🎌 Anime Techwear',
+      category: '🛹 Streetwear',
+      garmentType: 'T-Shirt',
     },
     {
-      id: 'wv-006',
-      title: 'Evolution of Beer',
-      creator: { name: 'College Hangover', username: 'campus_vibe', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' },
-      likesCount: 1980,
-      commentsCount: 165,
-      image: '/assets/evolution_beer.jpg',
-      price: 1199,
-      category: '🎓 College Drip',
+      id: 'wv-tee-05',
+      title: 'Blood Moon Sakura Ronin',
+      badge: '240 GSM TEE',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 3120,
+      commentsCount: 172,
+      image: '/assets/sakura_ronin.jpg',
+      price: 1599,
+      category: '🐉 Anime & Kanji',
+      garmentType: 'T-Shirt',
     },
     {
-      id: 'wv-007',
-      title: 'Cosmic Event Horizon',
-      creator: { name: 'Astro Punk', username: 'astropunk', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150' },
-      likesCount: 2640,
-      commentsCount: 210,
-      image: '/assets/cosmic_portal.jpg',
+      id: 'wv-tee-06',
+      title: 'Kanagawa Minimal Wave',
+      badge: '220 GSM TEE',
+      creator: { name: 'Yuki Morita', username: 'yukimorita', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120' },
+      likesCount: 1580,
+      commentsCount: 104,
+      image: '/assets/minimal_wave.jpg',
       price: 1399,
-      category: '👾 Cyber Glitch',
+      category: '⛰️ Minimalist',
+      garmentType: 'T-Shirt',
     },
   ];
 
@@ -955,45 +942,45 @@ export const HomePage: React.FC = () => {
             </button>
           </div>
 
-          {/* Quick Helper Chips targeted at Coders, College & Gen-Z */}
+          {/* Quick Curated Apparel Ideas */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none text-xs">
             <button
               type="button"
               onClick={() => {
-                setPromptInput('Acid-washed black tee with glowing neon green git commit terminal code and cyber matrix circuit');
-                handleGenerateInPage('Acid-washed black tee with glowing neon green git commit terminal code and cyber matrix circuit');
+                setPromptInput('Oversized boxy streetwear t-shirt with cyberpunk mecha dragon artwork in neon crimson on 240 GSM heavy combed black cotton');
+                handleGenerateInPage('Oversized boxy streetwear t-shirt with cyberpunk mecha dragon artwork in neon crimson on 240 GSM heavy combed black cotton');
               }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-emerald-300 hover:border-emerald-400'
-                  : 'bg-emerald-50 border-emerald-200 text-emerald-800 shadow-xs'
+                  ? 'bg-slate-900/80 border-slate-700/80 text-indigo-300 hover:border-indigo-400'
+                  : 'bg-indigo-50 border-indigo-200 text-indigo-800 shadow-xs'
               }`}
             >
-              <Terminal className="w-3.5 h-3.5 text-emerald-500" />
-              <span>💻 Git Push</span>
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+              <span>✨ Oversized Boxy Tee</span>
             </button>
 
             <button
               type="button"
               onClick={() => {
-                setPromptInput('Glowing neon cyan dynamic programming graph and binary tree on 240 GSM heavy tee');
-                handleGenerateInPage('Glowing neon cyan dynamic programming graph and binary tree on 240 GSM heavy tee');
+                setPromptInput('Heavyweight 450 GSM French terry black pullover hoodie with Tokyo cyberpunk neon purple kanji graphics');
+                handleGenerateInPage('Heavyweight 450 GSM French terry black pullover hoodie with Tokyo cyberpunk neon purple kanji graphics');
               }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-cyan-300 hover:border-cyan-400'
-                  : 'bg-cyan-50 border-cyan-200 text-cyan-800 shadow-xs'
+                  ? 'bg-slate-900/80 border-slate-700/80 text-violet-300 hover:border-violet-400'
+                  : 'bg-purple-50 border-purple-200 text-purple-800 shadow-xs'
               }`}
             >
-              <Cpu className="w-3.5 h-3.5 text-cyan-500" />
-              <span>⚡ Algo Overlord</span>
+              <span>🧥</span>
+              <span>Tokyo Cyber Hoodie</span>
             </button>
 
             <button
               type="button"
               onClick={() => {
-                setPromptInput('Glitch typography 404 Sleep Not Found with pixel coffee cup on dark charcoal tee');
-                handleGenerateInPage('Glitch typography 404 Sleep Not Found with pixel coffee cup on dark charcoal tee');
+                setPromptInput('380 GSM loopback French terry crewneck sweatshirt in warm cream with minimalist celestial sun geometry');
+                handleGenerateInPage('380 GSM loopback French terry crewneck sweatshirt in warm cream with minimalist celestial sun geometry');
               }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
@@ -1001,40 +988,40 @@ export const HomePage: React.FC = () => {
                   : 'bg-amber-50 border-amber-200 text-amber-800 shadow-xs'
               }`}
             >
-              <Coffee className="w-3.5 h-3.5 text-amber-500" />
-              <span>☕ 404 Sleep</span>
+              <span>🧶</span>
+              <span>Celestial Crewneck</span>
             </button>
 
             <button
               type="button"
               onClick={() => {
-                setPromptInput('Anime cyber hacker with dual glowing katana and floating terminal syntax');
-                handleGenerateInPage('Anime cyber hacker with dual glowing katana and floating terminal syntax');
+                setPromptInput('Japanese sumi-e ink brush samurai under blood moon and cherry blossoms on heavy black cotton tee');
+                handleGenerateInPage('Japanese sumi-e ink brush samurai under blood moon and cherry blossoms on heavy black cotton tee');
               }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-purple-300 hover:border-purple-400'
-                  : 'bg-purple-50 border-purple-200 text-purple-800 shadow-xs'
+                  ? 'bg-slate-900/80 border-slate-700/80 text-rose-300 hover:border-rose-400'
+                  : 'bg-rose-50 border-rose-200 text-rose-800 shadow-xs'
               }`}
             >
-              <Zap className="w-3.5 h-3.5 text-purple-500" />
-              <span>⚔️ Binary Samurai</span>
+              <span>🎌</span>
+              <span>Bushido Ronin Tee</span>
             </button>
 
             <button
               type="button"
               onClick={() => {
-                setPromptInput('Retro 90s vintage boxy washed streetwear tee with cyber renaissance glitch statue');
-                handleGenerateInPage('Retro 90s vintage boxy washed streetwear tee with cyber renaissance glitch statue');
+                setPromptInput('Speed demon 1982 vintage racing car with colorful burnout smoke on acid wash charcoal tee');
+                handleGenerateInPage('Speed demon 1982 vintage racing car with colorful burnout smoke on acid wash charcoal tee');
               }}
               className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
                 theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-pink-300 hover:border-pink-400'
-                  : 'bg-pink-50 border-pink-200 text-pink-800 shadow-xs'
+                  ? 'bg-slate-900/80 border-slate-700/80 text-cyan-300 hover:border-cyan-400'
+                  : 'bg-cyan-50 border-cyan-200 text-cyan-800 shadow-xs'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-pink-500" />
-              <span>🎓 College Drip</span>
+              <span>🏎️</span>
+              <span>Speed Demon Racer</span>
             </button>
           </div>
         </div>
@@ -1310,15 +1297,15 @@ export const HomePage: React.FC = () => {
           })}
         </div>
 
-        {/* 6. SECTION 1: CODER & DEVELOPER GRAILS (TARGETING CODERS & CP STUDENTS) */}
+        {/* 6. SECTION 1: HEAVYWEIGHT HOODIES & FRENCH TERRY SWEATSHIRTS */}
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse" />
               <h2 className={`text-lg sm:text-xl font-extrabold font-['Space_Grotesk'] ${
                 theme === 'dark' ? 'text-white' : 'text-slate-950'
               }`}>
-                Coder & Developer Grails
+                Heavyweight Hoodies & Sweatshirts
               </h2>
             </div>
             <button
@@ -1331,9 +1318,9 @@ export const HomePage: React.FC = () => {
             </button>
           </div>
 
-          {/* Horizontal Scrolling Developer Carousel */}
+          {/* Horizontal Scrolling Hoodies & Sweatshirts Carousel */}
           <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
-            {coderGrailsList.map((item) => (
+            {hoodieAndSweatList.map((item) => (
               <div
                 key={item.id}
                 onClick={() => {
@@ -1342,8 +1329,8 @@ export const HomePage: React.FC = () => {
                 }}
                 className={`w-64 sm:w-72 flex-shrink-0 rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer group ${
                   theme === 'dark'
-                    ? 'bg-[#121624] border-slate-800 hover:border-emerald-500/50 hover:shadow-emerald-500/10'
-                    : 'bg-white border-slate-200 hover:border-emerald-500 shadow-md hover:shadow-emerald-100'
+                    ? 'bg-[#121624] border-slate-800 hover:border-indigo-500/50 hover:shadow-indigo-500/10'
+                    : 'bg-white border-slate-200 hover:border-indigo-500 shadow-md hover:shadow-indigo-100'
                 }`}
               >
                 <div className="relative aspect-square overflow-hidden bg-slate-900">
@@ -1352,7 +1339,7 @@ export const HomePage: React.FC = () => {
                     alt={item.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-950/80 backdrop-blur-md border border-emerald-500/40 text-emerald-300 text-[10px] font-black uppercase tracking-wider">
+                  <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-slate-950/85 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[10px] font-black uppercase tracking-wider">
                     {item.badge}
                   </div>
                   <button
@@ -1403,14 +1390,17 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
 
-        {/* 7. SECTION 2: TRENDING GEN-Z & COLLEGE STREETWEAR */}
+        {/* 7. SECTION 2: CURATED GRAPHIC TEES */}
         <div className="space-y-3 pt-4">
           <div className="flex items-center justify-between">
-            <h2 className={`text-lg sm:text-xl font-extrabold font-['Space_Grotesk'] ${
-              theme === 'dark' ? 'text-white' : 'text-slate-950'
-            }`}>
-              Trending Gen-Z & College Drops
-            </h2>
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
+              <h2 className={`text-lg sm:text-xl font-extrabold font-['Space_Grotesk'] ${
+                theme === 'dark' ? 'text-white' : 'text-slate-950'
+              }`}>
+                Curated Luxury Graphic Tees (240 GSM)
+              </h2>
+            </div>
             <button
               type="button"
               onClick={() => setCurrentPage('explore')}
@@ -1442,6 +1432,9 @@ export const HomePage: React.FC = () => {
                     alt={item.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
+                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-slate-950/85 backdrop-blur-md border border-violet-500/40 text-violet-300 text-[10px] font-black uppercase tracking-wider">
+                    {item.badge}
+                  </div>
                   <button
                     type="button"
                     onClick={(e) => {

@@ -60,6 +60,7 @@ export interface Design {
   prompt: string;
   style: string;
   category: ApparelCategory;
+  garmentType?: 'T-Shirt' | 'Hoodie' | 'Sweatshirt';
   isTrending?: boolean;
   isCommunity?: boolean;
   isOwnerDrop?: boolean;

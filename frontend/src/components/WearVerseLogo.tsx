@@ -1,4 +1,5 @@
 import React from 'react';
+import { useApp } from '../context/AppContext';
 
 interface WearVerseLogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -13,6 +14,8 @@ export const WearVerseLogo: React.FC<WearVerseLogoProps> = ({
   className = '',
   showStudioBadge = false,
 }) => {
+  const { theme } = useApp();
+
   const iconDimensions = {
     sm: 'w-7 h-7',
     md: 'w-8 h-8 sm:w-9 sm:h-9',
@@ -24,6 +27,8 @@ export const WearVerseLogo: React.FC<WearVerseLogoProps> = ({
     md: 'text-base sm:text-lg',
     lg: 'text-xl sm:text-2xl',
   }[size];
+
+  const wearTextColor = theme === 'dark' ? '#ffffff' : '#090d16';
 
   return (
     <div className={`flex items-center gap-2.5 select-none ${className}`}>
@@ -77,11 +82,23 @@ export const WearVerseLogo: React.FC<WearVerseLogoProps> = ({
       {/* Brand Wordmark */}
       {showText && (
         <div className="flex items-center gap-2">
-          <span className={`${textDimensions} font-black tracking-tight text-slate-950 dark:text-white font-['Space_Grotesk'] leading-none`}>
-            Wear<span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Verse</span>
+          <span className={`${textDimensions} font-black tracking-tight font-['Space_Grotesk'] leading-none`}>
+            <span 
+              className={theme === 'dark' ? 'text-white' : 'text-[#090d16]'} 
+              style={{ color: wearTextColor, display: 'inline-block' }}
+            >
+              Wear
+            </span>
+            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              Verse
+            </span>
           </span>
           {showStudioBadge && (
-            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 tracking-widest font-mono shadow-xs">
+            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border tracking-widest font-mono shadow-xs ${
+              theme === 'dark'
+                ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+                : 'bg-indigo-50 text-indigo-700 border-indigo-200'
+            }`}>
               STUDIO
             </span>
           )}
