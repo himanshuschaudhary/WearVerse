@@ -10,10 +10,12 @@ export const generateCanvasComposite = async (
   garmentHex: string = '#0f0f11'
 ): Promise<string> => {
   return new Promise((resolve) => {
+    const safetyTimer = setTimeout(() => resolve(basePhotoUrl), 4000);
     try {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) {
+        clearTimeout(safetyTimer);
         resolve(basePhotoUrl);
         return;
       }
@@ -68,21 +70,29 @@ export const generateCanvasComposite = async (
           ctx.fillRect(torsoX - 10, torsoY - 10, torsoWidth + 20, torsoHeight + 20);
           ctx.restore();
 
-          resolve(canvas.toDataURL('image/jpeg', 0.94));
+          clearTimeout(safetyTimer);
+          try {
+            resolve(canvas.toDataURL('image/jpeg', 0.94));
+          } catch (err) {
+            console.warn('Canvas export tainted, using base photo:', err);
+            resolve(basePhotoUrl);
+          }
         };
 
         imgGraphic.onerror = () => {
-          // If graphic load fails, resolve base photo gracefully
+          clearTimeout(safetyTimer);
           resolve(basePhotoUrl);
         };
         imgGraphic.src = graphicUrl;
       };
 
       imgBase.onerror = () => {
+        clearTimeout(safetyTimer);
         resolve(basePhotoUrl);
       };
       imgBase.src = basePhotoUrl;
     } catch (e) {
+      clearTimeout(safetyTimer);
       console.error('Try-on composite error:', e);
       resolve(basePhotoUrl);
     }

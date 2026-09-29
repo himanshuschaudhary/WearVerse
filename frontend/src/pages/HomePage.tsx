@@ -29,7 +29,8 @@ import {
   Lock,
   ShieldCheck,
   Cpu,
-  Users
+  Users,
+  Upload
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { WearVerseLogo } from '../components/WearVerseLogo';
@@ -45,6 +46,7 @@ interface ChatMessage {
   variations?: AIVariation[];
   isGenerating?: boolean;
   stepText?: string;
+  userPhoto?: string;
 }
 
 interface ChatSession {
@@ -75,13 +77,47 @@ export const HomePage: React.FC = () => {
     creditsRemaining,
     hasUnlimitedPass,
     consumeCredit,
-    openUpgradeCreditsModal
+    openUpgradeCreditsModal,
+    updateTryOnPhoto
   } = useApp();
 
   // Navigation & Drawer
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
   const [promptInput, setPromptInput] = useState('');
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+
+  // Notification Center Popover (Past 5 Notifications)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(5);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  // Chat Continuity Try-On Photo State
+  const [uploadedTryOnPhoto, setUploadedTryOnPhoto] = useState<string | null>(user.tryOnPhotoUrl || null);
+  const [studioViewMode, setStudioViewMode] = useState<'mockup' | 'tryon'>('mockup');
+  const [tryOnCanvasUrl, setTryOnCanvasUrl] = useState<string | null>(null);
+  const [isTryOnCompositing, setIsTryOnCompositing] = useState(false);
+
+  // Close notifications on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setIsNotificationsOpen(false);
+      }
+    };
+    if (isNotificationsOpen) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [isNotificationsOpen]);
+
+  // Keep uploaded photo in sync with user profile
+  useEffect(() => {
+    if (user.tryOnPhotoUrl && !uploadedTryOnPhoto) {
+      setUploadedTryOnPhoto(user.tryOnPhotoUrl);
+    }
+  }, [user.tryOnPhotoUrl]);
 
   // In-Page AI Design Generation State (NO REDIRECTION — Stays on same screen!)
   const [isGenerating, setIsGenerating] = useState(false);
@@ -117,6 +153,132 @@ export const HomePage: React.FC = () => {
   ];
 
   const tshirtSizes: TShirtSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
+
+  // Fast Photorealistic Canvas Compositor for Chat Continuity Try-On
+  const compositeGarmentOnPhoto = async (photoUrl: string, variation: AIVariation, color: string) => {
+    setIsTryOnCompositing(true);
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setTryOnCanvasUrl(photoUrl);
+        setIsTryOnCompositing(false);
+        return;
+      }
+
+      const imgBase = new Image();
+      imgBase.crossOrigin = 'anonymous';
+      await new Promise<void>((resolve) => {
+        imgBase.onload = () => resolve();
+        imgBase.onerror = () => resolve();
+        imgBase.src = photoUrl;
+      });
+
+      canvas.width = imgBase.naturalWidth || 800;
+      canvas.height = imgBase.naturalHeight || 1066;
+      ctx.drawImage(imgBase, 0, 0, canvas.width, canvas.height);
+
+      const graphicUrl = variation.graphicUrl || variation.mockupUrl;
+      if (graphicUrl) {
+        const imgGraphic = new Image();
+        imgGraphic.crossOrigin = 'anonymous';
+        await new Promise<void>((resolve) => {
+          imgGraphic.onload = () => resolve();
+          imgGraphic.onerror = () => resolve();
+          imgGraphic.src = graphicUrl;
+        });
+
+        if (imgGraphic.naturalWidth > 0) {
+          const torsoWidth = canvas.width * 0.46;
+          const torsoHeight = torsoWidth * (imgGraphic.naturalHeight / imgGraphic.naturalWidth);
+          const torsoX = (canvas.width - torsoWidth) / 2;
+          const torsoY = canvas.height * 0.28;
+
+          ctx.save();
+          ctx.shadowColor = 'rgba(0,0,0,0.45)';
+          ctx.shadowBlur = 12;
+          ctx.shadowOffsetY = 6;
+
+          if (color === '#ffffff') {
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.globalAlpha = 0.94;
+          } else {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.globalAlpha = 0.96;
+          }
+
+          ctx.drawImage(imgGraphic, torsoX, torsoY, torsoWidth, torsoHeight);
+          ctx.restore();
+
+          // Fabric lighting map
+          ctx.save();
+          ctx.globalAlpha = 0.08;
+          ctx.globalCompositeOperation = 'multiply';
+          const drapeGradient = ctx.createLinearGradient(0, torsoY, 0, torsoY + torsoHeight);
+          drapeGradient.addColorStop(0, 'rgba(255,255,255,0.6)');
+          drapeGradient.addColorStop(0.3, 'rgba(0,0,0,0.3)');
+          drapeGradient.addColorStop(1, 'rgba(0,0,0,0.7)');
+          ctx.fillStyle = drapeGradient;
+          ctx.fillRect(torsoX - 10, torsoY - 10, torsoWidth + 20, torsoHeight + 20);
+          ctx.restore();
+        }
+      }
+
+      try {
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        setTryOnCanvasUrl(dataUrl);
+      } catch {
+        setTryOnCanvasUrl(photoUrl);
+      }
+    } catch {
+      setTryOnCanvasUrl(photoUrl);
+    } finally {
+      setIsTryOnCompositing(false);
+    }
+  };
+
+  // Handle User Photo Upload right inside Chat Continuity
+  const handlePhotoUploadInChat = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          const photoData = reader.result;
+          setUploadedTryOnPhoto(photoData);
+          updateTryOnPhoto(photoData);
+          setStudioViewMode('tryon');
+
+          // Add user photo message to chat continuity
+          const userMsg: ChatMessage = {
+            id: `usr-${Date.now()}`,
+            sender: 'user',
+            text: '📸 Uploaded my photo for instant virtual fitting & try-on:',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            userPhoto: photoData,
+          };
+
+          const aiMsgId = `ai-${Date.now()}`;
+          const aiMsg: ChatMessage = {
+            id: aiMsgId,
+            sender: 'ai',
+            text: '✨ Photo received & saved! Calibrated torso drape contours. You can now preview your synthesized designs fitted directly onto your photo.',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            userPhoto: photoData,
+          };
+
+          setInPageMessages(prev => [...prev, userMsg, aiMsg]);
+
+          if (activeVar) {
+            compositeGarmentOnPhoto(photoData, activeVar, selectedColor);
+          }
+
+          showToast('success', '📸 Photo Saved for Try-On!', 'Your photo is active for instant garment fitting.');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Helper to convert variation to Design object
   const varToDesign = (v: AIVariation, colorHex?: string): Design => ({
@@ -677,22 +839,177 @@ export const HomePage: React.FC = () => {
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* Notification Bell */}
-            <button
-              type="button"
-              onClick={() => {
-                showToast('info', '🔥 Coder Drop Alert', 'Git Commit --force 240 GSM Boxy Tee is live with DTG glow print!');
-              }}
-              className={`relative p-2 rounded-xl border transition active:scale-90 shadow-sm ${
-                theme === 'dark'
-                  ? 'bg-slate-900 border-slate-700/80 text-slate-300 hover:text-white'
-                  : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-950'
-              }`}
-              title="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
-            </button>
+            {/* Notification Bell with Past 5 Notifications Popover */}
+            <div className="relative" ref={notifRef}>
+              <button
+                type="button"
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className={`relative p-2 rounded-xl border transition active:scale-90 shadow-sm ${
+                  theme === 'dark'
+                    ? 'bg-slate-900 border-slate-700/80 text-slate-300 hover:text-white'
+                    : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-950'
+                }`}
+                title="Notifications"
+                aria-label="View 5 Notifications"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadNotifCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
+                )}
+              </button>
+
+              {/* Notification Popover Dropdown (Past 5 Notifications) */}
+              {isNotificationsOpen && (
+                <div className={`absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl shadow-2xl border overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150 ${
+                  theme === 'dark'
+                    ? 'bg-[#121626] border-slate-700 text-slate-200 shadow-2xl shadow-black/60'
+                    : 'bg-white border-slate-200 text-slate-800 shadow-xl'
+                }`}>
+                  <div className={`p-3.5 border-b flex items-center justify-between ${
+                    theme === 'dark' ? 'border-slate-800 bg-[#0e1220]' : 'border-slate-100 bg-slate-50'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-indigo-500" />
+                      <span className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Notifications</span>
+                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-indigo-600 text-white">5</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUnreadNotifCount(0);
+                        showToast('info', 'All Read', 'Marked all 5 notifications as read.');
+                      }}
+                      className="text-[10px] font-semibold text-indigo-500 hover:underline"
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
+
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800/80 max-h-80 overflow-y-auto">
+                    {/* Notification 1 */}
+                    <div 
+                      onClick={() => {
+                        setIsNotificationsOpen(false);
+                        inputRef.current?.focus();
+                        showToast('info', 'AI Studio Active', 'Synthesizing with Google Gemini 2.5 Flash.');
+                      }}
+                      className={`p-3 transition cursor-pointer flex gap-3 ${
+                        theme === 'dark' ? 'hover:bg-slate-800/60' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Sparkles className="w-4 h-4 text-indigo-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                          AI Studio 2.5 Flash Online ⚡
+                        </p>
+                        <p className={`text-[11px] mt-0.5 leading-snug ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                          Generative vector apparel synthesizer calibrated with Gemini 2.5 Flash.
+                        </p>
+                        <span className="text-[9px] text-indigo-500 font-semibold mt-1 block">Just now</span>
+                      </div>
+                    </div>
+
+                    {/* Notification 2 */}
+                    <div 
+                      onClick={() => {
+                        setIsNotificationsOpen(false);
+                        setCurrentPage('community');
+                      }}
+                      className={`p-3 transition cursor-pointer flex gap-3 ${
+                        theme === 'dark' ? 'hover:bg-slate-800/60' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Flame className="w-4 h-4 text-rose-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                          Trending #1 Drop of the Week 🔥
+                        </p>
+                        <p className={`text-[11px] mt-0.5 leading-snug ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                          "Cybernetic Phantom Samurai" reached 4,200+ likes on Community Drops.
+                        </p>
+                        <span className="text-[9px] text-slate-400 mt-1 block">15m ago</span>
+                      </div>
+                    </div>
+
+                    {/* Notification 3 */}
+                    <div 
+                      onClick={() => {
+                        setIsNotificationsOpen(false);
+                        setCurrentPage('orders');
+                      }}
+                      className={`p-3 transition cursor-pointer flex gap-3 ${
+                        theme === 'dark' ? 'hover:bg-slate-800/60' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <ShoppingBag className="w-4 h-4 text-emerald-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                          Order Dispatched 📦
+                        </p>
+                        <p className={`text-[11px] mt-0.5 leading-snug ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                          Bespoke drop #WV-9824 finished bio-wash and shipped via Express Air Delivery.
+                        </p>
+                        <span className="text-[9px] text-slate-400 mt-1 block">2h ago</span>
+                      </div>
+                    </div>
+
+                    {/* Notification 4 */}
+                    <div 
+                      onClick={() => {
+                        setIsNotificationsOpen(false);
+                        openUpgradeCreditsModal();
+                      }}
+                      className={`p-3 transition cursor-pointer flex gap-3 ${
+                        theme === 'dark' ? 'hover:bg-slate-800/60' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Zap className="w-4 h-4 text-amber-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                          Daily Credits Refreshed 👑
+                        </p>
+                        <p className={`text-[11px] mt-0.5 leading-snug ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                          Your 3 Free AI design generation & refinement credits have been reset.
+                        </p>
+                        <span className="text-[9px] text-slate-400 mt-1 block">5h ago</span>
+                      </div>
+                    </div>
+
+                    {/* Notification 5 */}
+                    <div 
+                      onClick={() => {
+                        setIsNotificationsOpen(false);
+                        setCurrentPage('community');
+                      }}
+                      className={`p-3 transition cursor-pointer flex gap-3 ${
+                        theme === 'dark' ? 'hover:bg-slate-800/60' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Users className="w-4 h-4 text-purple-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                          New Creator Drop: Devika Sharma 🎨
+                        </p>
+                        <p className={`text-[11px] mt-0.5 leading-snug ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                          @devikastyle released a new 380 GSM capsule "Heritage Cyber Kanji".
+                        </p>
+                        <span className="text-[9px] text-slate-400 mt-1 block">1d ago</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* User Profile Avatar / Sign In */}
             {isLoggedIn ? (
@@ -971,6 +1288,24 @@ export const HomePage: React.FC = () => {
               }`}
             />
 
+            {/* Direct Try-On Photo Upload Button in Chat Input */}
+            <label
+              className={`p-2 rounded-2xl border transition active:scale-90 cursor-pointer flex items-center gap-1.5 flex-shrink-0 ${
+                uploadedTryOnPhoto || user.tryOnPhotoUrl
+                  ? 'bg-indigo-600/15 border-indigo-500/50 text-indigo-500'
+                  : theme === 'dark' 
+                    ? 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white' 
+                    : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900'
+              }`}
+              title={uploadedTryOnPhoto || user.tryOnPhotoUrl ? 'Photo loaded: Click to change' : 'Upload your photo for instant try-on'}
+            >
+              <Camera className="w-4 h-4 text-indigo-500" />
+              <span className="text-[10px] font-bold hidden sm:inline">
+                {uploadedTryOnPhoto || user.tryOnPhotoUrl ? 'Photo Ready' : 'Try-On Photo'}
+              </span>
+              <input type="file" accept="image/*" onChange={handlePhotoUploadInChat} className="hidden" />
+            </label>
+
             {/* Vibrant Circular Send Button */}
             <button
               type="button"
@@ -1074,25 +1409,112 @@ export const HomePage: React.FC = () => {
 
               {/* Main Product Showcase Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
-                {/* Left: High-Res T-Shirt Mockup */}
-                <div className="relative rounded-2xl overflow-hidden border border-slate-700/40 shadow-xl group aspect-square flex items-center justify-center bg-black/30">
-                  <img 
-                    src={activeVar.mockupUrl} 
-                    alt={activeVar.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-zoom-in"
-                    onClick={() => setLightboxImg(activeVar.mockupUrl)}
-                  />
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-wider">
-                    240 GSM HEAVY COTTON
+                {/* Left: High-Res T-Shirt Mockup OR Try-On on User Photo */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className={`flex items-center gap-1 p-1 rounded-xl border text-xs font-bold ${
+                      theme === 'dark' ? 'bg-[#0f1220] border-slate-800' : 'bg-slate-100 border-slate-200'
+                    }`}>
+                      <button
+                        type="button"
+                        onClick={() => setStudioViewMode('mockup')}
+                        className={`px-2.5 py-1 rounded-lg transition ${
+                          studioViewMode === 'mockup'
+                            ? 'bg-indigo-600 text-white shadow-sm'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        👕 Flat Lay DTG
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStudioViewMode('tryon');
+                          const photo = uploadedTryOnPhoto || user.tryOnPhotoUrl;
+                          if (photo) {
+                            compositeGarmentOnPhoto(photo, activeVar, selectedColor);
+                          }
+                        }}
+                        className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 ${
+                          studioViewMode === 'tryon'
+                            ? 'bg-indigo-600 text-white shadow-sm'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <Camera className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>Fitted On My Photo</span>
+                      </button>
+                    </div>
+
+                    <label className="text-[11px] font-bold text-indigo-500 hover:underline cursor-pointer flex items-center gap-1">
+                      <Upload className="w-3 h-3" />
+                      <span>{uploadedTryOnPhoto || user.tryOnPhotoUrl ? 'Change Photo' : 'Upload Photo'}</span>
+                      <input type="file" accept="image/*" onChange={handlePhotoUploadInChat} className="hidden" />
+                    </label>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setLightboxImg(activeVar.mockupUrl)}
-                    className="absolute bottom-3 right-3 p-2 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 text-white hover:text-indigo-400 transition"
-                    title="Inspect High-Res"
-                  >
-                    <Maximize2 className="w-4 h-4" />
-                  </button>
+
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-700/40 shadow-xl group aspect-square flex items-center justify-center bg-black/30">
+                    {studioViewMode === 'tryon' ? (
+                      (uploadedTryOnPhoto || user.tryOnPhotoUrl) ? (
+                        <>
+                          <img 
+                            src={tryOnCanvasUrl || uploadedTryOnPhoto || user.tryOnPhotoUrl} 
+                            alt="Virtual Try-On preview" 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-zoom-in"
+                            onClick={() => setLightboxImg(tryOnCanvasUrl || uploadedTryOnPhoto || user.tryOnPhotoUrl)}
+                          />
+                          <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-emerald-950/80 backdrop-blur-md border border-emerald-500/40 text-emerald-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span>LIVE TRY-ON PREVIEW</span>
+                          </div>
+                          {isTryOnCompositing && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center gap-2 text-xs font-bold text-white">
+                              <RefreshCw className="w-4 h-4 animate-spin text-indigo-400" />
+                              <span>Fitting garment to your photo...</span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="p-6 text-center space-y-3">
+                          <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center mx-auto border border-indigo-500/30">
+                            <Camera className="w-6 h-6 text-indigo-400" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-white">Upload Your Photo to Try On</p>
+                            <p className="text-[11px] text-slate-400 mt-1 max-w-[200px] mx-auto">
+                              Take a quick selfie or upload a photo to see this design fitted on you.
+                            </p>
+                          </div>
+                          <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer shadow-md shadow-indigo-600/30 active:scale-95 transition">
+                            <Upload className="w-3.5 h-3.5" />
+                            <span>Select Photo</span>
+                            <input type="file" accept="image/*" onChange={handlePhotoUploadInChat} className="hidden" />
+                          </label>
+                        </div>
+                      )
+                    ) : (
+                      <>
+                        <img 
+                          src={activeVar.mockupUrl} 
+                          alt={activeVar.name} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 cursor-zoom-in"
+                          onClick={() => setLightboxImg(activeVar.mockupUrl)}
+                        />
+                        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-wider">
+                          240 GSM HEAVY COTTON
+                        </div>
+                      </>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setLightboxImg(studioViewMode === 'tryon' && (tryOnCanvasUrl || uploadedTryOnPhoto || user.tryOnPhotoUrl) ? (tryOnCanvasUrl || uploadedTryOnPhoto || user.tryOnPhotoUrl) : activeVar.mockupUrl)}
+                      className="absolute bottom-3 right-3 p-2 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 text-white hover:text-indigo-400 transition"
+                      title="Inspect High-Res"
+                    >
+                      <Maximize2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Right: Specifications & Direct Buy / Try-On Controls */}
@@ -1358,8 +1780,8 @@ export const HomePage: React.FC = () => {
             </button>
           </div>
 
-          {/* Horizontal Scrolling Card Carousel */}
-          <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
+          {/* 3 IN ONE LINE AND NEXT 3 AT ANOTHER LINE (GRID-COLS-3 ON MOBILE) */}
+          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-1">
             {trendingList.map((item) => (
               <div
                 key={item.id}
@@ -1367,7 +1789,7 @@ export const HomePage: React.FC = () => {
                   const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
                   if (fullDesign) openDetailModal(fullDesign);
                 }}
-                className={`w-60 sm:w-64 flex-shrink-0 rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer group ${
+                className={`rounded-2xl sm:rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer group flex flex-col justify-between ${
                   theme === 'dark'
                     ? 'bg-[#121624] border-slate-800 hover:border-indigo-500/50'
                     : 'bg-white border-slate-200 hover:border-indigo-400 shadow-sm'
@@ -1379,7 +1801,7 @@ export const HomePage: React.FC = () => {
                     alt={item.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full backdrop-blur-md text-[10px] font-black uppercase tracking-wider border shadow-sm ${
+                  <div className={`absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 px-1.5 sm:px-2.5 py-0.5 rounded-md sm:rounded-full backdrop-blur-md text-[8px] sm:text-[10px] font-black uppercase tracking-wider border shadow-sm ${
                     theme === 'dark' 
                       ? 'bg-slate-950/85 border-violet-500/40 text-violet-300' 
                       : 'bg-white/95 border-violet-200 text-violet-700'
@@ -1392,29 +1814,44 @@ export const HomePage: React.FC = () => {
                       e.stopPropagation();
                       toggleLikeDesign(item.id);
                     }}
-                    className={`absolute top-2.5 right-2.5 p-1.5 rounded-full backdrop-blur-md border transition ${
+                    className={`absolute top-1.5 sm:top-2.5 right-1.5 sm:right-2.5 p-1 sm:p-1.5 rounded-full backdrop-blur-md border transition ${
                       theme === 'dark' 
                         ? 'bg-slate-950/60 border-slate-700/60 text-white hover:text-rose-500' 
                         : 'bg-white/90 border-slate-200 text-slate-700 hover:text-rose-500 shadow-sm'
                     }`}
                   >
-                    <Heart className="w-3.5 h-3.5" />
+                    <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   </button>
                 </div>
 
-                <div className="p-3.5 space-y-1">
-                  <h3 className={`font-bold text-xs sm:text-sm truncate ${
-                    theme === 'dark' ? 'text-white' : 'text-slate-950'
-                  }`}>
-                    {item.title}
-                  </h3>
-                  <div className="flex items-center justify-between text-[11px] pt-1">
-                    <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>
+                <div className="p-2 sm:p-3.5 space-y-1 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className={`font-bold text-[10px] sm:text-sm line-clamp-1 ${
+                      theme === 'dark' ? 'text-white' : 'text-slate-950'
+                    }`}>
+                      {item.title}
+                    </h3>
+                    <p className={`text-[9px] sm:text-[11px] truncate ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                       @{item.creator.username}
-                    </span>
-                    <span className="font-extrabold text-indigo-500">
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                    <span className="font-extrabold text-[11px] sm:text-sm text-indigo-500">
                       ₹{item.price.toLocaleString()}
                     </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
+                        if (fullDesign) openTryOnModal(fullDesign);
+                      }}
+                      className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-indigo-600/10 hover:bg-indigo-600 text-indigo-500 hover:text-white text-[9px] sm:text-[11px] font-bold transition flex items-center gap-0.5"
+                    >
+                      <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                      <span className="hidden sm:inline">Try</span>
+                    </button>
                   </div>
                 </div>
               </div>

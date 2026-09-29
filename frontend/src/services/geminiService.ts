@@ -1,6 +1,6 @@
 /**
  * Google Gemini Generative AI Service for WearVerse
- * Powered by Google Gemini 2.5 Flash
+ * Powered by Google Gemini 2.5 Flash / 3.5 Flash
  */
 
 interface GeminiChatResponse {
@@ -40,6 +40,9 @@ function generateIntelligentFashionCritique(prompt: string): string {
   return `🔥 Synthesizing bespoke aesthetic for "${prompt}". Formulating ${themeDetail} onto ${fabricSpec}. Fabric treated with pre-shrunk bio-wash and ${printTech}.`;
 }
 
+// Available active Gemini models in order of preference
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-3.5-flash'];
+
 export const geminiService = {
   isConfigured(): boolean {
     const key = localStorage.getItem('wearverse_gemini_api_key') || import.meta.env.VITE_GEMINI_API_KEY || '';
@@ -51,73 +54,75 @@ export const geminiService = {
   },
 
   /**
-   * Generates a conversational streetwear fashion response using Gemini 1.5 Flash
+   * Helper to execute Gemini generation with fallback across models
+   */
+  async executeGemini(bodyPayload: any): Promise<string | null> {
+    const apiKey = this.getApiKey();
+    if (!apiKey) return null;
+
+    for (const model of GEMINI_MODELS) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyPayload),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text.trim();
+        } else {
+          console.warn(`Gemini model ${model} returned status: ${res.status}`);
+        }
+      } catch (err) {
+        console.warn(`Gemini error on model ${model}:`, err);
+      }
+    }
+    return null;
+  },
+
+  /**
+   * Generates a conversational streetwear fashion response using Gemini 2.5 Flash / 3.5 Flash
    */
   async generateFashionResponse(
     userPrompt: string, 
     chatHistory: { role: 'user' | 'model'; text: string }[] = []
   ): Promise<GeminiChatResponse> {
-    const apiKey = this.getApiKey();
-    if (!apiKey) {
-      return {
-        text: generateIntelligentFashionCritique(userPrompt),
-      };
-    }
-
-    const systemInstruction = `You are "WearVerse AI", the premier Senior Fashion Director & Streetwear Stylist for WearVerse — a luxury generative streetwear atelier that produces 240 GSM heavy combed cotton graphic T-shirts with 1200 DPI direct-to-garment (DTG) print craftsmanship.
+    const systemInstruction = `You are "WearVerse AI", the Senior Fashion Director & Streetwear Stylist for WearVerse — a luxury generative streetwear atelier producing 240 GSM heavy combed cotton graphic T-shirts with 1200 DPI direct-to-garment (DTG) print craftsmanship.
 
 Your persona:
-- High-fashion, knowledgeable in Japanese neo-traditional, vintage motorsport, cyber techwear, typography, sumi-e ink, minimalism, and coder culture.
-- Excited, concise, and inspiring. Keep your answers under 3 sentences.
-- Mention specific fabric details (e.g. 240 GSM heavy jersey, oversized boxy drape, vintage distress, pigment wash).
-- Specifically praise and critique the user's idea: "${userPrompt}".`;
+- Elite streetwear director knowledgeable in Japanese neo-traditional, vintage motorsport, cyber techwear, typography, sumi-e ink, minimalism, and coder culture.
+- Excited, concise, direct, and inspiring. Keep answers between 2 to 3 sentences maximum.
+- Mention specific fabric details (e.g. 240 GSM heavy jersey, boxy drop-shoulder silhouette, bio-silicon pre-shrunk wash).
+- Specifically praise, critique, and provide a stylistic direction for the user's idea: "${userPrompt}".`;
 
-    try {
-      const contents = [
-        ...chatHistory.slice(-4).map(h => ({
-          role: h.role,
-          parts: [{ text: h.text }]
-        })),
-        {
-          role: 'user',
-          parts: [{ text: userPrompt }]
-        }
-      ];
-
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: systemInstruction }]
-          },
-          contents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 250,
-          }
-        })
-      });
-
-      if (!res.ok) {
-        console.warn('Gemini API call returned status:', res.status);
-        return {
-          text: generateIntelligentFashionCritique(userPrompt),
-        };
+    const contents = [
+      ...chatHistory.slice(-4).map(h => ({
+        role: h.role,
+        parts: [{ text: h.text }]
+      })),
+      {
+        role: 'user',
+        parts: [{ text: userPrompt }]
       }
+    ];
 
-      const data = await res.json();
-      const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (generatedText) {
-        return {
-          text: generatedText.trim(),
-        };
+    const bodyPayload = {
+      systemInstruction: {
+        parts: [{ text: systemInstruction }]
+      },
+      contents,
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 250,
       }
-    } catch (err) {
-      console.warn('Gemini API error, using dynamic fashion critique:', err);
+    };
+
+    const text = await this.executeGemini(bodyPayload);
+    if (text) {
+      return { text };
     }
 
     return {
@@ -129,38 +134,24 @@ Your persona:
    * Use Gemini to elevate any brief user phrase into a luxury streetwear graphic prompt
    */
   async enhanceStreetwearPrompt(rawPrompt: string): Promise<string> {
-    const apiKey = this.getApiKey();
-    if (!apiKey) return rawPrompt;
-
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Convert this brief streetwear idea into a concise 1-sentence prompt for a 240 GSM oversized graphic T-shirt: "${rawPrompt}". Output only the final prompt text, no quotes, no extra explanations.`
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.6,
-            maxOutputTokens: 100,
-          }
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text && text.trim().length > 5) {
-          return text.trim();
-        }
+    const bodyPayload = {
+      contents: [{
+        parts: [{
+          text: `Convert this brief streetwear idea into a concise 1-sentence prompt for a 240 GSM oversized graphic T-shirt: "${rawPrompt}". Output only the final prompt text, no quotes, no extra explanations.`
+        }]
+      }],
+      generationConfig: {
+        temperature: 0.6,
+        maxOutputTokens: 100,
       }
-    } catch (err) {
-      console.warn('Gemini prompt enhancement fallback:', err);
+    };
+
+    const enhanced = await this.executeGemini(bodyPayload);
+    if (enhanced && enhanced.length > 5) {
+      return enhanced;
     }
 
     return rawPrompt;
   }
 };
+

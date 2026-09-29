@@ -29,15 +29,16 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
     creditsRemaining, 
     hasUnlimitedPass, 
     consumeCredit, 
-    openUpgradeCreditsModal 
+    openUpgradeCreditsModal,
+    updateTryOnPhoto 
   } = useApp();
 
   // Selected Garment Options
   const [selectedColor, setSelectedColor] = useState<string>(design.defaultColor || '#0f0f11');
   const [selectedSize, setSelectedSize] = useState<TShirtSize>('L');
 
-  // Input Photo State (Defaults to male model so it works instantly without uploading)
-  const [modelType, setModelType] = useState<'male' | 'female' | 'custom'>('male');
+  // Input Photo State (Defaults to user's saved photo if present, otherwise male model)
+  const [modelType, setModelType] = useState<'male' | 'female' | 'custom'>(user.tryOnPhotoUrl ? 'custom' : 'male');
   const [inputPhotoUrl, setInputPhotoUrl] = useState<string>(user.tryOnPhotoUrl || '/assets/tryon_black_front.jpg');
   const [inputPhotoName, setInputPhotoName] = useState<string>(user.tryOnPhotoUrl ? 'Your Saved Photo' : 'Male Streetwear Model (Default)');
 
@@ -80,11 +81,13 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
       const reader = new FileReader();
       reader.onload = () => {
         if (typeof reader.result === 'string') {
+          const photoData = reader.result;
           setModelType('custom');
-          setInputPhotoUrl(reader.result);
+          setInputPhotoUrl(photoData);
           setInputPhotoName(file.name || 'Your Uploaded Photo');
+          updateTryOnPhoto(photoData); // Permanently save to user context & storage
           setGeneratedTryOnUrl(null); // Reset previous generation
-          showToast('success', '📸 Photo Uploaded!', 'Click "Synthesize AI Virtual Try-On" to generate your custom preview.');
+          showToast('success', '📸 Photo Uploaded & Saved!', 'Click "Synthesize AI Virtual Try-On" to generate your custom preview.');
         }
       };
       reader.readAsDataURL(file);
@@ -98,9 +101,15 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
     garmentHex: string
   ): Promise<string> => {
     return new Promise((resolve) => {
+      // 4 second timeout safety to prevent hanging
+      const timer = setTimeout(() => {
+        resolve(basePhoto);
+      }, 4000);
+
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) {
+        clearTimeout(timer);
         resolve(basePhoto);
         return;
       }
@@ -154,12 +163,24 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
           ctx.fillRect(torsoX - 10, torsoY - 10, torsoWidth + 20, torsoHeight + 20);
           ctx.restore();
 
-          resolve(canvas.toDataURL('image/jpeg', 0.94));
+          clearTimeout(timer);
+          try {
+            resolve(canvas.toDataURL('image/jpeg', 0.94));
+          } catch (e) {
+            console.warn('Canvas export tainted, falling back to base photo:', e);
+            resolve(basePhoto);
+          }
         };
-        imgGraphic.onerror = () => resolve(basePhoto);
+        imgGraphic.onerror = () => {
+          clearTimeout(timer);
+          resolve(basePhoto);
+        };
         imgGraphic.src = graphicSrc;
       };
-      imgBase.onerror = () => resolve(basePhoto);
+      imgBase.onerror = () => {
+        clearTimeout(timer);
+        resolve(basePhoto);
+      };
       imgBase.src = basePhoto;
     });
   };
@@ -167,7 +188,7 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
   // Run Virtual Try-On (Instant In-Browser Neural Canvas Compositing - Zero API Key Needed)
   const handleStartAiTryOn = async () => {
     // 0. Ensure a photo or model is selected
-    const photoToUse = inputPhotoUrl || '/assets/tryon_black_front.jpg';
+    const photoToUse = inputPhotoUrl || user.tryOnPhotoUrl || '/assets/tryon_black_front.jpg';
     if (!inputPhotoUrl) {
       setInputPhotoUrl(photoToUse);
     }
