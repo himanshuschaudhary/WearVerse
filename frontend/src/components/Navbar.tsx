@@ -9,7 +9,8 @@ import {
   ChevronDown,
   LogOut,
   Sun,
-  Moon
+  Moon,
+  Users
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { WearVerseLogo } from './WearVerseLogo';
@@ -46,6 +47,7 @@ export const Navbar: React.FC = () => {
   const isExplore = currentPage === 'explore' || currentPage === 'shop';
   const isOrders = currentPage === 'orders';
   const isWardrobe = currentPage === 'my-designs';
+  const isCommunity = currentPage === 'community';
 
   return (
     <header className={`sticky top-0 z-40 w-full backdrop-blur-xl border-b transition-all select-none ${
@@ -119,6 +121,21 @@ export const Navbar: React.FC = () => {
           >
             <Shirt className="w-3.5 h-3.5 text-slate-400" />
             <span>Wardrobe</span>
+          </button>
+
+          {/* Community Collective */}
+          <button
+            onClick={() => setCurrentPage('community')}
+            className={`px-2.5 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              isCommunity
+                ? 'text-white bg-indigo-600 shadow-md shadow-indigo-600/30'
+                : theme === 'dark'
+                  ? 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  : 'text-slate-700 hover:text-slate-950 hover:bg-white shadow-sm'
+            }`}
+          >
+            <Users className={`w-3.5 h-3.5 ${isCommunity ? 'text-indigo-200' : 'text-indigo-500'}`} />
+            <span>Community</span>
           </button>
         </nav>
 
@@ -228,6 +245,21 @@ export const Navbar: React.FC = () => {
                     >
                       <Shirt className="w-3.5 h-3.5 text-indigo-500" />
                       <span>My Wardrobe</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setCurrentPage('community');
+                        setIsProfileOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition text-left ${
+                        theme === 'dark'
+                          ? 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950 font-semibold'
+                      }`}
+                    >
+                      <Users className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>Community Collective</span>
                     </button>
 
                     <button

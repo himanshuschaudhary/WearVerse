@@ -8,7 +8,8 @@ import {
   ShoppingBag, 
   Trash2, 
   Calendar,
-  Lock
+  Lock,
+  Users
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Design } from '../types';
@@ -114,13 +115,22 @@ export const MyDesignsPage: React.FC = () => {
             </p>
           </div>
 
-          <button
-            onClick={() => setCurrentPage('create')}
-            className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 !text-white text-white-force font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition active:scale-95"
-          >
-            <Sparkles className="w-4 h-4 !text-white text-white-force" />
-            <span>Design New T-Shirt</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+            <button
+              onClick={() => setCurrentPage('community')}
+              className="flex-1 sm:flex-initial px-4 py-3 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-sm"
+            >
+              <Users className="w-4 h-4 text-indigo-500" />
+              <span>Community Collective</span>
+            </button>
+            <button
+              onClick={() => setCurrentPage('create')}
+              className="flex-1 sm:flex-initial px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 !text-white text-white-force font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition active:scale-95"
+            >
+              <Sparkles className="w-4 h-4 !text-white text-white-force" />
+              <span>Design New T-Shirt</span>
+            </button>
+          </div>
         </div>
 
         {/* Tabs: My Designs, Liked */}
@@ -128,13 +138,20 @@ export const MyDesignsPage: React.FC = () => {
           {[
             { id: 'my-designs', label: `My Designs (${myDesigns.length})`, icon: Shirt },
             { id: 'liked', label: `Liked (${likedDesigns.length})`, icon: Heart },
+            { id: 'community', label: `Community Collective`, icon: Users },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => {
+                  if (tab.id === 'community') {
+                    setCurrentPage('community');
+                  } else {
+                    setActiveTab(tab.id as any);
+                  }
+                }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition flex-shrink-0 whitespace-nowrap active:scale-95 ${
                   isActive 
                     ? 'bg-indigo-600 !text-white text-white-force shadow-md shadow-indigo-600/30' 

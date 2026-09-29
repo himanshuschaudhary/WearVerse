@@ -28,7 +28,8 @@ import {
   Maximize2,
   Lock,
   ShieldCheck,
-  Cpu
+  Cpu,
+  Users
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { WearVerseLogo } from '../components/WearVerseLogo';
@@ -648,6 +649,16 @@ export const HomePage: React.FC = () => {
               <Shirt className="w-3.5 h-3.5 text-slate-400" />
               <span>Wardrobe</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setCurrentPage('community')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+                theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Community</span>
+            </button>
           </nav>
 
           {/* RIGHT HEADER ICONS: THEME TOGGLE, NOTIFICATIONS, USER AVATAR (NO SEARCH ICON!) */}
@@ -807,6 +818,60 @@ export const HomePage: React.FC = () => {
                   );
                 })
               )}
+            </div>
+
+            {/* Quick Navigation Shortcuts inside Drawer */}
+            <div className={`p-3 border-t space-y-1 ${
+              theme === 'dark' ? 'border-slate-800 bg-[#0c101d]/60' : 'border-slate-200 bg-slate-50/70'
+            }`}>
+              <p className={`text-[10px] font-bold uppercase tracking-wider px-2 pb-0.5 ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+              }`}>
+                Explore Platform
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentPage('community');
+                  setIsHistoryDrawerOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-left ${
+                  theme === 'dark' ? 'text-slate-300 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Community Collective</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentPage('explore');
+                  setIsHistoryDrawerOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-left ${
+                  theme === 'dark' ? 'text-slate-300 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5 text-rose-500" />
+                <span>Trending Drops</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isLoggedIn) {
+                    openAuthModal('login');
+                  } else {
+                    setCurrentPage('profile');
+                  }
+                  setIsHistoryDrawerOpen(false);
+                }}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-left ${
+                  theme === 'dark' ? 'text-slate-300 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>My Profile & Orders</span>
+              </button>
             </div>
 
             {/* Drawer Footer Quota Pill */}
