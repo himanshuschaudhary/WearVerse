@@ -98,7 +98,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [user, setUser] = useState<UserProfile>(() => storageService.getUser());
   const [designs, setDesigns] = useState<Design[]>(() => storageService.getDesigns());
-  const [orders, setOrders] = useState<Order[]>(() => storageService.getOrders());
+  const [orders, setOrders] = useState<Order[]>(() => {
+    try {
+      const logged = localStorage.getItem('wearverse_logged_in_v4') === 'true';
+      if (!logged) return [];
+      return storageService.getOrders();
+    } catch {
+      return [];
+    }
+  });
   const [reviews, setReviews] = useState<Record<string, Review[]>>(() => storageService.getReviews());
 
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
@@ -488,6 +496,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCreditsRemaining(9999);
         localStorage.setItem('wearverse_unlimited_pass_v4', 'true');
         localStorage.setItem('wearverse_credits_v4', '9999');
+        const currentOrders = storageService.getOrders();
+        setOrders(currentOrders);
+      } else {
+        setOrders(storageService.getOrders());
       }
     } catch (e) {
       console.error(e);
@@ -506,6 +518,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUser(INITIAL_USER);
     setHasUnlimitedPass(false);
     setCreditsRemaining(3);
+    setOrders([]);
     try {
       localStorage.setItem('wearverse_logged_in_v4', 'false');
       localStorage.removeItem('wearverse_user_v4');
@@ -555,12 +568,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Generation Credits Quota Guard
   const consumeCredit = (): boolean => {
-    if (!isLoggedIn) {
-      showToast('info', 'Sign in to Create', 'Please sign in or create an account to generate custom AI designs.');
-      openAuthModal('signup');
-      return false;
-    }
-
     // Founder Himanshu / Admin or Unlimited Pass: Always permitted!
     if (user.role === 'admin' || hasUnlimitedPass) {
       return true;

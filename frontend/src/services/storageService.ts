@@ -98,17 +98,11 @@ export const storageService = {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.ORDERS);
       if (!data) {
-        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(INITIAL_ORDERS));
-        return INITIAL_ORDERS;
+        return [];
       }
-      let parsed: Order[] = JSON.parse(data);
-      if (parsed.length === 0 && INITIAL_ORDERS.length > 0) {
-        parsed = INITIAL_ORDERS;
-        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(INITIAL_ORDERS));
-      }
-      return parsed;
+      return JSON.parse(data);
     } catch {
-      return INITIAL_ORDERS;
+      return [];
     }
   },
 

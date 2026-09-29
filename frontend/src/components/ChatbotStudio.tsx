@@ -28,7 +28,8 @@ import {
   Truck,
   Lock,
   Sun,
-  Moon
+  Moon,
+  ArrowLeft
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Design, AIVariation } from '../types';
@@ -944,9 +945,9 @@ export const ChatbotStudio: React.FC = () => {
 
     if (!sanitized || isGenerating) return;
 
-    if (!isLoggedIn) {
-      showToast('info', 'Sign in to Create', 'Please sign in or create an account to generate custom AI designs.');
-      openAuthModal('signup');
+    if (creditsRemaining <= 0 && user?.role !== 'admin' && !hasUnlimitedPass) {
+      showToast('warning', 'Generation Limit Reached (3/3)', 'You have used all 3 free generations. Refill tokens or sign in as Founder to continue.');
+      openUpgradeCreditsModal();
       return;
     }
 
@@ -993,18 +994,24 @@ export const ChatbotStudio: React.FC = () => {
 
     try {
       if (isRefinement && lastWithVars?.variations) {
-        const result = await aiService.refineDesign({
-          instruction: query,
-          currentVariations: lastWithVars.variations,
-          activeVariationId: lastWithVars.variations[0]?.id || '1',
-          hasProPass: hasUnlimitedPass,
-        }, (step) => setGenerationStep(step));
+        const [result, geminiComment] = await Promise.all([
+          aiService.refineDesign({
+            instruction: query,
+            currentVariations: lastWithVars.variations,
+            activeVariationId: lastWithVars.variations[0]?.id || '1',
+            hasProPass: hasUnlimitedPass,
+          }, (step) => setGenerationStep(step)),
+          aiService.generateFashionDialogue(
+            `The customer requested this design modification: "${query}". Provide a concise 1-sentence streetwear styling review.`,
+            []
+          ).catch(() => null)
+        ]);
 
         const finalizedMessages: ChatMessage[] = updatedMessages.map(m => {
           if (m.id === aiMsgId) {
             return {
               ...m,
-              text: result.message,
+              text: result.message + (geminiComment ? `\n\n✨ Stylist Note: ${geminiComment}` : ''),
               isGenerating: false,
               variations: result.requiresUpgrade ? lastWithVars.variations : result.updatedVariations,
               isUpgradePrompt: result.requiresUpgrade,
@@ -1034,16 +1041,29 @@ export const ChatbotStudio: React.FC = () => {
           saveSessionsToStorage(allSessions);
         }
       } else {
-        const variations = await aiService.generateDesign({
-          prompt: query,
-          garmentColor: '#0f0f11',
-        }, (step) => setGenerationStep(step));
+        // Run AI synthesis and Gemini Fashion Dialogue in parallel
+        const [variations, geminiDialogue] = await Promise.all([
+          aiService.generateDesign({
+            prompt: query,
+            garmentColor: '#0f0f11',
+          }, (step) => setGenerationStep(step)),
+          aiService.generateFashionDialogue(
+            query,
+            messages.slice(-4).map(m => ({
+              role: m.sender === 'user' ? 'user' : 'model',
+              text: m.text,
+            }))
+          ).catch(err => {
+            console.warn('Gemini live dialogue fallback:', err);
+            return `⚡ Synthesized bespoke 240 GSM streetwear designs for "${query}":`;
+          })
+        ]);
 
         if (variations?.[0]) {
           setActiveDesignContext(variations[0]);
         }
 
-        const aiResponseText = `⚡ Synthesized bespoke 240 GSM streetwear designs for "${query}":`;
+        const aiResponseText = geminiDialogue || `⚡ Synthesized bespoke 240 GSM streetwear designs for "${query}":`;
 
         const finalizedMessages: ChatMessage[] = updatedMessages.map(m => {
           if (m.id === aiMsgId) {
@@ -1109,14 +1129,30 @@ export const ChatbotStudio: React.FC = () => {
     }
   };
 
+  // Check if an initial prompt was forwarded from the Home page composer
+  useEffect(() => {
+    try {
+      const initialPrompt = sessionStorage.getItem('wearverse_initial_prompt');
+      if (initialPrompt && initialPrompt.trim()) {
+        sessionStorage.removeItem('wearverse_initial_prompt');
+        setInputPrompt(initialPrompt);
+        setTimeout(() => {
+          handleSendPrompt(initialPrompt);
+        }, 150);
+      }
+    } catch (e) {
+      console.error('Initial prompt load error:', e);
+    }
+  }, []);
+
   // Unified form submit handler supporting text, attached photo, or both (Requirement 2 & 3)
   const handleComposerSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (isGenerating) return;
 
-    if (!isLoggedIn) {
-      showToast('info', 'Sign in to Continue', 'Please sign in or create an account to generate designs and use virtual try-on.');
-      openAuthModal('signup');
+    if (creditsRemaining <= 0 && user?.role !== 'admin' && !hasUnlimitedPass) {
+      showToast('warning', 'Limit Reached (3/3)', 'You have used all 3 free generations. Refill tokens or sign in as Founder.');
+      openUpgradeCreditsModal();
       return;
     }
 
@@ -1415,12 +1451,27 @@ export const ChatbotStudio: React.FC = () => {
         </div>
 
         {/* Minimal Floating Corner Navigation */}
-        <div className="absolute top-3.5 left-3.5 z-30 flex items-center gap-2">
+        <div className="absolute top-3.5 left-3.5 z-30 flex items-center gap-1.5 sm:gap-2">
+          {/* Back to Home Navigation Button */}
+          <button
+            type="button"
+            onClick={() => setCurrentPage('home')}
+            className={`p-2 sm:px-3 sm:py-2 rounded-2xl border shadow-lg backdrop-blur-md transition flex items-center gap-1.5 text-xs font-bold active:scale-95 group ${
+              theme === 'dark'
+                ? 'bg-[#141824]/90 hover:bg-[#1d2336] border-slate-700/70 text-slate-200 hover:text-white'
+                : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 hover:text-slate-950 shadow-sm'
+            }`}
+            title="Back to Home Feed"
+          >
+            <ArrowLeft className="w-4 h-4 text-indigo-500 group-hover:-translate-x-0.5 transition-transform" />
+            <span className="hidden sm:inline">Home</span>
+          </button>
+
           {!isSidebarOpen && (
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
-              className={`p-2 sm:px-3 sm:py-2 rounded-2xl border shadow-lg backdrop-blur-md transition flex items-center gap-2 text-xs font-bold active:scale-95 group ${
+              className={`p-2 sm:px-3 sm:py-2 rounded-2xl border shadow-lg backdrop-blur-md transition flex items-center gap-1.5 text-xs font-bold active:scale-95 group ${
                 theme === 'dark'
                   ? 'bg-[#141824]/90 hover:bg-[#1d2336] border-slate-700/70 text-slate-200 hover:text-white'
                   : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 hover:text-slate-950 shadow-sm'
@@ -1506,26 +1557,6 @@ export const ChatbotStudio: React.FC = () => {
             <span className="hidden sm:inline">Explore Drops</span>
           </button>
 
-          {/* Orders & Tracking */}
-          <button
-            type="button"
-            onClick={() => setCurrentPage('orders')}
-            className={`px-3 py-1.5 rounded-full border shadow-lg backdrop-blur-md transition text-xs font-bold flex items-center gap-1.5 active:scale-95 ${
-              theme === 'dark'
-                ? 'bg-[#141824]/85 hover:bg-[#1d2336] border-slate-700/70 text-slate-300 hover:text-white'
-                : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-800 hover:text-slate-950 shadow-sm'
-            }`}
-            title="My Orders & Tracking"
-          >
-            <ShoppingBag className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="hidden sm:inline">Orders</span>
-            {orders.length > 0 && (
-              <span className="bg-emerald-600 text-white font-black text-[10px] px-1.5 py-0.2 rounded-full leading-none">
-                {orders.length}
-              </span>
-            )}
-          </button>
-
           {/* User Profile & Log Out Menu */}
           {isLoggedIn ? (
             <div className="relative" ref={profileRef}>
@@ -1586,6 +1617,22 @@ export const ChatbotStudio: React.FC = () => {
                   >
                     <Shirt className="w-3.5 h-3.5 text-indigo-500" />
                     <span>My Wardrobe / Designs</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setIsProfileOpen(false); setCurrentPage('orders'); }}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition ${
+                      theme === 'dark' ? 'hover:bg-slate-800/80 text-emerald-400 hover:text-emerald-300' : 'hover:bg-emerald-50 text-emerald-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShoppingBag className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>My Orders</span>
+                    </div>
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-indigo-600 text-white">
+                      {orders.length}
+                    </span>
                   </button>
 
                   <button

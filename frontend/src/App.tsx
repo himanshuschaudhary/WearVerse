@@ -6,6 +6,7 @@ import { MobileNav } from './components/MobileNav';
 import { ToastContainer } from './components/ToastContainer';
 
 // Pages & Studios
+import { HomePage } from './pages/HomePage';
 import { ChatbotStudio } from './components/ChatbotStudio';
 import { ExplorePage } from './pages/ExplorePage';
 import { CommunityPage } from './pages/CommunityPage';
@@ -28,6 +29,7 @@ const AppContent: React.FC = () => {
   const renderActivePage = () => {
     switch (currentPage) {
       case 'home':
+        return <HomePage />;
       case 'create':
       case 'editor':
         return <ChatbotStudio />;
@@ -43,20 +45,20 @@ const AppContent: React.FC = () => {
       case 'profile':
         return <ProfilePage />;
       default:
-        return <ChatbotStudio />;
+        return <HomePage />;
     }
   };
 
-  const isChatbotView = currentPage === 'home' || currentPage === 'create' || currentPage === 'editor';
+  const isStudioOnly = currentPage === 'create' || currentPage === 'editor';
 
   return (
     <div className={`flex flex-col font-['Plus_Jakarta_Sans',sans-serif] transition-colors duration-200 ${
       theme === 'dark' 
         ? 'bg-[#07090e] text-slate-100' 
         : 'bg-[#f8fafc] text-slate-900'
-    } ${isChatbotView ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'}`}>
-      {/* Top Main Navigation (Rendered on secondary pages; Studio has its own unified header) */}
-      {!isChatbotView && <Navbar />}
+    } ${isStudioOnly ? 'h-[100dvh] overflow-hidden' : 'min-h-screen'}`}>
+      {/* Top Main Navigation (Rendered on secondary pages & desktop home; mobile home has in-page header) */}
+      {!isStudioOnly && currentPage !== 'home' && <Navbar />}
 
       {/* Main View Area */}
       <main className="flex-1 w-full overflow-hidden">
@@ -64,10 +66,10 @@ const AppContent: React.FC = () => {
       </main>
 
       {/* Footer (Rendered only on standard secondary subpages) */}
-      {!isChatbotView && <Footer />}
+      {!isStudioOnly && currentPage !== 'home' && <Footer />}
 
-      {/* Mobile Bottom Navigation (Only on browse/secondary views so chat input is never blocked) */}
-      {!isChatbotView && <MobileNav />}
+      {/* Mobile Bottom Navigation (Shown on mobile views matching Image 4) */}
+      {!isStudioOnly && <MobileNav />}
 
       {/* Dynamic Modals */}
       {activeModal?.type === 'tryon' && (

@@ -1,6 +1,7 @@
 import { AIVariation, Design } from '../types';
 import { matchPromptToAsset, isEditRequest, SemanticMatchResult } from './promptMatchingEngine';
 import { TSHIRT_ASSET_LIBRARY } from '../data/tshirtAssetLibrary';
+import { geminiService } from './geminiService';
 
 export interface GenerateDesignParams {
   prompt: string;
@@ -247,4 +248,14 @@ export const aiService = {
   enhancePrompt(rawPrompt: string): string {
     return enhancePromptWithAI(rawPrompt);
   },
+
+  /**
+   * Generates live conversational fashion commentary using Google Gemini
+   */
+  async generateFashionDialogue(prompt: string, history?: { role: 'user' | 'model'; text: string }[]): Promise<string> {
+    const res = await geminiService.generateFashionResponse(prompt, history);
+    return res.text;
+  },
+
+  geminiService,
 };
