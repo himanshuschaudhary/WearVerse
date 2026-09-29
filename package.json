@@ -1,0 +1,23 @@
+{
+  "name": "wearverse-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WearVerse - AI Streetwear Fashion Platform (Frontend & Backend)",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev -- --host",
+    "dev:frontend": "npm --prefix frontend run dev -- --host",
+    "dev:backend": "npm --prefix backend start",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix backend start",
+    "install:all": "npm --prefix frontend install && npm --prefix backend install"
+  },
+  "keywords": [
+    "ai",
+    "streetwear",
+    "fashion",
+    "virtual-tryon",
+    "ecommerce"
+  ],
+  "author": "Himanshu Chaudhary",
+  "license": "ISC"
+}

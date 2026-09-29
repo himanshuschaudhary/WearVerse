@@ -1,0 +1,197 @@
+import React, { useState } from 'react';
+import { 
+  Heart, 
+  Sparkles,
+  ShoppingBag, 
+  Eye, 
+  Star, 
+  Crown,
+  Users,
+  Tag,
+  Truck,
+  CheckCircle2,
+  Flame
+} from 'lucide-react';
+import { Design } from '../types';
+import { useApp } from '../context/AppContext';
+import { getFallbackImage } from '../services/aiService';
+
+interface ProductCardProps {
+  design: Design;
+  showCategoryBadge?: boolean;
+}
+
+export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBadge = true }) => {
+  const { 
+    toggleLikeDesign, 
+    openTryOnModal, 
+    openOrderModal, 
+    openDetailModal, 
+    setCurrentPage,
+    showToast,
+    theme 
+  } = useApp();
+
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgSrc, setImgSrc] = useState(design.frontImage);
+
+  const handleImgError = () => {
+    setImgSrc(getFallbackImage(0));
+  };
+
+  return (
+    <div 
+      className={`rounded-3xl border transition-all duration-300 flex flex-col justify-between overflow-hidden group shadow-lg ${
+        theme === 'dark'
+          ? 'bg-[#151926] text-slate-100 border-slate-800 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-500/10'
+          : 'bg-white text-slate-900 border-slate-200 hover:border-indigo-400 hover:shadow-xl shadow-slate-200/50'
+      }`}
+    >
+      {/* MEDIA CONTAINER */}
+      <div 
+        onClick={() => openDetailModal(design)}
+        className="relative aspect-square w-full bg-slate-900 overflow-hidden cursor-pointer"
+      >
+        <img 
+          src={imgSrc} 
+          alt={design.title} 
+          loading="lazy"
+          onLoad={() => setImgLoaded(true)}
+          onError={handleImgError}
+          className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
+            imgLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+
+        {/* Top Floating Badges */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 pointer-events-none">
+          {/* Streetwear Badge: Trending vs Category */}
+          {design.isTrending ? (
+            <span className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-indigo-600/90 text-white backdrop-blur-md border border-indigo-400/40 shadow-sm">
+              <Flame className="w-3 h-3 text-rose-400" />
+              <span>Trending Drop</span>
+            </span>
+          ) : (
+            <span className="pointer-events-auto flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-slate-900/90 text-indigo-300 backdrop-blur-md border border-indigo-500/30 shadow-sm">
+              <Sparkles className="w-3 h-3 text-indigo-400" />
+              <span>{design.category}</span>
+            </span>
+          )}
+
+          {/* Like Heart Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleLikeDesign(design.id);
+            }}
+            className={`pointer-events-auto p-2 rounded-full transition-all duration-200 backdrop-blur-md shadow-md ${
+              design.isLiked 
+                ? 'bg-rose-500/20 text-rose-500 border border-rose-500/40 scale-105' 
+                : 'bg-slate-950/70 text-slate-300 hover:text-rose-400 hover:scale-105 border border-slate-700/60'
+            }`}
+            aria-label="Like design"
+          >
+            <Heart 
+              className={`w-4 h-4 transition-colors ${
+                design.isLiked ? 'fill-rose-500 text-rose-500' : 'text-slate-300'
+              }`} 
+            />
+          </button>
+        </div>
+
+        {/* Bottom Image Tag: GSM & Fabric */}
+        <div className="absolute bottom-3 left-3 bg-slate-950/85 backdrop-blur-md text-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md border border-slate-700/50 shadow-sm">
+          {design.fabric.gsm} GSM • {design.fabric.fit}
+        </div>
+      </div>
+
+      {/* CARD CONTENT */}
+      <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+        
+        {/* Title & Creator */}
+        <div>
+          <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
+            <span className="truncate font-medium">
+              By {design.creator.name}
+            </span>
+            <div className="flex items-center gap-1 text-amber-400 font-bold text-xs flex-shrink-0">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <span>{design.rating}</span>
+              <span className="text-slate-500 text-[10px] font-normal">({design.reviewsCount})</span>
+            </div>
+          </div>
+
+          <h3 
+            onClick={() => openDetailModal(design)}
+            className={`font-bold text-base transition-colors line-clamp-1 cursor-pointer ${
+              theme === 'dark' ? 'text-white group-hover:text-indigo-400' : 'text-slate-900 group-hover:text-indigo-600'
+            }`}
+          >
+            {design.title}
+          </h3>
+          
+          <p className={`text-xs line-clamp-1 mt-0.5 ${
+            theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+          }`}>
+            {design.description}
+          </p>
+        </div>
+
+        {/* Pricing & Free Delivery Guarantee */}
+        <div className={`pt-2 border-t flex items-center justify-between ${
+          theme === 'dark' ? 'border-slate-800/80' : 'border-slate-100'
+        }`}>
+          <div className="flex items-baseline gap-2">
+            <span className={`text-base sm:text-lg font-extrabold ${
+              theme === 'dark' ? 'text-white' : 'text-slate-900'
+            }`}>
+              ₹{design.price.toLocaleString()}
+            </span>
+            {design.originalPrice && (
+              <span className="text-xs text-slate-500 line-through">
+                ₹{design.originalPrice.toLocaleString()}
+              </span>
+            )}
+          </div>
+
+          <span className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+            theme === 'dark' 
+              ? 'text-emerald-400 bg-emerald-950/60 border border-emerald-500/30' 
+              : 'text-emerald-700 bg-emerald-50 border border-emerald-200'
+          }`}>
+            <Truck className="w-3 h-3" />
+            <span>Free Delivery</span>
+          </span>
+        </div>
+
+        {/* ALWAYS-VISIBLE ACTION BUTTONS (Designed for Learnability & All Age Groups) */}
+        <div className="space-y-1.5 pt-1">
+          <div className="grid grid-cols-2 gap-2">
+            {/* Try On Button */}
+            <button
+              onClick={() => openTryOnModal(design)}
+              className={`py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 border ${
+                theme === 'dark'
+                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700/60'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200 shadow-sm'
+              }`}
+            >
+              <Eye className="w-4 h-4 text-indigo-500" />
+              <span>Try On Me</span>
+            </button>
+
+            {/* Direct Order & Pay Button */}
+            <button
+              onClick={() => openOrderModal(design)}
+              className="py-2.5 px-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition shadow-md active:scale-95 shadow-indigo-600/30"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>Order Now</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};

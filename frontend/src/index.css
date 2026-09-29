@@ -1,0 +1,449 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 240 10% 98%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 250 84% 54%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 250 84% 54%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 250 84% 54%;
+    --radius: 0.85rem;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: #0b0e14;
+    color: #f8fafc;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border: none;
+    text-align: left;
+  }
+}
+
+/* Custom Sleek Dark Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+/* Dark AI workspace scrollbar */
+.dark-workspace ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dark-workspace ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+}
+.dark-workspace ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Glass & Glow utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-dark {
+  background: rgba(15, 17, 26, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand-gradient {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+}
+
+.brand-gradient-text {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark-gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.font-display {
+  font-family: 'Outfit', 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-mono-tech {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.font-body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Luxury Glassmorphic & Glow System */
+.glass-card-luxury {
+  background: linear-gradient(135deg, rgba(18, 23, 38, 0.85) 0%, rgba(11, 14, 24, 0.85) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.75), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.glow-box {
+  box-shadow: 0 0 50px -12px rgba(99, 102, 241, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.glow-card-interactive {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glow-card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: rgba(129, 140, 248, 0.5);
+  box-shadow: 0 12px 35px -8px rgba(99, 102, 241, 0.35), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+}
+
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+@keyframes aurora {
+  0%, 100% { transform: scale(1) translate(0px, 0px); opacity: 0.25; }
+  50% { transform: scale(1.15) translate(25px, -20px); opacity: 0.42; }
+}
+
+.animate-aurora {
+  animation: aurora 10s ease-in-out infinite alternate;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3.5s infinite;
+}
+
+/* ==============================================================================
+   DUAL THEME ENGINE (White as Default, Luxe Obsidian Dark Toggle)
+   ============================================================================== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Light Mode (DEFAULT) */
+html.light,
+html:not(.dark) {
+  color-scheme: light;
+}
+
+body.light-mode,
+html:not(.dark) body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Dark Mode */
+html.dark {
+  color-scheme: dark;
+}
+
+body.dark-mode,
+html.dark body {
+  background-color: #07090e;
+  color: #f8fafc;
+}
+
+/* Light Mode Overrides for Hardcoded Dark Palette */
+html:not(.dark) .bg-\[\#07090e\],
+html:not(.dark) .bg-\[\#0d0f17\],
+html:not(.dark) .bg-\[\#0b0e14\],
+html:not(.dark) .bg-\[\#0a0d14\],
+html:not(.dark) .bg-\[\#080a10\],
+html:not(.dark) .bg-\[\#090c14\] {
+  background-color: #f8fafc !important;
+}
+
+html:not(.dark) .bg-\[\#111422\],
+html:not(.dark) .bg-\[\#121626\],
+html:not(.dark) .bg-\[\#141826\],
+html:not(.dark) .bg-\[\#151926\],
+html:not(.dark) .bg-\[\#10131e\],
+html:not(.dark) .bg-\[\#0c101d\],
+html:not(.dark) .bg-\[\#0d111d\],
+html:not(.dark) .bg-\[\#0f1322\],
+html:not(.dark) .bg-\[\#141829\],
+html:not(.dark) .bg-\[\#141824\],
+html:not(.dark) .bg-\[\#121624\],
+html:not(.dark) .bg-\[\#0f121d\],
+html:not(.dark) .bg-\[\#0f131f\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+html:not(.dark) .bg-\[\#121626\]\/95,
+html:not(.dark) .bg-\[\#0f131f\]\/95,
+html:not(.dark) .bg-\[\#141824\]\/90,
+html:not(.dark) .bg-\[\#141824\]\/85,
+html:not(.dark) .bg-\[\#111422\]\/90,
+html:not(.dark) .bg-\[\#0a0d14\]\/90,
+html:not(.dark) .bg-\[\#0f1322\]\/70,
+html:not(.dark) .bg-\[\#121626\]\/80,
+html:not(.dark) .bg-\[\#121626\]\/85 {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  color: #0f172a !important;
+}
+
+html:not(.dark) .bg-\[\#161c2d\] {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+html:not(.dark) .bg-slate-900\/60,
+html:not(.dark) .bg-slate-900\/80,
+html:not(.dark) .bg-\[\#121622\]\/80,
+html:not(.dark) .bg-\[\#121622\]\/60 {
+  background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .bg-slate-800,
+html:not(.dark) .bg-slate-800\/90,
+html:not(.dark) .bg-slate-800\/80,
+html:not(.dark) .bg-slate-800\/60 {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+}
+
+html:not(.dark) .hover\:bg-slate-800:hover,
+html:not(.dark) .hover\:bg-slate-700:hover,
+html:not(.dark) .hover\:bg-\[\#1d2336\]:hover,
+html:not(.dark) .hover\:bg-\[\#151a2e\]:hover,
+html:not(.dark) .hover\:bg-\[\#181d32\]:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* Light Mode Typography Hierarchy & High-Contrast Readability */
+html:not(.dark) .text-white:not(button *):not([class*="bg-indigo-600"] *):not([class*="bg-violet-600"] *):not([class*="bg-purple-600"] *):not([class*="bg-emerald-600"] *):not([class*="bg-rose-600"] *):not(.badge-light-protect) {
+  color: #0f172a;
+}
+
+html:not(.dark) .text-slate-100,
+html:not(.dark) .text-slate-200,
+html:not(.dark) .text-slate-200\/90,
+html:not(.dark) .text-slate-200\/80 {
+  color: #1e293b !important;
+}
+
+html:not(.dark) .text-slate-300 {
+  color: #334155 !important;
+}
+
+html:not(.dark) .text-slate-400,
+html:not(.dark) .text-slate-400\/80 {
+  color: #475569 !important;
+}
+
+html:not(.dark) .text-slate-500 {
+  color: #475569 !important;
+}
+
+/* Strict Protection for Primary Buttons & Dark Filled Badges (White Text) */
+html:not(.dark) button.bg-indigo-600,
+html:not(.dark) button.bg-indigo-600 *,
+html:not(.dark) button[class*="bg-indigo-6"],
+html:not(.dark) button[class*="bg-indigo-6"] *,
+html:not(.dark) button[class*="from-indigo-6"],
+html:not(.dark) button[class*="from-indigo-6"] *,
+html:not(.dark) button[class*="from-violet-6"],
+html:not(.dark) button[class*="from-violet-6"] *,
+html:not(.dark) button[class*="from-purple-6"],
+html:not(.dark) button[class*="from-purple-6"] *,
+html:not(.dark) button[class*="bg-purple-6"],
+html:not(.dark) button[class*="bg-purple-6"] *,
+html:not(.dark) button.bg-emerald-600,
+html:not(.dark) button.bg-emerald-600 *,
+html:not(.dark) button[class*="bg-emerald-6"],
+html:not(.dark) button[class*="bg-emerald-6"] *,
+html:not(.dark) button.bg-rose-600,
+html:not(.dark) button.bg-rose-600 *,
+html:not(.dark) button[class*="bg-rose-6"],
+html:not(.dark) button[class*="bg-rose-6"] *,
+html:not(.dark) .text-white-force,
+html:not(.dark) .badge-light-protect {
+  color: #ffffff !important;
+}
+
+/* Ensure text-transparent gradients never get overridden by text color rules */
+.bg-clip-text,
+[class*="bg-clip-text"] {
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+html:not(.dark) .bg-clip-text,
+html:not(.dark) [class*="bg-clip-text"] {
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+html:not(.dark) .border-slate-800,
+html:not(.dark) .border-slate-800\/90,
+html:not(.dark) .border-slate-800\/80,
+html:not(.dark) .border-slate-700,
+html:not(.dark) .border-slate-700\/80,
+html:not(.dark) .border-slate-700\/70,
+html:not(.dark) .border-slate-700\/60 {
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) .bg-slate-950\/85 {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+}
+
+html:not(.dark) .ring-white\/10 {
+  --tw-ring-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+html:not(.dark) .glass-card-luxury {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+  box-shadow: 0 12px 30px -8px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Light Mode Input, Textarea, Select Readability */
+html:not(.dark) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html:not(.dark) textarea,
+html:not(.dark) select {
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Dark Mode Adaptation for any components authored with light utility classes */
+html.dark .bg-white {
+  background-color: #111422 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-200\/90,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/70,
+html.dark .border-slate-100 {
+  border-color: #1e293b !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+html.dark .bg-slate-100,
+html.dark .bg-slate-50 {
+  background-color: #181d2f !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark .hover\:bg-slate-200:hover,
+html.dark .hover\:bg-slate-100:hover {
+  background-color: #222942 !important;
+}
+
+/* Smooth Scrollbars in Both Themes */
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
