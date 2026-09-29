@@ -78,7 +78,6 @@ export const HomePage: React.FC = () => {
   // Navigation & Drawer
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
   const [promptInput, setPromptInput] = useState('');
-  const [activeCategory, setActiveCategory] = useState('All');
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
   // In-Page AI Design Generation State (NO REDIRECTION — Stays on same screen!)
@@ -115,17 +114,6 @@ export const HomePage: React.FC = () => {
   ];
 
   const tshirtSizes: TShirtSize[] = ['S', 'M', 'L', 'XL', 'XXL'];
-
-  // Categories targeted at Streetwear, Hoodies, Sweatshirts, and Graphic Tees
-  const categories = [
-    'All Drops',
-    '👕 T-Shirts',
-    '🧥 Hoodies',
-    '🧶 Sweatshirts',
-    '🛹 Streetwear',
-    '🐉 Anime & Kanji',
-    '⛰️ Minimalist'
-  ];
 
   // Helper to convert variation to Design object
   const varToDesign = (v: AIVariation, colorHex?: string): Design => ({
@@ -866,21 +854,11 @@ export const HomePage: React.FC = () => {
 
           {/* Hero Content */}
           <div className="relative z-10 max-w-lg space-y-3">
-            {/* Glowing Tag Pill */}
-            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-              theme === 'dark'
-                ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
-                : 'bg-indigo-100 border-indigo-200 text-indigo-700 shadow-xs'
-            }`}>
-              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Generative Techwear • Coder & Gen-Z Atelier • 240 GSM</span>
-            </div>
-
             {/* Headline */}
             <h1 className={`text-2xl sm:text-4xl font-extrabold tracking-tight font-['Space_Grotesk'] leading-tight ${
               theme === 'dark' ? 'text-white' : 'text-slate-950'
             }`}>
-              Turn Your Code & Ideas Into{' '}
+              Turn Your Ideas Into{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
                 Wearable Art
               </span>
@@ -890,13 +868,13 @@ export const HomePage: React.FC = () => {
             <p className={`text-xs sm:text-sm leading-relaxed max-w-sm ${
               theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
             }`}>
-              Heavyweight 240 GSM boxy streetwear engineered for developers, competitive programmers, college creators, and midnight hackers.
+              Curated luxury streetwear synthesized with generative AI. Design bespoke boxy tees, heavyweight hoodies, and French terry sweatshirts.
             </p>
           </div>
         </div>
 
         {/* EMBEDDED IN-PAGE AI PROMPT COMPOSER CARD (NO REDIRECTION!) */}
-        <div className={`p-4 rounded-3xl border shadow-xl space-y-3 transition-colors ${
+        <div className={`p-3.5 sm:p-4 rounded-3xl border shadow-xl transition-colors ${
           theme === 'dark'
             ? 'bg-[#121626]/95 border-indigo-500/30 shadow-indigo-500/5'
             : 'bg-white border-slate-200/90 shadow-lg shadow-indigo-100/40'
@@ -906,7 +884,7 @@ export const HomePage: React.FC = () => {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
               theme === 'dark' ? 'bg-indigo-600/20 text-indigo-400' : 'bg-indigo-50 text-indigo-600'
             }`}>
-              <Code className="w-4 h-4 text-indigo-500" />
+              <Sparkles className="w-4 h-4 text-indigo-500" />
             </div>
 
             <input
@@ -920,7 +898,7 @@ export const HomePage: React.FC = () => {
                   handleGenerateInPage();
                 }
               }}
-              placeholder="Describe your streetwear idea... e.g. An oversized acid-wash tee with neon git commit matrix code"
+              placeholder="Describe your streetwear idea... e.g. An oversized boxy tee with cyberpunk mecha dragon"
               className={`flex-1 text-xs sm:text-sm bg-transparent outline-none placeholder:text-slate-400 leading-normal ${
                 theme === 'dark' ? 'text-white' : 'text-slate-900 font-medium'
               }`}
@@ -939,89 +917,6 @@ export const HomePage: React.FC = () => {
               ) : (
                 <Send className="w-4 h-4 !text-white text-white-force ml-0.5" />
               )}
-            </button>
-          </div>
-
-          {/* Quick Curated Apparel Ideas */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none text-xs">
-            <button
-              type="button"
-              onClick={() => {
-                setPromptInput('Oversized boxy streetwear t-shirt with cyberpunk mecha dragon artwork in neon crimson on 240 GSM heavy combed black cotton');
-                handleGenerateInPage('Oversized boxy streetwear t-shirt with cyberpunk mecha dragon artwork in neon crimson on 240 GSM heavy combed black cotton');
-              }}
-              className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
-                theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-indigo-300 hover:border-indigo-400'
-                  : 'bg-indigo-50 border-indigo-200 text-indigo-800 shadow-xs'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-              <span>✨ Oversized Boxy Tee</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setPromptInput('Heavyweight 450 GSM French terry black pullover hoodie with Tokyo cyberpunk neon purple kanji graphics');
-                handleGenerateInPage('Heavyweight 450 GSM French terry black pullover hoodie with Tokyo cyberpunk neon purple kanji graphics');
-              }}
-              className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
-                theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-violet-300 hover:border-violet-400'
-                  : 'bg-purple-50 border-purple-200 text-purple-800 shadow-xs'
-              }`}
-            >
-              <span>🧥</span>
-              <span>Tokyo Cyber Hoodie</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setPromptInput('380 GSM loopback French terry crewneck sweatshirt in warm cream with minimalist celestial sun geometry');
-                handleGenerateInPage('380 GSM loopback French terry crewneck sweatshirt in warm cream with minimalist celestial sun geometry');
-              }}
-              className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
-                theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-amber-300 hover:border-amber-400'
-                  : 'bg-amber-50 border-amber-200 text-amber-800 shadow-xs'
-              }`}
-            >
-              <span>🧶</span>
-              <span>Celestial Crewneck</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setPromptInput('Japanese sumi-e ink brush samurai under blood moon and cherry blossoms on heavy black cotton tee');
-                handleGenerateInPage('Japanese sumi-e ink brush samurai under blood moon and cherry blossoms on heavy black cotton tee');
-              }}
-              className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
-                theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-rose-300 hover:border-rose-400'
-                  : 'bg-rose-50 border-rose-200 text-rose-800 shadow-xs'
-              }`}
-            >
-              <span>🎌</span>
-              <span>Bushido Ronin Tee</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setPromptInput('Speed demon 1982 vintage racing car with colorful burnout smoke on acid wash charcoal tee');
-                handleGenerateInPage('Speed demon 1982 vintage racing car with colorful burnout smoke on acid wash charcoal tee');
-              }}
-              className={`px-3 py-1.5 rounded-full border font-semibold flex items-center gap-1.5 flex-shrink-0 transition active:scale-95 ${
-                theme === 'dark'
-                  ? 'bg-slate-900/80 border-slate-700/80 text-cyan-300 hover:border-cyan-400'
-                  : 'bg-cyan-50 border-cyan-200 text-cyan-800 shadow-xs'
-              }`}
-            >
-              <span>🏎️</span>
-              <span>Speed Demon Racer</span>
             </button>
           </div>
         </div>
@@ -1272,29 +1167,6 @@ export const HomePage: React.FC = () => {
 
             </div>
           )}
-        </div>
-
-        {/* 5. HORIZONTAL CATEGORY PILLS */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
-          {categories.map((cat) => {
-            const isActive = activeCategory === cat;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex-shrink-0 whitespace-nowrap active:scale-95 ${
-                  isActive
-                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-md'
-                    : theme === 'dark'
-                      ? 'bg-[#141824] text-slate-400 hover:text-white border border-slate-800'
-                      : 'bg-white text-slate-700 hover:text-slate-950 border border-slate-200 shadow-xs'
-                }`}
-              >
-                {cat}
-              </button>
-            );
-          })}
         </div>
 
         {/* 6. SECTION 1: HEAVYWEIGHT HOODIES & FRENCH TERRY SWEATSHIRTS */}
