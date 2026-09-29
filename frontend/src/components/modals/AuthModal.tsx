@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, LogIn, UserPlus, Sparkles, Lock, Mail, User } from 'lucide-react';
+import { X, LogIn, UserPlus, Sparkles, Lock, Mail, User, Eye, EyeOff } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { WearVerseLogo } from '../WearVerseLogo';
 
@@ -13,6 +13,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ initialMode = 'login' }) =
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,18 +146,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({ initialMode = 'login' }) =
               <Lock className="w-3.5 h-3.5 text-indigo-500" />
               <span>Password</span>
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none transition ${
-                theme === 'dark'
-                  ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500'
-                  : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-indigo-600 focus:bg-white'
-              }`}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                className={`w-full pl-3.5 pr-10 py-2.5 rounded-xl border text-sm outline-none transition ${
+                  theme === 'dark'
+                    ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-indigo-600 focus:bg-white'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg transition ${
+                  theme === 'dark' 
+                    ? 'text-slate-400 hover:text-white hover:bg-slate-800' 
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+                title={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <button

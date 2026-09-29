@@ -156,10 +156,50 @@ export const aiService = {
       }
     }
 
-    // 2. High-performance Semantic Matching Engine
-    // Extracts entities, aesthetics, colors, niches, and matches against rich metadata
+    // 2. Synthesize Real Dynamic AI Variations for user prompt via Neural Synthesis
+    const cleanPrompt = params.prompt.trim();
+    const promptCap = cleanPrompt.charAt(0).toUpperCase() + cleanPrompt.slice(1);
+    const color = params.garmentColor || '#0f0f11';
+    const colorName = color === '#ffffff' ? 'white' : color === '#334155' ? 'charcoal' : 'black';
+    const seed1 = Math.floor(Math.random() * 899999) + 100000;
+    const seed2 = Math.floor(Math.random() * 899999) + 100000;
+
+    const liveMockup1 = buildLiveAiTeeMockupUrl(cleanPrompt, colorName, 'oversized boxy streetwear drop-shoulder fit, 240 GSM heavy cotton', seed1);
+    const liveGraphic1 = buildLiveAiGraphicUrl(cleanPrompt, '1200 DPI vector DTG apparel graphic', seed1);
+
+    const liveMockup2 = buildLiveAiTeeMockupUrl(cleanPrompt, colorName, 'bold graphic streetwear aesthetic, detailed typography and vector art', seed2);
+    const liveGraphic2 = buildLiveAiGraphicUrl(cleanPrompt, 'bold neo-streetwear print, high contrast vector layers', seed2);
+
+    // Also get semantic matches as inspiration references
     const matchResult: SemanticMatchResult = matchPromptToAsset(params.prompt, params.garmentColor);
-    return matchResult.variations;
+
+    const liveVariations: AIVariation[] = [
+      {
+        id: `var-live-1-${seed1}`,
+        name: `${promptCap} (Neural DTG Drop)`,
+        mockupUrl: liveMockup1,
+        graphicUrl: liveGraphic1,
+        prompt: cleanPrompt,
+        color: color,
+        fit: '240 GSM Oversized Boxy Drop-Shoulder',
+        aspectRatio: '1:1',
+        tags: ['#custom', '#bespoke', '#aiart', '#240gsm', '#streetwear'],
+      },
+      {
+        id: `var-live-2-${seed2}`,
+        name: `${promptCap} (Atelier Edition)`,
+        mockupUrl: liveMockup2,
+        graphicUrl: liveGraphic2,
+        prompt: `${cleanPrompt} (Atelier Edition)`,
+        color: color,
+        fit: '240 GSM Relaxed Drop-Shoulder Silhouette',
+        aspectRatio: '1:1',
+        tags: ['#atelier', '#exclusive', '#streetwear', '#dtg'],
+      },
+      ...(matchResult.variations || []).slice(0, 1),
+    ];
+
+    return liveVariations;
   },
 
   /**

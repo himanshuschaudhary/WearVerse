@@ -36,9 +36,10 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
   const [selectedColor, setSelectedColor] = useState<string>(design.defaultColor || '#0f0f11');
   const [selectedSize, setSelectedSize] = useState<TShirtSize>('L');
 
-  // Input Photo State (User's real photo required)
-  const [inputPhotoUrl, setInputPhotoUrl] = useState<string>(user.tryOnPhotoUrl || '');
-  const [inputPhotoName, setInputPhotoName] = useState<string>(user.tryOnPhotoUrl ? 'Your Saved Photo' : '');
+  // Input Photo State (Defaults to male model so it works instantly without uploading)
+  const [modelType, setModelType] = useState<'male' | 'female' | 'custom'>('male');
+  const [inputPhotoUrl, setInputPhotoUrl] = useState<string>(user.tryOnPhotoUrl || '/assets/tryon_black_front.jpg');
+  const [inputPhotoName, setInputPhotoName] = useState<string>(user.tryOnPhotoUrl ? 'Your Saved Photo' : 'Male Streetwear Model (Default)');
 
   // AI Synthesis States
   const [isSynthesizing, setIsSynthesizing] = useState(false);
@@ -59,6 +60,19 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
     { label: 'Sage Green', hex: '#788f78' },
   ];
 
+  // Handle Preset Model Switch
+  const handleSelectModel = (type: 'male' | 'female') => {
+    setModelType(type);
+    if (type === 'male') {
+      setInputPhotoUrl('/assets/tryon_black_front.jpg');
+      setInputPhotoName('Male Streetwear Model');
+    } else {
+      setInputPhotoUrl('/assets/hero_model.jpg');
+      setInputPhotoName('Female Streetwear Model');
+    }
+    setGeneratedTryOnUrl(null);
+  };
+
   // Handle User Photo Upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -66,8 +80,9 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
       const reader = new FileReader();
       reader.onload = () => {
         if (typeof reader.result === 'string') {
+          setModelType('custom');
           setInputPhotoUrl(reader.result);
-          setInputPhotoName(file.name);
+          setInputPhotoName(file.name || 'Your Uploaded Photo');
           setGeneratedTryOnUrl(null); // Reset previous generation
           showToast('success', '📸 Photo Uploaded!', 'Click "Synthesize AI Virtual Try-On" to generate your custom preview.');
         }
@@ -149,31 +164,25 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
     });
   };
 
-  // Run Fully Generative Paid Virtual Try-On
+  // Run Virtual Try-On (Instant In-Browser Neural Canvas Compositing - Zero API Key Needed)
   const handleStartAiTryOn = async () => {
-    // 0. Auth Guard
-    if (!isLoggedIn) {
-      showToast('info', 'Sign in for Virtual Try-On', 'Please sign in or create an account to use Virtual Try-On.');
-      openAuthModal('signup');
-      return;
-    }
-
-    // 0b. Real User Photo Guard
+    // 0. Ensure a photo or model is selected
+    const photoToUse = inputPhotoUrl || '/assets/tryon_black_front.jpg';
     if (!inputPhotoUrl) {
-      showToast('warning', 'Photo Required', 'Please upload a photo of yourself to synthesize and preview this T-shirt.');
-      return;
+      setInputPhotoUrl(photoToUse);
     }
 
-    // 1. Check Paid Credit Quota
-    if (!hasUnlimitedPass && creditsRemaining <= 0) {
-      showToast('warning', '⚡ 0 AI Credits Remaining', 'Refill tokens or upgrade to WearVerse Pro to use Neural Virtual Try-On.');
+    // 1. Check Credit Quota if user is logged in
+    if (isLoggedIn && !hasUnlimitedPass && creditsRemaining <= 0) {
+      showToast('warning', '⚡ 0 AI Credits Remaining', 'Refill tokens or upgrade to WearVerse Pro for unlimited syntheses.');
       openUpgradeCreditsModal();
       return;
     }
 
-    // 2. Deduct Paid Credit
-    const consumed = consumeCredit();
-    if (!consumed) return;
+    // 2. Consume credit if user is logged in
+    if (isLoggedIn) {
+      consumeCredit();
+    }
 
     // 3. Start Neural Synthesis Sequence
     setIsSynthesizing(true);
@@ -282,54 +291,59 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
                 <p className="text-[11px] sm:text-xs text-slate-300 leading-relaxed">
                   Provide a photo of yourself. Our neural fitting diffusion will synthesize you wearing <span className="font-semibold text-white">{design.title}</span> with 240 GSM heavy cotton draping and DTG print realism.
                 </p>
-                <div className="flex items-center gap-1.5 text-[10px] text-amber-300 font-medium pt-1">
-                  <Zap className="w-3 h-3 text-amber-400" />
-                  <span>Cost: 1 AI Try-On Credit (₹49 Value)</span>
+                <div className="flex items-center gap-1.5 text-[10px] text-emerald-300 font-medium pt-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Client-Side Neural Engine • Zero External API Keys Needed</span>
                 </div>
               </div>
 
-              {/* Step 1: Upload Your Image (Real User Photo Required) */}
-              <div>
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
-                  1. Your Photo (Required)
-                </label>
-                {inputPhotoUrl ? (
-                  <div className="p-3 rounded-2xl bg-[#141826] border border-slate-700/80 flex items-center justify-between gap-3 shadow-inner">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <img 
-                        src={inputPhotoUrl} 
-                        alt="Your uploaded photo" 
-                        className="w-12 h-12 rounded-xl object-cover border border-indigo-500/40 shadow-sm flex-shrink-0"
-                      />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Photo Ready</span>
-                        </div>
-                        <p className="text-[11px] text-slate-300 truncate max-w-[140px] sm:max-w-[180px]">
-                          {inputPhotoName || 'Custom Photo'}
-                        </p>
-                      </div>
+              {/* Step 1: Model Selection (Presets or Upload) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                    1. Select Model or Upload Photo
+                  </label>
+                  <span className="text-[10px] text-indigo-400 font-bold">
+                    {modelType === 'custom' ? 'Custom Upload' : 'Preset Studio Model'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectModel('male')}
+                    className={`p-2 rounded-xl border text-center transition flex flex-col items-center gap-1.5 ${
+                      modelType === 'male' 
+                        ? 'border-indigo-500 bg-indigo-950/80 text-white ring-1 ring-indigo-500 shadow-md shadow-indigo-500/20' 
+                        : 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <img src="/assets/tryon_black_front.jpg" alt="Male Model" className="w-10 h-10 rounded-lg object-cover border border-slate-700" />
+                    <span className="text-[10px] font-bold">Male Model</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSelectModel('female')}
+                    className={`p-2 rounded-xl border text-center transition flex flex-col items-center gap-1.5 ${
+                      modelType === 'female' 
+                        ? 'border-indigo-500 bg-indigo-950/80 text-white ring-1 ring-indigo-500 shadow-md shadow-indigo-500/20' 
+                        : 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <img src="/assets/hero_model.jpg" alt="Female Model" className="w-10 h-10 rounded-lg object-cover border border-slate-700" />
+                    <span className="text-[10px] font-bold">Female Model</span>
+                  </button>
+
+                  <label className={`p-2 rounded-xl border text-center cursor-pointer transition flex flex-col items-center justify-center gap-1.5 ${
+                    modelType === 'custom' 
+                      ? 'border-indigo-500 bg-indigo-950/80 text-white ring-1 ring-indigo-500 shadow-md shadow-indigo-500/20' 
+                      : 'border-dashed border-indigo-500/50 bg-[#141826] text-indigo-300 hover:bg-[#191f32]'
+                  }`}>
+                    <div className="w-10 h-10 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+                      <Upload className="w-5 h-5 text-indigo-400" />
                     </div>
-                    <label className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-slate-200 cursor-pointer transition">
-                      Change
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={handleFileUpload} 
-                        className="hidden" 
-                      />
-                    </label>
-                  </div>
-                ) : (
-                  <label className="flex flex-col items-center justify-center p-5 border-2 border-dashed border-indigo-500/40 hover:border-indigo-400 rounded-2xl cursor-pointer bg-[#141826]/90 hover:bg-[#191f32] transition group shadow-sm">
-                    <Upload className="w-6 h-6 text-indigo-400 mb-1.5 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-bold text-white group-hover:text-indigo-300">
-                      Upload Your Photo
-                    </span>
-                    <span className="text-[10px] text-slate-400 text-center mt-1">
-                      Selfie, mirror shot, or standing pose
-                    </span>
+                    <span className="text-[10px] font-bold">Upload Photo</span>
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -337,7 +351,25 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
                       className="hidden" 
                     />
                   </label>
-                )}
+                </div>
+
+                {/* Status indicator */}
+                <div className="p-2.5 rounded-xl bg-[#141826] border border-slate-700/80 flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <img 
+                      src={inputPhotoUrl} 
+                      alt="Selected target" 
+                      className="w-7 h-7 rounded-lg object-cover border border-indigo-500/40 flex-shrink-0" 
+                    />
+                    <span className="text-slate-300 truncate text-[11px] font-medium">
+                      Active: <strong className="text-white">{inputPhotoName}</strong>
+                    </span>
+                  </div>
+                  <label className="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer flex-shrink-0">
+                    Upload
+                    <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                  </label>
+                </div>
               </div>
 
               {/* Garment Color Swatches */}
