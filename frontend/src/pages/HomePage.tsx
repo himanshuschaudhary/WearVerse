@@ -597,6 +597,18 @@ export const HomePage: React.FC = () => {
   // Curated Luxury Heavyweight Hoodies & Sweatshirts
   const hoodieAndSweatList = [
     {
+      id: 'wv-pro-hoodie-01',
+      title: 'Quantum Matrix Techwear Hoodie',
+      badge: 'PRO // 450 GSM',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 6840,
+      commentsCount: 312,
+      image: '/assets/pro_quantum_hoodie.jpg',
+      price: 2799,
+      tags: ['#procreation', '#techwear', '#quantum', '#450gsm'],
+      garmentType: 'Hoodie',
+    },
+    {
       id: 'wv-hoodie-01',
       title: 'Tokyo Cyber Heavyweight Hoodie',
       badge: '450 GSM HOODIE',
@@ -648,6 +660,18 @@ export const HomePage: React.FC = () => {
 
   // Curated Luxury Streetwear Graphic Tees (240 GSM)
   const trendingList = [
+    {
+      id: 'wv-pro-tee-01',
+      title: '2077 Mecha Genesis Samurai',
+      badge: 'PRO // 240 GSM',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 7920,
+      commentsCount: 428,
+      image: '/assets/pro_mecha_samurai.jpg',
+      price: 1699,
+      category: '🐉 Pro AI Drop',
+      garmentType: 'T-Shirt',
+    },
     {
       id: 'wv-tee-01',
       title: 'Neo-Tokyo Cyber Dragon Tee',
@@ -706,18 +730,6 @@ export const HomePage: React.FC = () => {
       image: '/assets/celestial_astral_tee.jpg',
       price: 1499,
       category: '⛰️ Minimalist',
-      garmentType: 'T-Shirt',
-    },
-    {
-      id: 'wv-tee-06',
-      title: 'Mecha Ronin Streetwear Tee',
-      badge: '240 GSM TEE',
-      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-      likesCount: 3950,
-      commentsCount: 184,
-      image: '/assets/cyber_samurai_tee.jpg',
-      price: 1599,
-      category: '🛹 Streetwear',
       garmentType: 'T-Shirt',
     },
   ];

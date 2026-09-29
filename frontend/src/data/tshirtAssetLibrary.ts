@@ -29,6 +29,80 @@ export interface TShirtAssetMetadata {
 }
 
 export const TSHIRT_ASSET_LIBRARY: TShirtAssetMetadata[] = [
+  // 0. PRO CREATION: 2077 MECHA GENESIS CYBER SAMURAI
+  {
+    id: 'asset-pro-mecha-samurai',
+    name: '2077 Mecha Genesis Cyber Samurai',
+    slug: '2077-mecha-cyber-samurai',
+    mockupUrl: '/assets/pro_mecha_samurai.jpg',
+    graphicUrl: '/assets/pro_mecha_samurai.jpg',
+    defaultGarmentColor: '#0f0f11',
+    availableColors: ['#0f0f11', '#18181b', '#282c37', '#ffffff'],
+    price: 1699,
+    originalPrice: 2499,
+    fit: 'Oversized Boxy Drop-Shoulder',
+    gsm: 240,
+    mainSubject: 'Robotic Mecha Samurai with Dual Crimson Energy Katanas',
+    theme: 'Neo-Tokyo 2077 Cyber Mecha',
+    style: 'Masterpiece Pro AI Mecha Illustration',
+    artStyle: 'Ultra-HD Mecha Concept Art with Kanji Calligraphy',
+    colorPalette: ['#0f0f11', '#dc2626', '#ef4444', '#f87171', '#ffffff'],
+    typographyStyle: 'Distressed Japanese Kanji & Techwear Cyber Stencil',
+    targetAudience: 'Streetwear collectors, anime fans, gamers, cyber aesthetics',
+    niche: 'Cyber Mecha Streetwear',
+    mood: 'Lethal, futuristic, iconic, sharp, high-octane',
+    visualElements: ['samurai', 'mecha warrior', 'crimson katana', 'katana blades', 'energy sword', 'kanji', 'japanese calligraphy', 'armor plating', 'robot helm'],
+    objectsAndCharacters: ['mecha samurai', 'cyborg ronin', 'robot warrior', 'cyber blade'],
+    keywords: [
+      'samurai', 'mecha', 'robot', 'katana', 'sword', 'cyberpunk', '2077', 'japanese', 'kanji', 
+      'crimson', 'red energy', 'warrior', 'armor', 'pro', 'masterpiece', 'streetwear', 'oversized', 'blade'
+    ],
+    promptPhrases: [
+      'black oversized t-shirt with 2077 mecha samurai holding crimson katanas',
+      'futuristic robot samurai with japanese kanji',
+      'mecha cyber samurai streetwear tee',
+      'cyberpunk samurai with red glowing swords'
+    ],
+    tags: ['#samurai', '#mecha', '#2077', '#katana', '#cyberpunk', '#procreation']
+  },
+
+  // 0.1 PRO CREATION: QUANTUM MATRIX TECHWEAR HOODIE
+  {
+    id: 'asset-pro-quantum-hoodie',
+    name: 'Quantum Matrix Cyber Techwear Hoodie',
+    slug: 'quantum-matrix-techwear-hoodie',
+    mockupUrl: '/assets/pro_quantum_hoodie.jpg',
+    graphicUrl: '/assets/pro_quantum_hoodie.jpg',
+    defaultGarmentColor: '#0a0b10',
+    availableColors: ['#0a0b10', '#18181b', '#1e1b4b'],
+    price: 2799,
+    originalPrice: 3999,
+    fit: 'Oversized Boxy Dropped-Shoulder Hoodie',
+    gsm: 450,
+    mainSubject: 'Holographic Quantum Circuit & Matrix Neural Nodes',
+    theme: 'Quantum Computing & Cyber Techwear',
+    style: 'Iridescent Holographic Matrix DTG',
+    artStyle: 'Vector Precision Integrated Circuitry with Bioluminescent Cyan Glow',
+    colorPalette: ['#0a0b10', '#06b6d4', '#3b82f6', '#8b5cf6', '#ffffff'],
+    typographyStyle: 'Hexadecimal & Quantum Matrix Stencil',
+    targetAudience: 'Techwear aficionados, hackers, cyberpunk fans, luxury streetwear',
+    niche: 'Cyber Techwear Fleece',
+    mood: 'Mysterious, sophisticated, hyper-advanced, sleek',
+    visualElements: ['quantum circuit', 'matrix nodes', 'binary code', 'iridescent neon', 'cyan traces', 'hoodie', 'techwear', 'heavyweight fleece'],
+    objectsAndCharacters: ['quantum processor', 'cybernetic matrix', 'neural core'],
+    keywords: [
+      'quantum', 'circuit', 'matrix', 'hoodie', 'techwear', 'cyberpunk', 'cyber', 'cyan', 
+      'blue glow', 'holographic', '450gsm', 'fleece', 'pro', 'iridescent', 'binary', 'neural'
+    ],
+    promptPhrases: [
+      'heavyweight black hoodie with glowing cyan quantum circuits',
+      'quantum matrix techwear hoodie',
+      'cyberpunk circuit board hoodie',
+      'iridescent techwear fleece'
+    ],
+    tags: ['#hoodie', '#quantum', '#circuit', '#techwear', '#cyberpunk', '#450gsm']
+  },
+
   // 1. CYBERPUNK DRAGON & KANJI
   {
     id: 'asset-cyber-dragon',
