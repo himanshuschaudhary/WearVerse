@@ -94,25 +94,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
             className={`pointer-events-auto p-2 rounded-full transition-all duration-200 backdrop-blur-md shadow-md ${
               design.isLiked 
                 ? 'bg-rose-500/20 text-rose-500 border border-rose-500/40 scale-105' 
-                : 'bg-slate-950/70 text-slate-300 hover:text-rose-400 hover:scale-105 border border-slate-700/60'
+                : theme === 'dark'
+                  ? 'bg-slate-950/70 text-slate-300 hover:text-rose-400 hover:scale-105 border border-slate-700/60'
+                  : 'bg-white/90 text-slate-700 hover:text-rose-500 hover:scale-105 border border-slate-200 shadow-sm'
             }`}
             aria-label="Like design"
           >
             <Heart 
               className={`w-4 h-4 transition-colors ${
-                design.isLiked ? 'fill-rose-500 text-rose-500' : 'text-slate-300'
+                design.isLiked ? 'fill-rose-500 text-rose-500' : theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
               }`} 
             />
           </button>
-        </div>
-
-        {/* Bottom Image Tag: Garment Type & GSM */}
-        <div className="absolute bottom-3 left-3 bg-slate-950/90 backdrop-blur-md text-slate-200 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-700/60 shadow-sm flex items-center gap-1.5">
-          <span className="text-indigo-400 font-black">{design.garmentType || 'T-Shirt'}</span>
-          <span className="text-slate-500">•</span>
-          <span>{design.fabric.gsm} GSM</span>
-          <span className="text-slate-500">•</span>
-          <span className="text-slate-300 font-medium">{design.fabric.fit}</span>
         </div>
       </div>
 

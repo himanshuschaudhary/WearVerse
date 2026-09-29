@@ -133,7 +133,6 @@ export const Navbar: React.FC = () => {
                 ? 'text-amber-300 hover:text-white hover:bg-slate-800/80 border-slate-800 bg-[#121622]/60'
                 : 'text-indigo-600 hover:text-indigo-900 hover:bg-slate-100 border-slate-200 bg-white'
             }`}
-            title={theme === 'dark' ? 'Switch to Light Mode (Default)' : 'Switch to Obsidian Dark Mode'}
             aria-label="Toggle Theme"
           >
             {theme === 'dark' ? (

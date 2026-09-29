@@ -1532,7 +1532,6 @@ export const ChatbotStudio: React.FC = () => {
                 ? 'bg-[#141824]/90 hover:bg-[#1d2336] border-slate-700/70 text-amber-300 hover:text-white'
                 : 'bg-white hover:bg-slate-100 border-slate-300 text-indigo-600 hover:text-indigo-900 shadow-sm'
             }`}
-            title={theme === 'dark' ? 'Switch to Light Mode (Default)' : 'Switch to Obsidian Dark Mode'}
             aria-label="Toggle Theme"
           >
             {theme === 'dark' ? (

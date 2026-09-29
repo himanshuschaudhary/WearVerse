@@ -33,6 +33,7 @@ import {
 import { useApp } from '../context/AppContext';
 import { WearVerseLogo } from '../components/WearVerseLogo';
 import { Design, AIVariation, TShirtSize } from '../types';
+import { INITIAL_DESIGNS } from '../data/sampleDesigns';
 import { aiService } from '../services/aiService';
 
 interface ChatMessage {
@@ -66,6 +67,7 @@ export const HomePage: React.FC = () => {
     openTryOnModal, 
     openOrderModal, 
     openDetailModal,
+    designs,
     theme, 
     toggleTheme,
     showToast,
@@ -659,7 +661,7 @@ export const HomePage: React.FC = () => {
                   ? 'bg-slate-900 border-slate-700/80 text-amber-300 hover:bg-slate-850'
                   : 'bg-slate-100 border-slate-200 text-indigo-600 hover:bg-slate-200'
               }`}
-              title="Toggle Dark / Light Theme"
+              aria-label="Toggle Theme"
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
@@ -1196,8 +1198,8 @@ export const HomePage: React.FC = () => {
               <div
                 key={item.id}
                 onClick={() => {
-                  setPromptInput(item.title);
-                  handleGenerateInPage(item.title);
+                  const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
+                  if (fullDesign) openDetailModal(fullDesign);
                 }}
                 className={`w-64 sm:w-72 flex-shrink-0 rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer group ${
                   theme === 'dark'
@@ -1211,7 +1213,11 @@ export const HomePage: React.FC = () => {
                     alt={item.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-slate-950/85 backdrop-blur-md border border-indigo-500/40 text-indigo-300 text-[10px] font-black uppercase tracking-wider">
+                  <div className={`absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full backdrop-blur-md text-[10px] font-black uppercase tracking-wider border shadow-sm ${
+                    theme === 'dark' 
+                      ? 'bg-slate-950/85 border-indigo-500/40 text-indigo-300' 
+                      : 'bg-white/95 border-indigo-200 text-indigo-700'
+                  }`}>
                     {item.badge}
                   </div>
                   <button
@@ -1220,7 +1226,11 @@ export const HomePage: React.FC = () => {
                       e.stopPropagation();
                       toggleLikeDesign(item.id);
                     }}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-slate-700/60 text-white hover:text-rose-500 transition"
+                    className={`absolute top-2.5 right-2.5 p-1.5 rounded-full backdrop-blur-md border transition ${
+                      theme === 'dark' 
+                        ? 'bg-slate-950/60 border-slate-700/60 text-white hover:text-rose-500' 
+                        : 'bg-white/90 border-slate-200 text-slate-700 hover:text-rose-500 shadow-sm'
+                    }`}
                   >
                     <Heart className="w-3.5 h-3.5" />
                   </button>
@@ -1248,12 +1258,12 @@ export const HomePage: React.FC = () => {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setPromptInput(item.title);
-                        handleGenerateInPage(item.title);
+                        const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
+                        if (fullDesign) openTryOnModal(fullDesign);
                       }}
-                      className="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition shadow-sm"
+                      className="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition shadow-sm flex items-center gap-1"
                     >
-                      Remix in AI
+                      <Eye className="w-3 h-3" /> Try On
                     </button>
                   </div>
                 </div>
@@ -1289,8 +1299,8 @@ export const HomePage: React.FC = () => {
               <div
                 key={item.id}
                 onClick={() => {
-                  setPromptInput(item.title);
-                  handleGenerateInPage(item.title);
+                  const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
+                  if (fullDesign) openDetailModal(fullDesign);
                 }}
                 className={`w-60 sm:w-64 flex-shrink-0 rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer group ${
                   theme === 'dark'
@@ -1304,7 +1314,11 @@ export const HomePage: React.FC = () => {
                     alt={item.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-slate-950/85 backdrop-blur-md border border-violet-500/40 text-violet-300 text-[10px] font-black uppercase tracking-wider">
+                  <div className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full backdrop-blur-md text-[10px] font-black uppercase tracking-wider border shadow-sm ${
+                    theme === 'dark' 
+                      ? 'bg-slate-950/85 border-violet-500/40 text-violet-300' 
+                      : 'bg-white/95 border-violet-200 text-violet-700'
+                  }`}>
                     {item.badge}
                   </div>
                   <button
@@ -1313,7 +1327,11 @@ export const HomePage: React.FC = () => {
                       e.stopPropagation();
                       toggleLikeDesign(item.id);
                     }}
-                    className="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-slate-950/60 backdrop-blur-md border border-slate-700/60 text-white hover:text-rose-500 transition"
+                    className={`absolute top-2.5 right-2.5 p-1.5 rounded-full backdrop-blur-md border transition ${
+                      theme === 'dark' 
+                        ? 'bg-slate-950/60 border-slate-700/60 text-white hover:text-rose-500' 
+                        : 'bg-white/90 border-slate-200 text-slate-700 hover:text-rose-500 shadow-sm'
+                    }`}
                   >
                     <Heart className="w-3.5 h-3.5" />
                   </button>

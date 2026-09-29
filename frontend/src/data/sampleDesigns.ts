@@ -488,7 +488,7 @@ export const INITIAL_REVIEWS: Record<string, Review[]> = {
         isVerifiedBuyer: true,
       },
       rating: 5,
-      comment: 'I remixed Aryan’s design with my own initials on the sleeve. Got it delivered in 3 days. WearVerse is literally the future of fashion.',
+      comment: 'I customized Aryan’s design with my own initials on the sleeve. Got it delivered in 3 days. WearVerse is literally the future of fashion.',
       date: 'March 25, 2026',
       helpfulCount: 12,
     }
