@@ -10,7 +10,9 @@ import {
   Tag,
   Truck,
   CheckCircle2,
-  Flame
+  Flame,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { Design } from '../types';
 import { useApp } from '../context/AppContext';
@@ -34,6 +36,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
 
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgSrc, setImgSrc] = useState(design.frontImage);
+  const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
+
+  const hasBackView = Boolean(design.backImage && design.backImage !== design.frontImage && !design.backImage.includes('tryon_model_back'));
+  const currentImg = viewSide === 'front' ? (imgSrc || design.frontImage) : (design.backImage || design.frontImage);
 
   const handleImgError = () => {
     setImgSrc(getFallbackImage(0));
@@ -53,7 +59,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
         className="relative aspect-square w-full bg-slate-900 overflow-hidden cursor-pointer"
       >
         <img 
-          src={imgSrc} 
+          src={currentImg} 
           alt={design.title} 
           loading="lazy"
           onLoad={() => setImgLoaded(true)}
@@ -62,6 +68,37 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
             imgLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         />
+
+        {/* Navigation Button > to see Back View Side */}
+        {hasBackView && (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setViewSide(prev => prev === 'front' ? 'back' : 'front');
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/75 hover:bg-indigo-600 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all hover:scale-110 shadow-xl z-20"
+              title={viewSide === 'front' ? 'Click > to see Back view side' : 'Click < to see Front view side'}
+            >
+              {viewSide === 'front' ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+
+            {/* Front / Back Side Badge */}
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                setViewSide(prev => prev === 'front' ? 'back' : 'front');
+              }}
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-slate-950/85 hover:bg-slate-900 border border-white/20 text-[9px] font-black uppercase tracking-wider text-slate-200 backdrop-blur-md transition cursor-pointer flex items-center gap-1 z-20 shadow-md"
+            >
+              <span className={viewSide === 'front' ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Front</span>
+              <span className="text-slate-500">•</span>
+              <span className={viewSide === 'back' ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Back</span>
+              <span className="text-indigo-400 ml-0.5 font-bold">&gt;</span>
+            </div>
+          </>
+        )}
 
         {/* Top Floating Badges */}
         <div className="absolute top-1.5 sm:top-3 left-1.5 sm:left-3 right-1.5 sm:right-3 flex items-center justify-between z-10 pointer-events-none">

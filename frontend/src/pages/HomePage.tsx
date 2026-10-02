@@ -30,7 +30,9 @@ import {
   ShieldCheck,
   Cpu,
   Users,
-  Upload
+  Upload,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { WearVerseLogo } from '../components/WearVerseLogo';
@@ -85,6 +87,17 @@ export const HomePage: React.FC = () => {
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
   const [promptInput, setPromptInput] = useState('');
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+
+  // Front / Back View side toggle for cards
+  const [cardSides, setCardSides] = useState<Record<string, 'front' | 'back'>>({});
+
+  const toggleCardSide = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCardSides(prev => ({
+      ...prev,
+      [id]: prev[id] === 'back' ? 'front' : 'back',
+    }));
+  };
 
   // Notification Center Popover (Past 5 Notifications)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -596,6 +609,20 @@ export const HomePage: React.FC = () => {
 
   // Curated Luxury Heavyweight Hoodies & Sweatshirts
   const hoodieAndSweatList = [
+    {
+      id: 'wv-kitsune-ronin-hoodie',
+      title: 'Tokyo Kitsune & Ronin Dual Hoodie',
+      badge: '450 GSM DUAL-SIDED',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 10420,
+      commentsCount: 584,
+      image: '/assets/kitsune_ronin_hoodie_front.jpg',
+      frontImage: '/assets/kitsune_ronin_hoodie_front.jpg',
+      backImage: '/assets/kitsune_ronin_hoodie_back.jpg',
+      price: 2799,
+      tags: ['#kitsune', '#ronin', '#dualsided', '#hoodie', '#450gsm'],
+      garmentType: 'Hoodie',
+    },
     {
       id: 'wv-tenshi-hoodie-01',
       title: 'Tenshi Tokyo Lost Souls Hoodie',
@@ -1717,47 +1744,78 @@ export const HomePage: React.FC = () => {
 
           {/* 3 IN ONE LINE AND NEXT 3 AT ANOTHER LINE (GRID-COLS-3 ON MOBILE) */}
           <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-1">
-            {trendingList.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => {
-                  const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
-                  if (fullDesign) openDetailModal(fullDesign);
-                }}
-                className={`rounded-2xl sm:rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer group flex flex-col justify-between ${
-                  theme === 'dark'
-                    ? 'bg-[#121624] border-slate-800 hover:border-indigo-500/50'
-                    : 'bg-white border-slate-200 hover:border-indigo-400 shadow-sm'
-                }`}
-              >
-                <div className="relative aspect-square overflow-hidden bg-slate-900">
-                  <img 
-                    src={item.image} 
-                    alt={item.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className={`absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 px-1.5 sm:px-2.5 py-0.5 rounded-md sm:rounded-full backdrop-blur-md text-[8px] sm:text-[10px] font-black uppercase tracking-wider border shadow-sm ${
-                    theme === 'dark' 
-                      ? 'bg-slate-950/85 border-violet-500/40 text-violet-300' 
-                      : 'bg-white/95 border-violet-200 text-violet-700'
-                  }`}>
-                    {item.badge}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLikeDesign(item.id);
-                    }}
-                    className={`absolute top-1.5 sm:top-2.5 right-1.5 sm:right-2.5 p-1 sm:p-1.5 rounded-full backdrop-blur-md border transition ${
+            {trendingList.map((item) => {
+              const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
+              const backImg = fullDesign?.backImage && fullDesign.backImage !== fullDesign.frontImage && !fullDesign.backImage.includes('tryon_model_back') ? fullDesign.backImage : null;
+              const hasBack = Boolean(backImg);
+              const isBack = cardSides[item.id] === 'back';
+              const currentImg = (isBack && backImg) ? backImg : item.image;
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    if (fullDesign) openDetailModal(fullDesign);
+                  }}
+                  className={`rounded-2xl sm:rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer group flex flex-col justify-between ${
+                    theme === 'dark'
+                      ? 'bg-[#121624] border-slate-800 hover:border-indigo-500/50'
+                      : 'bg-white border-slate-200 hover:border-indigo-400 shadow-sm'
+                  }`}
+                >
+                  <div className="relative aspect-square overflow-hidden bg-slate-900">
+                    <img 
+                      src={currentImg} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className={`absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 px-1.5 sm:px-2.5 py-0.5 rounded-md sm:rounded-full backdrop-blur-md text-[8px] sm:text-[10px] font-black uppercase tracking-wider border shadow-sm z-10 ${
                       theme === 'dark' 
-                        ? 'bg-slate-950/60 border-slate-700/60 text-white hover:text-rose-500' 
-                        : 'bg-white/90 border-slate-200 text-slate-700 hover:text-rose-500 shadow-sm'
-                    }`}
-                  >
-                    <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  </button>
-                </div>
+                        ? 'bg-slate-950/85 border-violet-500/40 text-violet-300' 
+                        : 'bg-white/95 border-violet-200 text-violet-700'
+                    }`}>
+                      {item.badge}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLikeDesign(item.id);
+                      }}
+                      className={`absolute top-1.5 sm:top-2.5 right-1.5 sm:right-2.5 p-1 sm:p-1.5 rounded-full backdrop-blur-md border transition z-10 ${
+                        theme === 'dark' 
+                          ? 'bg-slate-950/60 border-slate-700/60 text-white hover:text-rose-500' 
+                          : 'bg-white/90 border-slate-200 text-slate-700 hover:text-rose-500 shadow-sm'
+                      }`}
+                    >
+                      <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    </button>
+
+                    {/* Navigation Button > to see Back View Side */}
+                    {hasBack && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={(e) => toggleCardSide(item.id, e)}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/75 hover:bg-indigo-600 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all hover:scale-110 shadow-lg z-20"
+                          title={isBack ? 'Click < to see Front view side' : 'Click > to see Back view side'}
+                        >
+                          {isBack ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                        </button>
+
+                        {/* Front / Back Indicator Pill */}
+                        <div 
+                          onClick={(e) => toggleCardSide(item.id, e)}
+                          className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-950/85 hover:bg-slate-900 border border-white/20 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-slate-200 backdrop-blur-md transition cursor-pointer flex items-center gap-0.5 z-20 shadow-md"
+                        >
+                          <span className={!isBack ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Front</span>
+                          <span className="text-slate-500">•</span>
+                          <span className={isBack ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Back</span>
+                          <span className="text-indigo-400 font-bold">&gt;</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
 
                 <div className="p-2 sm:p-3.5 space-y-1 flex-1 flex flex-col justify-between">
                   <div>
@@ -1790,7 +1848,8 @@ export const HomePage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+          })}
           </div>
         </div>
 
@@ -1817,47 +1876,78 @@ export const HomePage: React.FC = () => {
 
           {/* Horizontal Scrolling Hoodies & Sweatshirts Carousel */}
           <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
-            {hoodieAndSweatList.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => {
-                  const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
-                  if (fullDesign) openDetailModal(fullDesign);
-                }}
-                className={`w-64 sm:w-72 flex-shrink-0 rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer group ${
-                  theme === 'dark'
-                    ? 'bg-[#121624] border-slate-800 hover:border-indigo-500/50 hover:shadow-indigo-500/10'
-                    : 'bg-white border-slate-200 hover:border-indigo-500 shadow-md hover:shadow-indigo-100'
-                }`}
-              >
-                <div className="relative aspect-square overflow-hidden bg-slate-900">
-                  <img 
-                    src={item.image} 
-                    alt={item.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className={`absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full backdrop-blur-md text-[10px] font-black uppercase tracking-wider border shadow-sm ${
-                    theme === 'dark' 
-                      ? 'bg-slate-950/85 border-indigo-500/40 text-indigo-300' 
-                      : 'bg-white/95 border-indigo-200 text-indigo-700'
-                  }`}>
-                    {item.badge}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLikeDesign(item.id);
-                    }}
-                    className={`absolute top-2.5 right-2.5 p-1.5 rounded-full backdrop-blur-md border transition ${
+            {hoodieAndSweatList.map((item) => {
+              const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
+              const backImg = item.backImage || (fullDesign?.backImage && fullDesign.backImage !== fullDesign.frontImage && !fullDesign.backImage.includes('tryon_model_back') ? fullDesign.backImage : null);
+              const hasBack = Boolean(backImg);
+              const isBack = cardSides[item.id] === 'back';
+              const currentImg = (isBack && backImg) ? backImg : (item.frontImage || item.image);
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    if (fullDesign) openDetailModal(fullDesign);
+                  }}
+                  className={`w-64 sm:w-72 flex-shrink-0 rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer group ${
+                    theme === 'dark'
+                      ? 'bg-[#121624] border-slate-800 hover:border-indigo-500/50 hover:shadow-indigo-500/10'
+                      : 'bg-white border-slate-200 hover:border-indigo-500 shadow-md hover:shadow-indigo-100'
+                  }`}
+                >
+                  <div className="relative aspect-square overflow-hidden bg-slate-900">
+                    <img 
+                      src={currentImg} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className={`absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full backdrop-blur-md text-[10px] font-black uppercase tracking-wider border shadow-sm z-10 ${
                       theme === 'dark' 
-                        ? 'bg-slate-950/60 border-slate-700/60 text-white hover:text-rose-500' 
-                        : 'bg-white/90 border-slate-200 text-slate-700 hover:text-rose-500 shadow-sm'
-                    }`}
-                  >
-                    <Heart className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                        ? 'bg-slate-950/85 border-indigo-500/40 text-indigo-300' 
+                        : 'bg-white/95 border-indigo-200 text-indigo-700'
+                    }`}>
+                      {item.badge}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLikeDesign(item.id);
+                      }}
+                      className={`absolute top-2.5 right-2.5 p-1.5 rounded-full backdrop-blur-md border transition z-10 ${
+                        theme === 'dark' 
+                          ? 'bg-slate-950/60 border-slate-700/60 text-white hover:text-rose-500' 
+                          : 'bg-white/90 border-slate-200 text-slate-700 hover:text-rose-500 shadow-sm'
+                      }`}
+                    >
+                      <Heart className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Navigation Button > to see Back View Side */}
+                    {hasBack && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={(e) => toggleCardSide(item.id, e)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/75 hover:bg-indigo-600 text-white flex items-center justify-center backdrop-blur-md border border-white/25 transition-all hover:scale-110 shadow-xl z-20"
+                          title={isBack ? 'Click < to see Front view side' : 'Click > to see Back view side'}
+                        >
+                          {isBack ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </button>
+
+                        {/* Front / Back Indicator Pill */}
+                        <div 
+                          onClick={(e) => toggleCardSide(item.id, e)}
+                          className="absolute bottom-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-slate-950/85 hover:bg-slate-900 border border-white/20 text-[9px] font-black uppercase tracking-wider text-slate-200 backdrop-blur-md transition cursor-pointer flex items-center gap-1 z-20 shadow-md"
+                        >
+                          <span className={!isBack ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Front</span>
+                          <span className="text-slate-500">•</span>
+                          <span className={isBack ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Back</span>
+                          <span className="text-indigo-400 ml-0.5 font-bold">&gt;</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
 
                 <div className="p-3.5 space-y-2">
                   <div>
@@ -1891,7 +1981,8 @@ export const HomePage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+          })}
           </div>
         </div>
 

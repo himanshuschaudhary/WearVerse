@@ -29,6 +29,48 @@ export interface TShirtAssetMetadata {
 }
 
 export const TSHIRT_ASSET_LIBRARY: TShirtAssetMetadata[] = [
+  // 0.00 DUAL-SIDED MASTERPIECE: TOKYO KITSUNE & BLOOD MOON RONIN HOODIE
+  {
+    id: 'asset-kitsune-ronin-dualsided',
+    name: 'Tokyo Kitsune & Blood Moon Ronin Dual-Sided Hoodie',
+    slug: 'tokyo-kitsune-ronin-dualsided-hoodie',
+    mockupUrl: '/assets/kitsune_ronin_hoodie_front.jpg',
+    graphicUrl: '/assets/kitsune_ronin_hoodie_front.jpg',
+    defaultGarmentColor: '#0a0b10',
+    availableColors: ['#0a0b10', '#18181b', '#1e1b4b'],
+    price: 2799,
+    originalPrice: 3899,
+    fit: 'Oversized Boxy Dropped-Shoulder Hoodie',
+    gsm: 450,
+    mainSubject: 'Dual-View: Kitsune Fox Mask on Front & Lone Mountain Ronin on Back',
+    theme: 'Dual-Sided Traditional Japanese Mythology & Streetwear',
+    style: 'Sumi-e Ink Wash & Vibrant Crimson Graphic with Front and Back View',
+    artStyle: 'Two-Sided Ultra-HD Direct-To-Garment with Sleeve Prints',
+    colorPalette: ['#0a0b10', '#dc2626', '#ef4444', '#ffffff'],
+    typographyStyle: 'Kanji Brush (東京・夢を追え・過去に囚われず 未来を創る)',
+    targetAudience: 'Streetwear connoisseurs, anime enthusiasts, Japanese folklore fans',
+    niche: 'Dual-Sided Japanese Anime & Techwear Fleece',
+    mood: 'Mythical, dualistic, dramatic, iconic, transcendent',
+    visualElements: [
+      'kitsune', 'fox mask', 'shrine path', 'lanterns', 'torii gate', 'cherry blossoms', 
+      'sakura', 'blood moon', 'red moon', 'ronin', 'samurai', 'kasa hat', 'katana', 
+      'pagoda', 'waterfall', 'mountains', 'sleeve prints', 'back view', 'front view'
+    ],
+    objectsAndCharacters: ['kitsune mask', 'ronin samurai', 'torii gate', 'pagoda', 'waterfall'],
+    keywords: [
+      'kitsune', 'fox mask', 'reversible', 'dual sided', 'two sided', 'front and back', 
+      'back view', 'front view', 'ronin', 'samurai', 'blood moon', 'red moon', 'torii', 
+      'hoodie', '450gsm', 'heavyweight', 'tokyo', 'streetwear', 'fleece'
+    ],
+    promptPhrases: [
+      'dual sided black hoodie with kitsune mask on front and ronin samurai on back',
+      'two sided japanese hoodie with front and back view',
+      'kitsune fox mask front and red moon ronin back hoodie',
+      'dual print japanese streetwear hoodie with front and back designs'
+    ],
+    tags: ['#kitsune', '#ronin', '#dualsided', '#hoodie', '#bloodmoon', '#450gsm', '#tokyo']
+  },
+
   // 0.01 USER MASTERPIECE: BLOOD MOON RONIN BUSHIDO TEE
   {
     id: 'asset-ronin-blood-moon',

@@ -11,7 +11,9 @@ import {
   Copy,
   ArrowRight,
   Eye,
-  Bookmark
+  Bookmark,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { Design } from '../../types';
 import { useApp } from '../../context/AppContext';
@@ -34,6 +36,10 @@ export const DesignDetailModal: React.FC<DesignDetailModalProps> = ({ design }) 
   const [activeTab, setActiveTab] = useState<'details' | 'reviews'>('details');
   const [newReviewText, setNewReviewText] = useState('');
   const [newRating, setNewRating] = useState(5);
+  const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
+
+  const hasBackView = Boolean(design.backImage && design.backImage !== design.frontImage && !design.backImage.includes('tryon_model_back'));
+  const currentImage = viewSide === 'front' ? design.frontImage : (design.backImage || design.frontImage);
 
   const designReviews = reviews[design.id] || [];
 
@@ -91,13 +97,53 @@ export const DesignDetailModal: React.FC<DesignDetailModalProps> = ({ design }) 
           <div className="lg:col-span-6 p-4 sm:p-6 md:p-8 bg-[#090c14] flex flex-col items-center justify-center relative">
             <div className="relative w-full aspect-square max-w-md rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950">
               <img 
-                src={design.frontImage} 
-                alt={design.title} 
-                className="w-full h-full object-cover object-center"
+                src={currentImage} 
+                alt={`${design.title} - ${viewSide} view`} 
+                className="w-full h-full object-cover object-center transition-all duration-300"
               />
-              <div className="absolute top-3 left-3 bg-slate-950/85 backdrop-blur-md text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase">
-                ⚡ 240 GSM DTG Cured
+              <div className="absolute top-3 left-3 bg-slate-950/85 backdrop-blur-md text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase z-10">
+                ⚡ {design.fabric?.gsm || 240} GSM DTG Cured
               </div>
+
+              {/* Navigation Arrows for Front / Back Views */}
+              {hasBackView && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setViewSide(prev => prev === 'front' ? 'back' : 'front')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/75 hover:bg-indigo-600 text-white flex items-center justify-center backdrop-blur-md border border-white/25 transition-all hover:scale-110 shadow-2xl z-20"
+                    title={viewSide === 'front' ? 'Click > to see Back view side' : 'Click < to see Front view side'}
+                  >
+                    {viewSide === 'front' ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+                  </button>
+
+                  {/* Bottom Toggle Pills */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1 rounded-full bg-slate-950/85 backdrop-blur-md border border-white/20 z-20 shadow-xl">
+                    <button
+                      type="button"
+                      onClick={() => setViewSide('front')}
+                      className={`px-3 py-1 rounded-full text-[11px] font-bold transition ${
+                        viewSide === 'front' 
+                          ? 'bg-indigo-600 text-white shadow-md' 
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Front Side
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewSide('back')}
+                      className={`px-3 py-1 rounded-full text-[11px] font-bold transition ${
+                        viewSide === 'back' 
+                          ? 'bg-indigo-600 text-white shadow-md' 
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Back Side &gt;
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Quick Prompt Tooltip Preview */}
