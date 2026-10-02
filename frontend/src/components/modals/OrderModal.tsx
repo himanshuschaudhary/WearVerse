@@ -78,7 +78,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   initialColor = design.defaultColor || '#0f0f11',
   initialSize = 'L'
 }) => {
-  const { user, closeModal, placeOrder, setCurrentPage } = useApp();
+  const { user, closeModal, placeOrder, setCurrentPage, theme } = useApp();
 
   const [step, setStep] = useState<'details' | 'payment' | 'success'>('details');
   const [selectedSize, setSelectedSize] = useState<TShirtSize>(initialSize);
@@ -177,16 +177,28 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] overflow-y-auto bg-slate-950/85 backdrop-blur-xl animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl bg-[#0d111d] rounded-3xl shadow-2xl border border-slate-700/80 overflow-hidden max-h-[92vh] sm:max-h-[96vh] flex flex-col text-slate-100 ring-1 ring-white/10">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] overflow-y-auto backdrop-blur-xl animate-in fade-in duration-200 ${
+      theme === 'dark' ? 'bg-slate-950/85' : 'bg-slate-900/40'
+    }`}>
+      <div className={`relative w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[96vh] flex flex-col border transition-colors ${
+        theme === 'dark' 
+          ? 'bg-[#0d111d] border-slate-700/80 text-slate-100 ring-1 ring-white/10' 
+          : 'bg-white border-slate-200 text-slate-900 shadow-slate-400/30 ring-1 ring-slate-900/5'
+      }`}>
         
         {/* Modal Header */}
-        <div className="px-5 sm:px-6 py-4 border-b border-slate-800 bg-[#121626]/80 backdrop-blur-md flex items-center justify-between">
+        <div className={`px-5 sm:px-6 py-4 border-b backdrop-blur-md flex items-center justify-between transition-colors ${
+          theme === 'dark' ? 'border-slate-800 bg-[#121626]/80' : 'border-slate-200 bg-slate-50/90'
+        }`}>
           <div className="flex items-center gap-3">
             {step === 'payment' && (
               <button 
                 onClick={() => setStep('details')} 
-                className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition mr-1"
+                className={`p-1.5 rounded-xl transition mr-1 ${
+                  theme === 'dark' 
+                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white' 
+                    : 'bg-slate-200 hover:bg-slate-300 text-slate-700 hover:text-slate-900'
+                }`}
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
@@ -195,12 +207,14 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               <ShoppingBag className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-extrabold text-white tracking-tight font-['Space_Grotesk'] leading-tight">
+              <h2 className={`text-sm sm:text-base font-extrabold tracking-tight font-['Space_Grotesk'] leading-tight ${
+                theme === 'dark' ? 'text-white' : 'text-slate-950'
+              }`}>
                 {step === 'details' && 'Configure & Order Your T-Shirt'}
                 {step === 'payment' && 'Verified Secure Payment'}
                 {step === 'success' && 'Order Confirmed & Sent to Print!'}
               </h2>
-              <p className="text-[11px] text-slate-400">
+              <p className={`text-[11px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                 {step === 'details' && '240 GSM 100% Combed Cotton • Free 24h Dispatch'}
                 {step === 'payment' && `Total Amount: ₹${totalAmount.toLocaleString()} • 256-bit SSL Protected`}
                 {step === 'success' && `Owner notified for physical printing and handover`}
@@ -210,7 +224,11 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
           <button
             onClick={closeModal}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className={`p-2 rounded-xl transition ${
+              theme === 'dark' 
+                ? 'text-slate-400 hover:text-white hover:bg-slate-800' 
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/80'
+            }`}
           >
             <X className="w-5 h-5" />
           </button>
@@ -224,35 +242,59 @@ export const OrderModal: React.FC<OrderModalProps> = ({
             <form onSubmit={handleProceedToPayment} className="space-y-6">
               
               {/* Product Preview Strip */}
-              <div className="p-4 rounded-2xl bg-[#141826] border border-slate-800 flex gap-4 items-center">
+              <div className={`p-4 rounded-2xl border flex gap-4 items-center transition-colors ${
+                theme === 'dark' ? 'bg-[#141826] border-slate-800' : 'bg-slate-50 border-slate-200'
+              }`}>
                 <img 
                   src={design.frontImage} 
                   alt={design.title} 
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover bg-slate-900 border border-slate-700 flex-shrink-0 shadow-md"
+                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border flex-shrink-0 shadow-md ${
+                    theme === 'dark' ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
+                  }`}
                 />
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded-full border border-indigo-500/30">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      theme === 'dark' 
+                        ? 'text-indigo-400 bg-indigo-950/80 border-indigo-500/30' 
+                        : 'text-indigo-700 bg-indigo-50 border-indigo-200'
+                    }`}>
                       240 GSM Combed Cotton
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      theme === 'dark' 
+                        ? 'text-emerald-400 bg-emerald-950/80 border-emerald-500/30' 
+                        : 'text-emerald-700 bg-emerald-100 border-emerald-300'
+                    }`}>
                       1200 DPI DTG
                     </span>
                   </div>
-                  <h3 className="text-sm font-bold text-white truncate">{design.title}</h3>
+                  <h3 className={`text-sm font-bold truncate ${
+                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                  }`}>{design.title}</h3>
                   <div className="flex items-center gap-3 text-xs">
-                    <span className="text-base font-extrabold text-white">₹{design.price.toLocaleString()}</span>
-                    <span className="text-xs text-slate-500 line-through">₹2,499</span>
-                    <span className="text-[10px] text-emerald-400 font-bold">40% OFF Studio Special</span>
+                    <span className={`text-base font-extrabold ${
+                      theme === 'dark' ? 'text-white' : 'text-slate-950'
+                    }`}>₹{design.price.toLocaleString()}</span>
+                    <span className={`text-xs line-through ${
+                      theme === 'dark' ? 'text-slate-500' : 'text-slate-400'
+                    }`}>₹2,499</span>
+                    <span className={`text-[10px] font-bold ${
+                      theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+                    }`}>40% OFF Studio Special</span>
                   </div>
                 </div>
               </div>
 
               {/* Garment Color Selection */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                <label className={`text-xs font-bold uppercase tracking-wider flex items-center justify-between ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                }`}>
                   <span>1. Garment Color</span>
-                  <span className="text-indigo-400 font-semibold text-xs lowercase">
+                  <span className={`font-semibold text-xs lowercase ${
+                    theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'
+                  }`}>
                     {colorOptions.find(c => c.hex === selectedColor)?.label || 'Custom Color'}
                   </span>
                 </label>
@@ -264,12 +306,12 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                       onClick={() => setSelectedColor(c.hex)}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition ${
                         selectedColor === c.hex 
-                          ? 'border-indigo-500 bg-indigo-950/50 text-white shadow-sm ring-1 ring-indigo-500' 
-                          : 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white hover:bg-slate-800'
+                          ? (theme === 'dark' ? 'border-indigo-500 bg-indigo-950/50 text-white shadow-sm ring-1 ring-indigo-500' : 'border-indigo-600 bg-indigo-50 text-indigo-950 shadow-sm ring-1 ring-indigo-600') 
+                          : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white hover:bg-slate-800' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300')
                       }`}
                     >
                       <span 
-                        className="w-3.5 h-3.5 rounded-full border border-slate-600 shadow-inner flex-shrink-0"
+                        className="w-3.5 h-3.5 rounded-full border border-slate-400 shadow-inner flex-shrink-0"
                         style={{ backgroundColor: c.hex }}
                       />
                       <span>{c.label}</span>
@@ -281,13 +323,17 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               {/* Size Selection with Measurements */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <label className={`text-xs font-bold uppercase tracking-wider ${
+                    theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                  }`}>
                     2. Streetwear Size (Oversized Boxy Cut)
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowSizeGuide(!showSizeGuide)}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-semibold"
+                    className={`text-xs flex items-center gap-1 font-semibold ${
+                      theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-700'
+                    }`}
                   >
                     <Ruler className="w-3.5 h-3.5" />
                     <span>{showSizeGuide ? 'Hide Measurements' : 'Size Measurements'}</span>
@@ -302,12 +348,12 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                       onClick={() => setSelectedSize(sz)}
                       className={`p-1.5 sm:p-2.5 rounded-xl border text-center transition flex flex-col items-center justify-center min-h-[46px] sm:min-h-[50px] ${
                         selectedSize === sz
-                          ? 'border-indigo-500 bg-indigo-600 text-white font-extrabold shadow-md shadow-indigo-600/30'
-                          : 'border-slate-800 bg-[#141826] text-slate-300 hover:text-white hover:bg-slate-800'
+                          ? 'border-indigo-600 bg-indigo-600 text-white font-extrabold shadow-md shadow-indigo-600/30'
+                          : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-300 hover:text-white hover:bg-slate-800' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300')
                       }`}
                     >
                       <span className="text-xs sm:text-sm font-bold">{sz}</span>
-                      <span className={`text-[9px] sm:text-[10px] mt-0.5 truncate ${selectedSize === sz ? 'text-indigo-200' : 'text-slate-500'}`}>
+                      <span className={`text-[9px] sm:text-[10px] mt-0.5 truncate ${selectedSize === sz ? 'text-indigo-100' : (theme === 'dark' ? 'text-slate-500' : 'text-slate-400')}`}>
                         {sizeDetails[sz].chest.split(' ')[0]}
                       </span>
                     </button>
@@ -315,18 +361,24 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                 </div>
 
                 {showSizeGuide && (
-                  <div className="p-3 bg-[#141826] rounded-xl border border-slate-800 text-xs space-y-1 animate-in fade-in duration-150">
-                    <p className="font-bold text-white text-[11px] uppercase tracking-wider mb-1">
+                  <div className={`p-3 rounded-xl border text-xs space-y-1 animate-in fade-in duration-150 ${
+                    theme === 'dark' ? 'bg-[#141826] border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
+                  }`}>
+                    <p className={`font-bold text-[11px] uppercase tracking-wider mb-1 ${
+                      theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    }`}>
                       Boxy Heavyweight Fit Specs:
                     </p>
-                    <div className="grid grid-cols-3 text-[11px] text-slate-400 border-b border-slate-800 pb-1 font-semibold">
+                    <div className={`grid grid-cols-3 text-[11px] border-b pb-1 font-semibold ${
+                      theme === 'dark' ? 'text-slate-400 border-slate-800' : 'text-slate-500 border-slate-200'
+                    }`}>
                       <span>Size</span>
                       <span>Chest Width</span>
                       <span>Garment Length</span>
                     </div>
                     {Object.entries(sizeDetails).map(([sz, details]) => (
-                      <div key={sz} className="grid grid-cols-3 text-[11px] text-slate-300 py-0.5">
-                        <span className="font-bold text-indigo-400">{sz}</span>
+                      <div key={sz} className="grid grid-cols-3 text-[11px] py-0.5">
+                        <span className={`font-bold ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`}>{sz}</span>
                         <span>{details.chest}</span>
                         <span>{details.length}</span>
                       </div>
@@ -338,10 +390,14 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               {/* Clothe Fabric & Material Selection */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <label className={`text-xs font-bold uppercase tracking-wider ${
+                    theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                  }`}>
                     3. Clothe Fabric & Material
                   </label>
-                  <span className="text-indigo-400 font-semibold text-xs">
+                  <span className={`font-semibold text-xs ${
+                    theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'
+                  }`}>
                     {selectedMaterial.name} ({selectedMaterial.gsm} GSM)
                   </span>
                 </div>
@@ -353,20 +409,26 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                       onClick={() => setSelectedMaterial(mat)}
                       className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between gap-1.5 ${
                         selectedMaterial.id === mat.id
-                          ? 'border-indigo-500 bg-indigo-950/60 ring-1 ring-indigo-500 text-white shadow-md'
-                          : 'border-slate-800 bg-[#141826] text-slate-300 hover:text-white hover:bg-slate-800'
+                          ? (theme === 'dark' ? 'border-indigo-500 bg-indigo-950/60 ring-1 ring-indigo-500 text-white shadow-md' : 'border-indigo-600 bg-indigo-50/80 ring-1 ring-indigo-600 text-indigo-950 shadow-md')
+                          : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-300 hover:text-white hover:bg-slate-800' : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50/60 shadow-sm')
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-xs">{mat.name}</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          theme === 'dark' ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                        }`}>
                           {mat.badge}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-snug">
+                      <p className={`text-[11px] leading-snug ${
+                        theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                      }`}>
                         {mat.description}
                       </p>
-                      <div className="text-[10px] font-semibold text-emerald-400 pt-0.5">
+                      <div className={`text-[10px] font-semibold pt-0.5 ${
+                        theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+                      }`}>
                         {mat.extraPrice > 0 ? `+₹${mat.extraPrice} Upgrade` : 'Included Free'}
                       </div>
                     </button>
@@ -375,8 +437,12 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               </div>
 
               {/* Quantity Selector */}
-              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#141826] border border-slate-800">
-                <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+              <div className={`flex items-center justify-between p-3.5 rounded-2xl border transition-colors ${
+                theme === 'dark' ? 'bg-[#141826] border-slate-800' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <span className={`text-xs font-bold uppercase tracking-wider ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                }`}>
                   4. Quantity
                 </span>
                 <div className="flex items-center gap-3">
@@ -384,15 +450,21 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                     type="button"
                     disabled={quantity <= 1}
                     onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white transition active:scale-95"
+                    className={`p-1.5 rounded-lg disabled:opacity-40 transition active:scale-95 ${
+                      theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+                    }`}
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="text-sm font-extrabold text-white w-6 text-center">{quantity}</span>
+                  <span className={`text-sm font-extrabold w-6 text-center ${
+                    theme === 'dark' ? 'text-white' : 'text-slate-900'
+                  }`}>{quantity}</span>
                   <button
                     type="button"
                     onClick={() => setQuantity(q => q + 1)}
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white transition active:scale-95"
+                    className={`p-1.5 rounded-lg transition active:scale-95 ${
+                      theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+                    }`}
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -401,101 +473,149 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
               {/* Delivery Address Fields */}
               <div className="space-y-3 pt-2">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                <label className={`text-xs font-bold uppercase tracking-wider block ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                }`}>
                   5. Shipping & Handover Details
                 </label>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[11px] text-slate-400 font-semibold mb-1 block">Full Name</label>
+                    <label className={`text-[11px] font-semibold mb-1 block ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                    }`}>Full Name</label>
                     <input 
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       placeholder="Your full name"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#141826] border border-slate-800 focus:border-indigo-500 text-base sm:text-xs text-white placeholder:text-slate-600 outline-none transition"
+                      className={`w-full px-3.5 py-2.5 rounded-xl border text-base sm:text-xs outline-none transition ${
+                        theme === 'dark' 
+                          ? 'bg-[#141826] border-slate-800 focus:border-indigo-500 text-white placeholder:text-slate-600' 
+                          : 'bg-white border-slate-300 focus:border-indigo-600 text-slate-900 placeholder:text-slate-400 shadow-sm'
+                      }`}
                     />
-                    {errors.fullName && <p className="text-[10px] text-rose-400 mt-0.5">{errors.fullName}</p>}
+                    {errors.fullName && <p className="text-[10px] text-rose-500 mt-0.5">{errors.fullName}</p>}
                   </div>
 
                   <div>
-                    <label className="text-[11px] text-slate-400 font-semibold mb-1 block">Phone Number (for Handover)</label>
+                    <label className={`text-[11px] font-semibold mb-1 block ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                    }`}>Phone Number (for Handover)</label>
                     <input 
                       type="text"
                       value={formData.phoneNumber}
                       onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                       placeholder="+91 98765 43210"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#141826] border border-slate-800 focus:border-indigo-500 text-base sm:text-xs text-white placeholder:text-slate-600 outline-none transition"
+                      className={`w-full px-3.5 py-2.5 rounded-xl border text-base sm:text-xs outline-none transition ${
+                        theme === 'dark' 
+                          ? 'bg-[#141826] border-slate-800 focus:border-indigo-500 text-white placeholder:text-slate-600' 
+                          : 'bg-white border-slate-300 focus:border-indigo-600 text-slate-900 placeholder:text-slate-400 shadow-sm'
+                      }`}
                     />
-                    {errors.phoneNumber && <p className="text-[10px] text-rose-400 mt-0.5">{errors.phoneNumber}</p>}
+                    {errors.phoneNumber && <p className="text-[10px] text-rose-500 mt-0.5">{errors.phoneNumber}</p>}
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-slate-400 font-semibold mb-1 block">Street Address</label>
+                  <label className={`text-[11px] font-semibold mb-1 block ${
+                    theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                  }`}>Street Address</label>
                   <input 
                     type="text"
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     placeholder="House/Flat number, building, street, area"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#141826] border border-slate-800 focus:border-indigo-500 text-base sm:text-xs text-white placeholder:text-slate-600 outline-none transition"
+                    className={`w-full px-3.5 py-2.5 rounded-xl border text-base sm:text-xs outline-none transition ${
+                      theme === 'dark' 
+                        ? 'bg-[#141826] border-slate-800 focus:border-indigo-500 text-white placeholder:text-slate-600' 
+                        : 'bg-white border-slate-300 focus:border-indigo-600 text-slate-900 placeholder:text-slate-400 shadow-sm'
+                    }`}
                   />
-                  {errors.address && <p className="text-[10px] text-rose-400 mt-0.5">{errors.address}</p>}
+                  {errors.address && <p className="text-[10px] text-rose-500 mt-0.5">{errors.address}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
                   <div>
-                    <label className="text-[11px] text-slate-400 font-semibold mb-1 block">City</label>
+                    <label className={`text-[11px] font-semibold mb-1 block ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                    }`}>City</label>
                     <input 
                       type="text"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       placeholder="City"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#141826] border border-slate-800 focus:border-indigo-500 text-base sm:text-xs text-white placeholder:text-slate-600 outline-none transition"
+                      className={`w-full px-3.5 py-2.5 rounded-xl border text-base sm:text-xs outline-none transition ${
+                        theme === 'dark' 
+                          ? 'bg-[#141826] border-slate-800 focus:border-indigo-500 text-white placeholder:text-slate-600' 
+                          : 'bg-white border-slate-300 focus:border-indigo-600 text-slate-900 placeholder:text-slate-400 shadow-sm'
+                      }`}
                     />
-                    {errors.city && <p className="text-[10px] text-rose-400 mt-0.5">{errors.city}</p>}
+                    {errors.city && <p className="text-[10px] text-rose-500 mt-0.5">{errors.city}</p>}
                   </div>
                   <div>
-                    <label className="text-[11px] text-slate-400 font-semibold mb-1 block">Pincode</label>
+                    <label className={`text-[11px] font-semibold mb-1 block ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                    }`}>Pincode</label>
                     <input 
                       type="text"
                       value={formData.pincode}
                       onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
                       placeholder="6 digits"
                       maxLength={6}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#141826] border border-slate-800 focus:border-indigo-500 text-base sm:text-xs text-white placeholder:text-slate-600 outline-none transition"
+                      className={`w-full px-3.5 py-2.5 rounded-xl border text-base sm:text-xs outline-none transition ${
+                        theme === 'dark' 
+                          ? 'bg-[#141826] border-slate-800 focus:border-indigo-500 text-white placeholder:text-slate-600' 
+                          : 'bg-white border-slate-300 focus:border-indigo-600 text-slate-900 placeholder:text-slate-400 shadow-sm'
+                      }`}
                     />
-                    {errors.pincode && <p className="text-[10px] text-rose-400 mt-0.5">{errors.pincode}</p>}
+                    {errors.pincode && <p className="text-[10px] text-rose-500 mt-0.5">{errors.pincode}</p>}
                   </div>
                   <div>
-                    <label className="text-[11px] text-slate-400 font-semibold mb-1 block">State</label>
+                    <label className={`text-[11px] font-semibold mb-1 block ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                    }`}>State</label>
                     <input 
                       type="text"
                       value={formData.state}
                       onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                       placeholder="State"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#141826] border border-slate-800 focus:border-indigo-500 text-base sm:text-xs text-white placeholder:text-slate-600 outline-none transition"
+                      className={`w-full px-3.5 py-2.5 rounded-xl border text-base sm:text-xs outline-none transition ${
+                        theme === 'dark' 
+                          ? 'bg-[#141826] border-slate-800 focus:border-indigo-500 text-white placeholder:text-slate-600' 
+                          : 'bg-white border-slate-300 focus:border-indigo-600 text-slate-900 placeholder:text-slate-400 shadow-sm'
+                      }`}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Price Breakdown & Proceed */}
-              <div className="p-4 rounded-2xl bg-[#121624] border border-slate-800 space-y-2">
-                <div className="flex justify-between text-xs text-slate-400">
+              <div className={`p-4 rounded-2xl border space-y-2 transition-colors ${
+                theme === 'dark' ? 'bg-[#121624] border-slate-800' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <div className={`flex justify-between text-xs ${
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                }`}>
                   <span>Subtotal ({quantity} item{quantity > 1 ? 's' : ''})</span>
-                  <span className="text-white font-semibold">₹{subtotal.toLocaleString()}</span>
+                  <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>₹{subtotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-xs text-slate-400">
+                <div className={`flex justify-between text-xs ${
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                }`}>
                   <span className="flex items-center gap-1">
-                    <Truck className="w-3.5 h-3.5 text-emerald-400" />
+                    <Truck className={`w-3.5 h-3.5 ${theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'}`} />
                     <span>Free Express Shipping</span>
                   </span>
-                  <span className="text-emerald-400 font-bold">FREE</span>
+                  <span className={`font-bold ${theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'}`}>FREE</span>
                 </div>
-                <div className="flex justify-between text-sm font-extrabold text-white pt-2 border-t border-slate-800">
+                <div className={`flex justify-between text-sm font-extrabold pt-2 border-t ${
+                  theme === 'dark' ? 'text-white border-slate-800' : 'text-slate-950 border-slate-200'
+                }`}>
                   <span>Total Payable:</span>
-                  <span className="text-base text-indigo-400 font-black">₹{totalAmount.toLocaleString()}</span>
+                  <span className={`text-base font-black ${
+                    theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'
+                  }`}>₹{totalAmount.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -515,22 +635,34 @@ export const OrderModal: React.FC<OrderModalProps> = ({
             <div className="space-y-6">
               
               {/* Payment Summary Header */}
-              <div className="p-4 rounded-2xl bg-[#141826] border border-indigo-500/30 flex items-center justify-between">
+              <div className={`p-4 rounded-2xl border flex items-center justify-between transition-colors ${
+                theme === 'dark' ? 'bg-[#141826] border-indigo-500/30' : 'bg-indigo-50/70 border-indigo-200'
+              }`}>
                 <div>
-                  <span className="text-[10px] font-bold uppercase text-indigo-400 tracking-wider">
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                    theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'
+                  }`}>
                     Total Amount
                   </span>
-                  <p className="text-2xl font-black text-white">₹{totalAmount.toLocaleString()}</p>
+                  <p className={`text-2xl font-black ${
+                    theme === 'dark' ? 'text-white' : 'text-slate-950'
+                  }`}>₹{totalAmount.toLocaleString()}</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-semibold text-slate-300 block">{design.title}</span>
-                  <span className="text-[11px] text-slate-400">Size {selectedSize} • {selectedMaterial.name} • {quantity} Unit{quantity > 1 ? 's' : ''}</span>
+                  <span className={`text-xs font-semibold block ${
+                    theme === 'dark' ? 'text-slate-200' : 'text-slate-800'
+                  }`}>{design.title}</span>
+                  <span className={`text-[11px] ${
+                    theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                  }`}>Size {selectedSize} • {selectedMaterial.name} • {quantity} Unit{quantity > 1 ? 's' : ''}</span>
                 </div>
               </div>
 
               {/* Payment Method Selector */}
               <div className="space-y-2.5">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                <label className={`text-xs font-bold uppercase tracking-wider block ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                }`}>
                   Select Payment Method (Instant Verification)
                 </label>
 
@@ -540,14 +672,16 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                     onClick={() => setPaymentMethod('upi')}
                     className={`p-3 rounded-2xl border text-left transition flex items-center gap-3 ${
                       paymentMethod === 'upi'
-                        ? 'border-indigo-500 bg-indigo-950/60 text-white shadow-md ring-1 ring-indigo-500'
-                        : 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white'
+                        ? (theme === 'dark' ? 'border-indigo-500 bg-indigo-950/60 text-white shadow-md ring-1 ring-indigo-500' : 'border-indigo-600 bg-indigo-50 text-indigo-950 shadow-md ring-1 ring-indigo-600')
+                        : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm')
                     }`}
                   >
-                    <QrCode className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                    <QrCode className="w-5 h-5 text-indigo-500 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-bold text-white">UPI QR Code</p>
-                      <p className="text-[10px] text-slate-400">GPay, PhonePe, Paytm</p>
+                      <p className={`text-xs font-bold ${
+                        paymentMethod === 'upi' ? (theme === 'dark' ? 'text-white' : 'text-indigo-950') : (theme === 'dark' ? 'text-white' : 'text-slate-900')
+                      }`}>UPI QR Code</p>
+                      <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>GPay, PhonePe, Paytm</p>
                     </div>
                   </button>
 
@@ -556,14 +690,16 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                     onClick={() => setPaymentMethod('gpay')}
                     className={`p-3 rounded-2xl border text-left transition flex items-center gap-3 ${
                       paymentMethod === 'gpay'
-                        ? 'border-indigo-500 bg-indigo-950/60 text-white shadow-md ring-1 ring-indigo-500'
-                        : 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white'
+                        ? (theme === 'dark' ? 'border-indigo-500 bg-indigo-950/60 text-white shadow-md ring-1 ring-indigo-500' : 'border-indigo-600 bg-indigo-50 text-indigo-950 shadow-md ring-1 ring-indigo-600')
+                        : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm')
                     }`}
                   >
-                    <Smartphone className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                    <Smartphone className="w-5 h-5 text-emerald-500 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-bold text-white">Direct UPI App</p>
-                      <p className="text-[10px] text-slate-400">Instant Redirect</p>
+                      <p className={`text-xs font-bold ${
+                        paymentMethod === 'gpay' ? (theme === 'dark' ? 'text-white' : 'text-indigo-950') : (theme === 'dark' ? 'text-white' : 'text-slate-900')
+                      }`}>Direct UPI App</p>
+                      <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Instant Redirect</p>
                     </div>
                   </button>
 
@@ -572,14 +708,16 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                     onClick={() => setPaymentMethod('card')}
                     className={`p-3 rounded-2xl border text-left transition flex items-center gap-3 ${
                       paymentMethod === 'card'
-                        ? 'border-indigo-500 bg-indigo-950/60 text-white shadow-md ring-1 ring-indigo-500'
-                        : 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white'
+                        ? (theme === 'dark' ? 'border-indigo-500 bg-indigo-950/60 text-white shadow-md ring-1 ring-indigo-500' : 'border-indigo-600 bg-indigo-50 text-indigo-950 shadow-md ring-1 ring-indigo-600')
+                        : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm')
                     }`}
                   >
-                    <CreditCard className="w-5 h-5 text-violet-400 flex-shrink-0" />
+                    <CreditCard className="w-5 h-5 text-violet-500 flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-bold text-white">Cards / Netbanking</p>
-                      <p className="text-[10px] text-slate-400">Visa, Mastercard, RuPay</p>
+                      <p className={`text-xs font-bold ${
+                        paymentMethod === 'card' ? (theme === 'dark' ? 'text-white' : 'text-indigo-950') : (theme === 'dark' ? 'text-white' : 'text-slate-900')
+                      }`}>Cards / Netbanking</p>
+                      <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Visa, Mastercard, RuPay</p>
                     </div>
                   </button>
                 </div>
@@ -587,8 +725,10 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
               {/* UPI QR Simulation or Card Fields */}
               {paymentMethod === 'upi' && (
-                <div className="p-5 rounded-2xl bg-[#141826] border border-slate-800 flex flex-col items-center text-center space-y-3">
-                  <div className="p-3 bg-white rounded-2xl shadow-xl">
+                <div className={`p-5 rounded-2xl border flex flex-col items-center text-center space-y-3 transition-colors ${
+                  theme === 'dark' ? 'bg-[#141826] border-slate-800' : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <div className="p-3 bg-white rounded-2xl shadow-xl border border-slate-200">
                     {/* Simulated SVG QR Code */}
                     <svg className="w-36 h-36" viewBox="0 0 100 100" fill="none">
                       <rect width="100" height="100" fill="white" />
@@ -616,37 +756,55 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-white">Scan with Google Pay, PhonePe, or Paytm</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">UPI ID: <span className="font-mono text-indigo-400">wearverse.pay@icici</span></p>
+                    <p className={`text-xs font-bold ${
+                      theme === 'dark' ? 'text-white' : 'text-slate-900'
+                    }`}>Scan with Google Pay, PhonePe, or Paytm</p>
+                    <p className={`text-[11px] mt-0.5 ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                    }`}>UPI ID: <span className={`font-mono font-bold ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`}>wearverse.pay@icici</span></p>
                   </div>
                 </div>
               )}
 
               {paymentMethod === 'card' && (
-                <div className="p-4 rounded-2xl bg-[#141826] border border-slate-800 space-y-3">
+                <div className={`p-4 rounded-2xl border space-y-3 transition-colors ${
+                  theme === 'dark' ? 'bg-[#141826] border-slate-800' : 'bg-slate-50 border-slate-200'
+                }`}>
                   <div>
-                    <label className="text-[11px] text-slate-400 font-semibold mb-1 block">Card Number</label>
+                    <label className={`text-[11px] font-semibold mb-1 block ${
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                    }`}>Card Number</label>
                     <input 
                       type="text" 
                       defaultValue="4532 •••• •••• 8920" 
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#0f121e] border border-slate-800 text-base sm:text-xs text-white font-mono outline-none"
+                      className={`w-full px-3.5 py-2.5 rounded-xl border text-base sm:text-xs font-mono outline-none ${
+                        theme === 'dark' ? 'bg-[#0f121e] border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900 shadow-sm'
+                      }`}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[11px] text-slate-400 font-semibold mb-1 block">Expiry</label>
+                      <label className={`text-[11px] font-semibold mb-1 block ${
+                        theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                      }`}>Expiry</label>
                       <input 
                         type="text" 
                         defaultValue="08/28" 
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#0f121e] border border-slate-800 text-base sm:text-xs text-white font-mono outline-none"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-base sm:text-xs font-mono outline-none ${
+                          theme === 'dark' ? 'bg-[#0f121e] border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900 shadow-sm'
+                        }`}
                       />
                     </div>
                     <div>
-                      <label className="text-[11px] text-slate-400 font-semibold mb-1 block">CVV</label>
+                      <label className={`text-[11px] font-semibold mb-1 block ${
+                        theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                      }`}>CVV</label>
                       <input 
                         type="password" 
                         defaultValue="•••" 
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#0f121e] border border-slate-800 text-base sm:text-xs text-white font-mono outline-none"
+                        className={`w-full px-3.5 py-2.5 rounded-xl border text-base sm:text-xs font-mono outline-none ${
+                          theme === 'dark' ? 'bg-[#0f121e] border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900 shadow-sm'
+                        }`}
                       />
                     </div>
                   </div>
@@ -654,18 +812,26 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               )}
 
               {paymentMethod === 'gpay' && (
-                <div className="p-4 rounded-2xl bg-[#141826] border border-slate-800 space-y-2 text-center">
-                  <p className="text-xs font-semibold text-slate-300">Enter UPI ID for intent trigger:</p>
+                <div className={`p-4 rounded-2xl border space-y-2 text-center transition-colors ${
+                  theme === 'dark' ? 'bg-[#141826] border-slate-800' : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <p className={`text-xs font-semibold ${
+                    theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                  }`}>Enter UPI ID for intent trigger:</p>
                   <input 
                     type="text" 
                     placeholder="user@okhdfcbank"
-                    className="w-full max-w-xs mx-auto px-3.5 py-2.5 rounded-xl bg-[#0f121e] border border-slate-800 text-base sm:text-xs text-white font-mono outline-none text-center"
+                    className={`w-full max-w-xs mx-auto px-3.5 py-2.5 rounded-xl border text-base sm:text-xs font-mono outline-none text-center ${
+                      theme === 'dark' ? 'bg-[#0f121e] border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900 shadow-sm'
+                    }`}
                   />
                 </div>
               )}
 
               {/* 256-bit SSL Security Guarantee */}
-              <div className="flex items-center justify-center gap-2 text-[11px] text-emerald-400">
+              <div className={`flex items-center justify-center gap-2 text-[11px] font-medium ${
+                theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+              }`}>
                 <Lock className="w-3.5 h-3.5" />
                 <span>256-Bit Bank-Grade Encryption • 100% Payment Guarantee</span>
               </div>
@@ -697,59 +863,93 @@ export const OrderModal: React.FC<OrderModalProps> = ({
           {step === 'success' && completedOrder && (
             <div className="space-y-6 text-center animate-in zoom-in-95 duration-200">
               
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto shadow-2xl shadow-emerald-500/20">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/40 flex items-center justify-center mx-auto shadow-2xl shadow-emerald-500/20">
                 <CheckCircle2 className="w-9 h-9" />
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-xl sm:text-2xl font-black text-white font-['Space_Grotesk']">
+                <h3 className={`text-xl sm:text-2xl font-black font-['Space_Grotesk'] ${
+                  theme === 'dark' ? 'text-white' : 'text-slate-950'
+                }`}>
                   Payment Verified & Order Confirmed!
                 </h3>
-                <p className="text-xs text-slate-400">
-                  Order Number: <strong className="text-indigo-400 font-mono text-sm">{completedOrder.orderNumber}</strong>
+                <p className={`text-xs ${
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                }`}>
+                  Order Number: <strong className={`font-mono text-sm ${
+                    theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'
+                  }`}>{completedOrder.orderNumber}</strong>
                 </p>
               </div>
 
-              {/* Handover Alert Notice (What the user specifically wanted) */}
-              <div className="p-4 rounded-2xl bg-indigo-950/60 border border-indigo-500/40 text-left space-y-2">
-                <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs">
-                  <Mail className="w-4 h-4 text-indigo-400" />
+              {/* Handover Alert Notice */}
+              <div className={`p-4 rounded-2xl border text-left space-y-2 transition-colors ${
+                theme === 'dark' 
+                  ? 'bg-indigo-950/60 border-indigo-500/40 text-slate-300' 
+                  : 'bg-indigo-50/80 border-indigo-200 text-slate-800'
+              }`}>
+                <div className={`flex items-center gap-2 font-bold text-xs ${
+                  theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'
+                }`}>
+                  <Mail className="w-4 h-4" />
                   <span>Production Dispatch & Fulfillment Alert:</span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
-                  "A new paid order (<strong className="text-white">{completedOrder.orderNumber}</strong>) has been confirmed for <strong className="text-white">{completedOrder.customer.fullName}</strong> for <strong className="text-white">{completedOrder.designTitle}</strong> (Fabric: <span className="text-indigo-300 font-bold">{completedOrder.material || selectedMaterial.name}</span>, Size: {completedOrder.size}, Color: {completedOrder.color}, Total: ₹{completedOrder.totalAmount}). High-resolution print files synthesized and scheduled for 1200 DPI DTG curing."
+                <p className={`text-[11px] leading-relaxed ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                }`}>
+                  "A new paid order (<strong className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>{completedOrder.orderNumber}</strong>) has been confirmed for <strong className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>{completedOrder.customer.fullName}</strong> for <strong className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>{completedOrder.designTitle}</strong> (Fabric: <span className={`font-bold ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'}`}>{completedOrder.material || selectedMaterial.name}</span>, Size: {completedOrder.size}, Color: {completedOrder.color}, Total: ₹{completedOrder.totalAmount}). High-resolution print files synthesized and scheduled for 1200 DPI DTG curing."
                 </p>
-                <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1.5 pt-1">
+                <div className={`text-[10px] font-semibold flex items-center gap-1.5 pt-1 ${
+                  theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+                }`}>
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Fulfillment Pipeline Active • Handover Scheduled</span>
                 </div>
               </div>
 
               {/* Order Tracking Steps */}
-              <div className="p-4 rounded-2xl bg-[#141826] border border-slate-800 text-left space-y-3">
-                <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+              <div className={`p-4 rounded-2xl border text-left space-y-3 transition-colors ${
+                theme === 'dark' ? 'bg-[#141826] border-slate-800' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <p className={`text-xs font-bold uppercase tracking-wider ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                }`}>
                   Live Production & Handover Status
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-3 text-xs">
-                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-[10px]">✓</div>
+                    <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-[10px]">✓</div>
                     <div className="flex-1">
-                      <span className="text-white font-semibold block">Payment Verified (₹{completedOrder.totalAmount})</span>
-                      <span className="text-[10px] text-slate-400">{completedOrder.paymentMethod} • ID: {completedOrder.paymentId}</span>
+                      <span className={`font-semibold block ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                        Payment Verified (₹{completedOrder.totalAmount})
+                      </span>
+                      <span className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                        {completedOrder.paymentMethod} • ID: {completedOrder.paymentId}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-xs">
                     <div className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold text-[10px] animate-pulse">⚡</div>
                     <div className="flex-1">
-                      <span className="text-white font-semibold block">In Production ({completedOrder.material || selectedMaterial.name})</span>
-                      <span className="text-[10px] text-slate-400">1200 DPI DTG Vector Curing</span>
+                      <span className={`font-semibold block ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                        In Production ({completedOrder.material || selectedMaterial.name})
+                      </span>
+                      <span className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                        1200 DPI DTG Vector Curing
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-xs">
-                    <div className="w-5 h-5 rounded-full bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-[10px]">3</div>
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] ${
+                      theme === 'dark' ? 'bg-slate-800 text-slate-500' : 'bg-slate-200 text-slate-600'
+                    }`}>3</div>
                     <div className="flex-1">
-                      <span className="text-slate-300 font-semibold block">Physical Handover / Dispatch</span>
-                      <span className="text-[10px] text-slate-500">{completedOrder.customer.address}, {completedOrder.customer.city}</span>
+                      <span className={`font-semibold block ${theme === 'dark' ? 'text-slate-300' : 'text-slate-800'}`}>
+                        Physical Handover / Dispatch
+                      </span>
+                      <span className={`text-[10px] ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
+                        {completedOrder.customer.address}, {completedOrder.customer.city}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -770,7 +970,11 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 
                 <button
                   onClick={closeModal}
-                  className="py-3 px-5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition"
+                  className={`py-3 px-5 rounded-2xl font-semibold text-xs transition ${
+                    theme === 'dark' 
+                      ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' 
+                      : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
+                  }`}
                 >
                   Close & Continue Creating
                 </button>

@@ -30,7 +30,8 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
     hasUnlimitedPass, 
     consumeCredit, 
     openUpgradeCreditsModal,
-    updateTryOnPhoto 
+    updateTryOnPhoto,
+    theme 
   } = useApp();
 
   // Selected Garment Options
@@ -248,26 +249,42 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] overflow-y-auto bg-slate-950/85 backdrop-blur-xl animate-in fade-in duration-200">
-      <div className="relative w-full max-w-5xl bg-[#0c101d] rounded-3xl shadow-2xl border border-slate-700/80 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[94vh] text-slate-100 ring-1 ring-white/10">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] overflow-y-auto backdrop-blur-xl animate-in fade-in duration-200 ${
+      theme === 'dark' ? 'bg-slate-950/85' : 'bg-slate-900/40'
+    }`}>
+      <div className={`relative w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[94vh] border transition-colors ${
+        theme === 'dark' 
+          ? 'bg-[#0c101d] border-slate-700/80 text-slate-100 ring-1 ring-white/10' 
+          : 'bg-white border-slate-200 text-slate-900 shadow-slate-400/30 ring-1 ring-slate-900/5'
+      }`}>
         
         {/* Header Bar */}
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 bg-[#121626]/85 backdrop-blur-md flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
+        <div className={`px-4 sm:px-6 py-3 sm:py-4 border-b backdrop-blur-md flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 transition-colors ${
+          theme === 'dark' ? 'border-slate-800 bg-[#121626]/85' : 'border-slate-200 bg-slate-50/90'
+        }`}>
           <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-indigo-600/30 flex-shrink-0">
               <Bot className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-xs sm:text-base font-extrabold text-white tracking-tight font-['Space_Grotesk'] leading-tight truncate">
+                <h2 className={`text-xs sm:text-base font-extrabold tracking-tight font-['Space_Grotesk'] leading-tight truncate ${
+                  theme === 'dark' ? 'text-white' : 'text-slate-950'
+                }`}>
                   AI Virtual Try-On Studio
                 </h2>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-rose-500/20 text-amber-300 border border-amber-500/40">
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                  theme === 'dark' 
+                    ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-rose-500/20 text-amber-300 border-amber-500/40' 
+                    : 'bg-amber-100 text-amber-800 border-amber-300'
+                }`}>
                   💎 Paid AI Tool
                 </span>
               </div>
-              <p className="text-[10px] sm:text-[11px] text-slate-400 truncate">
-                Simulating <span className="font-semibold text-white">{design.title}</span> on your body
+              <p className={`text-[10px] sm:text-[11px] truncate ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+              }`}>
+                Simulating <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{design.title}</span> on your body
               </p>
             </div>
           </div>
@@ -276,18 +293,26 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
           <div className="flex items-center gap-2 flex-shrink-0">
             <div 
               onClick={openUpgradeCreditsModal}
-              className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-950/70 hover:bg-indigo-900/80 border border-indigo-500/40 text-xs font-bold transition shadow-sm"
+              className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition shadow-sm border ${
+                theme === 'dark' 
+                  ? 'bg-indigo-950/70 hover:bg-indigo-900/80 border-indigo-500/40 text-indigo-200' 
+                  : 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700'
+              }`}
               title="Click to upgrade or refill credits"
             >
-              <Zap className="w-3.5 h-3.5 text-indigo-400 fill-indigo-400" />
-              <span className="text-indigo-200">
+              <Zap className="w-3.5 h-3.5 text-indigo-500 fill-indigo-500" />
+              <span>
                 {hasUnlimitedPass ? 'Pro Unlimited' : `${creditsRemaining} / 3 Free`}
               </span>
             </div>
 
             <button
               onClick={closeModal}
-              className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              className={`p-1.5 sm:p-2 rounded-xl transition ${
+                theme === 'dark' 
+                  ? 'text-slate-400 hover:text-white hover:bg-slate-800' 
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/80'
+              }`}
             >
               <X className="w-5 h-5" />
             </button>
@@ -298,33 +323,47 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 overflow-y-auto">
           
           {/* Left Column: AI Assistant & Image Input (ChatGPT / NanoBanana style) */}
-          <div className="order-2 lg:order-1 lg:col-span-4 p-4 sm:p-5 border-t lg:border-t-0 lg:border-r border-slate-800 bg-[#0f1322]/70 flex flex-col justify-between gap-4 overflow-y-auto">
+          <div className={`order-2 lg:order-1 lg:col-span-4 p-4 sm:p-5 border-t lg:border-t-0 lg:border-r flex flex-col justify-between gap-4 overflow-y-auto transition-colors ${
+            theme === 'dark' ? 'border-slate-800 bg-[#0f1322]/70' : 'border-slate-200 bg-slate-50/60'
+          }`}>
             <div className="space-y-4">
               
               {/* AI Agent Greeting & Prompt */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-950/70 via-[#131828] to-[#101422] border border-indigo-500/30 space-y-2 shadow-lg">
+              <div className={`p-3.5 rounded-2xl border space-y-2 shadow-sm transition-colors ${
+                theme === 'dark' 
+                  ? 'bg-gradient-to-br from-indigo-950/70 via-[#131828] to-[#101422] border-indigo-500/30 shadow-lg' 
+                  : 'bg-gradient-to-br from-indigo-50 via-white to-indigo-50/40 border-indigo-200'
+              }`}>
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs">
                     <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                   </div>
-                  <span className="text-xs font-bold text-indigo-300">WearVerse Stylist Agent v4.5</span>
+                  <span className={`text-xs font-bold ${theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'}`}>
+                    WearVerse Stylist Agent v4.5
+                  </span>
                 </div>
-                <p className="text-[11px] sm:text-xs text-slate-300 leading-relaxed">
-                  Provide a photo of yourself. Our neural fitting diffusion will synthesize you wearing <span className="font-semibold text-white">{design.title}</span> with 240 GSM heavy cotton draping and DTG print realism.
+                <p className={`text-[11px] sm:text-xs leading-relaxed ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                }`}>
+                  Provide a photo of yourself. Our neural fitting diffusion will synthesize you wearing <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-950'}`}>{design.title}</span> with 240 GSM heavy cotton draping and DTG print realism.
                 </p>
-                <div className="flex items-center gap-1.5 text-[10px] text-emerald-300 font-medium pt-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Client-Side Neural Engine • Zero External API Keys Needed</span>
+                <div className="flex items-center gap-1.5 text-[10px] font-medium pt-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className={theme === 'dark' ? 'text-emerald-300' : 'text-emerald-700'}>
+                    Client-Side Neural Engine • Zero External API Keys Needed
+                  </span>
                 </div>
               </div>
 
               {/* Step 1: Model Selection (Presets or Upload) */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                  <label className={`text-xs font-bold uppercase tracking-wider block ${
+                    theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                  }`}>
                     1. Select Model or Upload Photo
                   </label>
-                  <span className="text-[10px] text-indigo-400 font-bold">
+                  <span className={`text-[10px] font-bold ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`}>
                     {modelType === 'custom' ? 'Custom Upload' : 'Preset Studio Model'}
                   </span>
                 </div>
@@ -335,11 +374,11 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
                     onClick={() => handleSelectModel('male')}
                     className={`p-2 rounded-xl border text-center transition flex flex-col items-center gap-1.5 ${
                       modelType === 'male' 
-                        ? 'border-indigo-500 bg-indigo-950/80 text-white ring-1 ring-indigo-500 shadow-md shadow-indigo-500/20' 
-                        : 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white hover:bg-slate-800/60'
+                        ? (theme === 'dark' ? 'border-indigo-500 bg-indigo-950/80 text-white ring-1 ring-indigo-500 shadow-md shadow-indigo-500/20' : 'border-indigo-600 bg-indigo-50 text-indigo-950 ring-1 ring-indigo-600 shadow-sm') 
+                        : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white hover:bg-slate-800/60' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100 shadow-sm')
                     }`}
                   >
-                    <img src="/assets/tryon_black_front.jpg" alt="Male Model" className="w-10 h-10 rounded-lg object-cover border border-slate-700" />
+                    <img src="/assets/tryon_black_front.jpg" alt="Male Model" className="w-10 h-10 rounded-lg object-cover border border-slate-300 dark:border-slate-700" />
                     <span className="text-[10px] font-bold">Male Model</span>
                   </button>
 
@@ -348,21 +387,21 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
                     onClick={() => handleSelectModel('female')}
                     className={`p-2 rounded-xl border text-center transition flex flex-col items-center gap-1.5 ${
                       modelType === 'female' 
-                        ? 'border-indigo-500 bg-indigo-950/80 text-white ring-1 ring-indigo-500 shadow-md shadow-indigo-500/20' 
-                        : 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white hover:bg-slate-800/60'
+                        ? (theme === 'dark' ? 'border-indigo-500 bg-indigo-950/80 text-white ring-1 ring-indigo-500 shadow-md shadow-indigo-500/20' : 'border-indigo-600 bg-indigo-50 text-indigo-950 ring-1 ring-indigo-600 shadow-sm') 
+                        : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white hover:bg-slate-800/60' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100 shadow-sm')
                     }`}
                   >
-                    <img src="/assets/hero_model.jpg" alt="Female Model" className="w-10 h-10 rounded-lg object-cover border border-slate-700" />
+                    <img src="/assets/hero_model.jpg" alt="Female Model" className="w-10 h-10 rounded-lg object-cover border border-slate-300 dark:border-slate-700" />
                     <span className="text-[10px] font-bold">Female Model</span>
                   </button>
 
                   <label className={`p-2 rounded-xl border text-center cursor-pointer transition flex flex-col items-center justify-center gap-1.5 ${
                     modelType === 'custom' 
-                      ? 'border-indigo-500 bg-indigo-950/80 text-white ring-1 ring-indigo-500 shadow-md shadow-indigo-500/20' 
-                      : 'border-dashed border-indigo-500/50 bg-[#141826] text-indigo-300 hover:bg-[#191f32]'
+                      ? (theme === 'dark' ? 'border-indigo-500 bg-indigo-950/80 text-white ring-1 ring-indigo-500 shadow-md shadow-indigo-500/20' : 'border-indigo-600 bg-indigo-50 text-indigo-950 ring-1 ring-indigo-600 shadow-sm') 
+                      : (theme === 'dark' ? 'border-dashed border-indigo-500/50 bg-[#141826] text-indigo-300 hover:bg-[#191f32]' : 'border-dashed border-indigo-300 bg-white text-indigo-700 hover:bg-indigo-50 shadow-sm')
                   }`}>
-                    <div className="w-10 h-10 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-                      <Upload className="w-5 h-5 text-indigo-400" />
+                    <div className="w-10 h-10 rounded-lg bg-indigo-600/10 border border-indigo-500/30 flex items-center justify-center">
+                      <Upload className="w-5 h-5 text-indigo-500" />
                     </div>
                     <span className="text-[10px] font-bold">Upload Photo</span>
                     <input 
@@ -375,18 +414,24 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
                 </div>
 
                 {/* Status indicator */}
-                <div className="p-2.5 rounded-xl bg-[#141826] border border-slate-700/80 flex items-center justify-between gap-2 text-xs">
+                <div className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 text-xs transition-colors ${
+                  theme === 'dark' ? 'bg-[#141826] border-slate-700/80' : 'bg-white border-slate-200 shadow-sm'
+                }`}>
                   <div className="flex items-center gap-2 min-w-0">
                     <img 
                       src={inputPhotoUrl} 
                       alt="Selected target" 
                       className="w-7 h-7 rounded-lg object-cover border border-indigo-500/40 flex-shrink-0" 
                     />
-                    <span className="text-slate-300 truncate text-[11px] font-medium">
-                      Active: <strong className="text-white">{inputPhotoName}</strong>
+                    <span className={`truncate text-[11px] font-medium ${
+                      theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                    }`}>
+                      Active: <strong className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>{inputPhotoName}</strong>
                     </span>
                   </div>
-                  <label className="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer flex-shrink-0">
+                  <label className={`text-[11px] font-bold cursor-pointer flex-shrink-0 ${
+                    theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-700'
+                  }`}>
                     Upload
                     <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                   </label>
@@ -395,7 +440,9 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
 
               {/* Garment Color Swatches */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                <label className={`text-xs font-bold uppercase tracking-wider block ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                }`}>
                   Garment Color
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -408,11 +455,11 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
                       }}
                       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition ${
                         selectedColor === c.hex 
-                          ? 'border-indigo-500 bg-indigo-950/70 text-white ring-1 ring-indigo-500' 
-                          : 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white'
+                          ? (theme === 'dark' ? 'border-indigo-500 bg-indigo-950/70 text-white ring-1 ring-indigo-500' : 'border-indigo-600 bg-indigo-50 text-indigo-950 ring-1 ring-indigo-600') 
+                          : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-400 hover:text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm')
                       }`}
                     >
-                      <span className="w-3 h-3 rounded-full border border-slate-600" style={{ backgroundColor: c.hex }} />
+                      <span className="w-3 h-3 rounded-full border border-slate-400" style={{ backgroundColor: c.hex }} />
                       <span>{c.label.split(' ')[0]}</span>
                     </button>
                   ))}
@@ -444,27 +491,33 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
           </div>
 
           {/* Center Column: Live Generated Preview Canvas */}
-          <div className="order-1 lg:order-2 lg:col-span-5 p-4 sm:p-5 flex flex-col items-center justify-center bg-[#090c14] relative overflow-hidden min-h-[380px] sm:min-h-[460px]">
+          <div className={`order-1 lg:order-2 lg:col-span-5 p-4 sm:p-5 flex flex-col items-center justify-center relative overflow-hidden min-h-[380px] sm:min-h-[460px] transition-colors ${
+            theme === 'dark' ? 'bg-[#090c14]' : 'bg-slate-100/90 border-x border-slate-200'
+          }`}>
             
             {/* Neural Synthesis Visualizer Overlay */}
             {isSynthesizing && (
-              <div className="absolute inset-0 bg-[#090c14]/92 z-30 flex flex-col items-center justify-center gap-4 p-6 text-center animate-in fade-in backdrop-blur-md">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center">
+              <div className={`absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 p-6 text-center animate-in fade-in backdrop-blur-md ${
+                theme === 'dark' ? 'bg-[#090c14]/92 text-white' : 'bg-white/92 text-slate-900'
+              }`}>
+                <div className="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-500 flex items-center justify-center">
                   <RefreshCw className="w-7 h-7 animate-spin" />
                 </div>
                 
                 <div className="max-w-xs space-y-2">
-                  <p className="text-sm font-bold text-white">{synthesisStep}</p>
+                  <p className={`text-sm font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-950'}`}>{synthesisStep}</p>
                   
                   {/* Progress Bar */}
-                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden border border-slate-700">
+                  <div className={`w-full h-2 rounded-full overflow-hidden border ${
+                    theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-slate-200 border-slate-300'
+                  }`}>
                     <div 
                       className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-300"
                       style={{ width: `${synthesisProgress}%` }}
                     />
                   </div>
                   
-                  <p className="text-[10px] text-slate-400">
+                  <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                     Applying bespoke 240 GSM heavy cotton drape & DTG print...
                   </p>
                 </div>
@@ -472,7 +525,9 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
             )}
 
             {/* The Photo Frame */}
-            <div className="relative w-full max-w-sm aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 flex items-center justify-center">
+            <div className={`relative w-full max-w-sm aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border flex items-center justify-center transition-colors ${
+              theme === 'dark' ? 'border-slate-800 bg-slate-950 shadow-black/50' : 'border-slate-200 bg-white shadow-slate-300/60'
+            }`}>
               
               {inputPhotoUrl ? (
                 <>
@@ -487,7 +542,7 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
                   />
 
                   {/* Status Badge */}
-                  <div className="absolute bottom-3 left-3 bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-[10px] font-bold text-white flex items-center gap-2 shadow-lg">
+                  <div className="absolute bottom-3 left-3 bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-[10px] font-bold text-white flex items-center gap-2 shadow-lg">
                     <span className={`w-2 h-2 rounded-full ${generatedTryOnUrl ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
                     <span>
                       {generatedTryOnUrl && activeView === 'generated'
@@ -497,13 +552,15 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-center text-slate-400 gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                <div className={`flex flex-col items-center justify-center p-6 text-center gap-3 ${
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                }`}>
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500">
                     <Upload className="w-7 h-7" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-white">Upload Your Photo</p>
-                    <p className="text-[11px] text-slate-400 max-w-[200px] leading-relaxed">
+                    <p className={`text-sm font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Upload Your Photo</p>
+                    <p className={`text-[11px] max-w-[200px] leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                       Upload a photo of yourself to synthesize and preview this T-shirt fitted on you.
                     </p>
                   </div>
@@ -542,17 +599,25 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
               <div className="w-full max-w-sm mt-3 flex items-center justify-between gap-2">
                 <button
                   onClick={handleDownload}
-                  className="flex-1 py-2 px-3 rounded-xl bg-[#141826] hover:bg-[#1a2034] border border-slate-800 text-xs font-bold text-slate-300 hover:text-white flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm"
+                  className={`flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm ${
+                    theme === 'dark' 
+                      ? 'bg-[#141826] hover:bg-[#1a2034] border-slate-800 text-slate-300 hover:text-white' 
+                      : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-700 hover:text-slate-950'
+                  }`}
                 >
-                  <Download className="w-3.5 h-3.5 text-indigo-400" />
+                  <Download className="w-3.5 h-3.5 text-indigo-500" />
                   <span>Download Lookbook</span>
                 </button>
                 <button
                   onClick={handleStartAiTryOn}
-                  className="py-2 px-3 rounded-xl bg-[#141826] hover:bg-[#1a2034] border border-slate-800 text-xs font-bold text-slate-300 hover:text-white flex items-center justify-center gap-1.5 transition active:scale-95"
+                  className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 ${
+                    theme === 'dark' 
+                      ? 'bg-[#141826] hover:bg-[#1a2034] border-slate-800 text-slate-300 hover:text-white' 
+                      : 'bg-white hover:bg-slate-50 border-slate-300 text-slate-700 hover:text-slate-950'
+                  }`}
                   title="Regenerate fitting"
                 >
-                  <RefreshCw className="w-3.5 h-3.5 text-purple-400" />
+                  <RefreshCw className="w-3.5 h-3.5 text-purple-500" />
                   <span>Re-render</span>
                 </button>
               </div>
@@ -561,32 +626,46 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
           </div>
 
           {/* Right Column: Size Advisor & Direct Purchase */}
-          <div className="order-3 lg:order-3 lg:col-span-3 p-4 sm:p-5 border-t lg:border-t-0 lg:border-l border-slate-800 bg-[#0f1322]/70 flex flex-col justify-between gap-4 overflow-y-auto">
+          <div className={`order-3 lg:order-3 lg:col-span-3 p-4 sm:p-5 border-t lg:border-t-0 lg:border-l flex flex-col justify-between gap-4 overflow-y-auto transition-colors ${
+            theme === 'dark' ? 'border-slate-800 bg-[#0f1322]/70' : 'border-slate-200 bg-white'
+          }`}>
             <div className="space-y-4">
               
               <div>
-                <h3 className="text-sm font-extrabold text-white font-['Space_Grotesk']">
+                <h3 className={`text-sm font-extrabold font-['Space_Grotesk'] ${
+                  theme === 'dark' ? 'text-white' : 'text-slate-950'
+                }`}>
                   Fit Analysis & Sizing
                 </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className={`text-[11px] mt-0.5 ${
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                }`}>
                   AI perspective analysis for bespoke 240 GSM heavy drape.
                 </p>
               </div>
 
               {/* AI Size Recommendation */}
-              <div className="p-3.5 rounded-2xl bg-indigo-950/60 border border-indigo-500/40 space-y-1.5 shadow-sm">
-                <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs">
-                  <Ruler className="w-4 h-4 text-indigo-400" />
+              <div className={`p-3.5 rounded-2xl border space-y-1.5 shadow-sm transition-colors ${
+                theme === 'dark' ? 'bg-indigo-950/60 border-indigo-500/40 text-slate-300' : 'bg-indigo-50/80 border-indigo-200 text-slate-700'
+              }`}>
+                <div className={`flex items-center gap-2 font-bold text-xs ${
+                  theme === 'dark' ? 'text-indigo-300' : 'text-indigo-700'
+                }`}>
+                  <Ruler className="w-4 h-4 text-indigo-500" />
                   <span>Recommended: Size {selectedSize}</span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-relaxed">
+                <p className={`text-[11px] leading-relaxed ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
+                }`}>
                   For an oversized boxy drape with drop-shoulder silhouette, Size {selectedSize} matches 240 GSM heavy cotton body contouring.
                 </p>
               </div>
 
               {/* Size Selector */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                <label className={`text-xs font-bold uppercase tracking-wider block ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                }`}>
                   Select Size to Order
                 </label>
                 <div className="grid grid-cols-5 gap-1.5">
@@ -596,8 +675,8 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
                       onClick={() => setSelectedSize(sz)}
                       className={`py-2 rounded-xl border text-xs font-bold transition text-center ${
                         selectedSize === sz
-                          ? 'border-indigo-500 bg-indigo-600 text-white shadow-md'
-                          : 'border-slate-800 bg-[#141826] text-slate-300 hover:text-white'
+                          ? 'border-indigo-600 bg-indigo-600 text-white shadow-md'
+                          : (theme === 'dark' ? 'border-slate-800 bg-[#141826] text-slate-300 hover:text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm')
                       }`}
                     >
                       {sz}
@@ -607,31 +686,35 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
               </div>
 
               {/* Garment Fabric Specifications */}
-              <div className="p-3.5 bg-[#141826] rounded-2xl border border-slate-800 text-xs space-y-1.5">
-                <div className="flex justify-between text-slate-400">
+              <div className={`p-3.5 rounded-2xl border text-xs space-y-1.5 transition-colors ${
+                theme === 'dark' ? 'bg-[#141826] border-slate-800' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <div className={`flex justify-between ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                   <span>Fabric:</span>
-                  <span className="font-bold text-white">240 GSM Combed Cotton</span>
+                  <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>240 GSM Combed Cotton</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className={`flex justify-between ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                   <span>Fit Drape:</span>
-                  <span className="font-bold text-emerald-400">99.4% True Silhouette</span>
+                  <span className={`font-bold ${theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'}`}>99.4% True Silhouette</span>
                 </div>
-                <div className="flex justify-between text-slate-400">
+                <div className={`flex justify-between ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
                   <span>Inks:</span>
-                  <span className="font-medium text-slate-300">1200 DPI DTG Cured</span>
+                  <span className={`font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>1200 DPI DTG Cured</span>
                 </div>
               </div>
 
               {/* Price & Guarantee */}
-              <div className="p-3.5 bg-[#141826] rounded-2xl border border-slate-800 space-y-1">
+              <div className={`p-3.5 rounded-2xl border space-y-1 transition-colors ${
+                theme === 'dark' ? 'bg-[#141826] border-slate-800' : 'bg-slate-50 border-slate-200'
+              }`}>
                 <div className="flex justify-between items-baseline">
-                  <span className="text-xs text-slate-400">Total Price:</span>
+                  <span className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Total Price:</span>
                   <div className="text-right">
-                    <span className="text-lg font-black text-white">₹{design.price.toLocaleString()}</span>
-                    <span className="text-xs text-slate-500 line-through ml-2">₹{design.originalPrice?.toLocaleString() || 2499}</span>
+                    <span className={`text-lg font-black ${theme === 'dark' ? 'text-white' : 'text-slate-950'}`}>₹{design.price.toLocaleString()}</span>
+                    <span className={`text-xs line-through ml-2 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>₹{design.originalPrice?.toLocaleString() || 2499}</span>
                   </div>
                 </div>
-                <p className="text-[10px] text-emerald-400 font-semibold">⚡ Includes Free Express Delivery (48h)</p>
+                <p className={`text-[10px] font-semibold ${theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'}`}>⚡ Includes Free Express Delivery (48h)</p>
               </div>
 
             </div>
@@ -651,7 +734,9 @@ export const TryOnModal: React.FC<TryOnModalProps> = ({ design }) => {
 
               <button
                 onClick={closeModal}
-                className="w-full py-2 text-center text-xs text-slate-400 hover:text-white transition"
+                className={`w-full py-2 text-center text-xs transition ${
+                  theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+                }`}
               >
                 Back to Studio
               </button>
