@@ -98,38 +98,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
           </>
         )}
 
-        {/* Top Floating Badges */}
-        <div className="absolute top-1.5 sm:top-3 left-1.5 sm:left-3 right-1.5 sm:right-3 flex items-center justify-between z-10 pointer-events-none">
-          {/* Garment Type Badge */}
-          <span className="pointer-events-auto flex items-center gap-1 px-1.5 sm:px-2.5 py-0.5 sm:py-1 text-[8px] sm:text-[10px] font-black uppercase tracking-wider rounded-md sm:rounded-lg bg-indigo-600/90 text-white backdrop-blur-md border border-indigo-400/40 shadow-sm">
-            {design.garmentType === 'Hoodie' ? (
-              <>
-                <span>🧥</span>
-                <span className="hidden sm:inline">450 GSM Hoodie</span>
-                <span className="sm:hidden">450 GSM</span>
-              </>
-            ) : design.garmentType === 'Sweatshirt' ? (
-              <>
-                <span>🧶</span>
-                <span className="hidden sm:inline">380 GSM Sweatshirt</span>
-                <span className="sm:hidden">380 GSM</span>
-              </>
-            ) : (
-              <>
-                <span>👕</span>
-                <span className="hidden sm:inline">240 GSM Boxy Tee</span>
-                <span className="sm:hidden">240 GSM</span>
-              </>
-            )}
-          </span>
-
-          {/* Like Heart Button */}
+        {/* Top Floating Heart Button */}
+        <div className="absolute top-1.5 sm:top-3 right-1.5 sm:right-3 z-10">
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               toggleLikeDesign(design.id);
             }}
-            className={`pointer-events-auto p-1 sm:p-2 rounded-full transition-all duration-200 backdrop-blur-md shadow-md ${
+            className={`p-1 sm:p-2 rounded-full transition-all duration-200 backdrop-blur-md shadow-md ${
               design.isLiked 
                 ? 'bg-rose-500/20 text-rose-500 border border-rose-500/40 scale-105' 
                 : theme === 'dark'

@@ -1782,13 +1782,6 @@ export const HomePage: React.FC = () => {
                       alt={item.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className={`absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 px-1.5 sm:px-2.5 py-0.5 rounded-md sm:rounded-full backdrop-blur-md text-[8px] sm:text-[10px] font-black uppercase tracking-wider border shadow-sm z-10 ${
-                      theme === 'dark' 
-                        ? 'bg-slate-950/85 border-violet-500/40 text-violet-300' 
-                        : 'bg-white/95 border-violet-200 text-violet-700'
-                    }`}>
-                      {item.badge}
-                    </div>
                     <button
                       type="button"
                       onClick={(e) => {
@@ -1912,13 +1905,6 @@ export const HomePage: React.FC = () => {
                       alt={item.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className={`absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full backdrop-blur-md text-[10px] font-black uppercase tracking-wider border shadow-sm z-10 ${
-                      theme === 'dark' 
-                        ? 'bg-slate-950/85 border-indigo-500/40 text-indigo-300' 
-                        : 'bg-white/95 border-indigo-200 text-indigo-700'
-                    }`}>
-                      {item.badge}
-                    </div>
                     <button
                       type="button"
                       onClick={(e) => {
