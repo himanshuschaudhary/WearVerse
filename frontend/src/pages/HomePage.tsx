@@ -725,9 +725,22 @@ export const HomePage: React.FC = () => {
   // Curated Luxury Streetwear Graphic Tees (240 GSM)
   const trendingList = [
     {
+      id: 'wv-desi-hitters-tee',
+      title: 'Desi Hitters Galli to Global Tee',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 14850,
+      commentsCount: 792,
+      image: '/assets/desi_hitters_tee_front.jpg',
+      frontImage: '/assets/desi_hitters_tee_front.jpg',
+      backImage: '/assets/desi_hitters_tee_back.jpg',
+      price: 1799,
+      tags: ['#desihitters', '#cricket', '#dualsided', '#tshirt', '#240gsm'],
+      category: '🏏 Cricket Streetwear',
+      garmentType: 'T-Shirt',
+    },
+    {
       id: 'wv-ronin-moon-01',
       title: 'Blood Moon Ronin Bushido',
-      badge: 'PRO // 240 GSM',
       creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
       likesCount: 8420,
       commentsCount: 384,

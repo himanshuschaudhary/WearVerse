@@ -29,7 +29,47 @@ export interface TShirtAssetMetadata {
 }
 
 export const TSHIRT_ASSET_LIBRARY: TShirtAssetMetadata[] = [
-  // 0.00 DUAL-SIDED MASTERPIECE: DESI HITTERS STADIUM CRICKET HOODIE
+  // 0.00 DUAL-SIDED MASTERPIECE: DESI HITTERS STREETWEAR GRAPHIC TEE (240 GSM)
+  {
+    id: 'asset-desi-hitters-tee',
+    name: 'Desi Hitters Galli to Global Dual-Sided Tee',
+    slug: 'desi-hitters-galli-to-global-tee',
+    mockupUrl: '/assets/desi_hitters_tee_front.jpg',
+    graphicUrl: '/assets/desi_hitters_tee_front.jpg',
+    defaultGarmentColor: '#0a0b10',
+    availableColors: ['#0a0b10', '#18181b', '#1e293b'],
+    price: 1799,
+    originalPrice: 2499,
+    fit: 'Oversized Boxy Dropped-Shoulder Tee',
+    gsm: 240,
+    mainSubject: 'Dual-View: Desi Hitters Batter Entering Stadium on Front & High Six Shot into Red Sun on Back',
+    theme: 'Cricket Streetwear & Galli to Global Heritage',
+    style: 'Graffiti Streetwear Inks with Crimson Red & Monochrome Stadium Art',
+    artStyle: 'Two-Sided Ultra-HD Direct-To-Garment with Slogans',
+    colorPalette: ['#0a0b10', '#dc2626', '#ef4444', '#ffffff'],
+    typographyStyle: 'Distressed Brush Graffiti (DESI HITTERS • GALLI TO GLOBAL • SAME GAME DIFFERENT BREED)',
+    targetAudience: 'Cricket fans, streetwear connoisseurs, athletes, urban culture enthusiasts',
+    niche: 'Dual-Sided Cricket & Sports Streetwear Graphic Tee',
+    mood: 'Triumphant, fearless, energetic, cultural, legendary',
+    visualElements: [
+      'cricket', 'desi hitters', 'batsman', 'batter', 'bat', 'stadium', 'floodlights', 
+      'galli to global', 'same game different breed', 'cricket people culture forever', 
+      'it is more than a game', 'red sun', 'crown', 'back view', 'front view'
+    ],
+    objectsAndCharacters: ['cricket batsman', 'cricket bat', 'stadium crowd', 'floodlights', 'red sun'],
+    keywords: [
+      'cricket', 'desi hitters', 'desi', 'hitters', 'bat', 'batsman', 'batter', 
+      'stadium', 'galli', 'galli to global', 'tshirt', 'tee', 'dual sided', 'front and back', 
+      'back view', 'front view', '240gsm', 'streetwear', 'sports', 'red sun'
+    ],
+    promptPhrases: [
+      'Desi Hitters cricket streetwear graphic t-shirt front and back',
+      'Dual sided cricket graphic tee with batsman in stadium under red sun',
+      'Galli to global Desi Hitters oversized luxury 240 GSM boxy tee'
+    ],
+    tags: ['#desihitters', '#cricket', '#dualsided', '#tshirt', '#240gsm', '#streetwear']
+  },
+  // 0.01 DUAL-SIDED MASTERPIECE: DESI HITTERS STADIUM CRICKET HOODIE
   {
     id: 'asset-desi-hitters-hoodie',
     name: 'Desi Hitters Stadium Edition Dual-Sided Hoodie',

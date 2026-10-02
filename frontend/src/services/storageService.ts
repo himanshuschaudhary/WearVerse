@@ -2,7 +2,7 @@ import { Design, UserProfile, Order, Review } from '../types';
 import { INITIAL_DESIGNS, INITIAL_USER, INITIAL_ORDERS, INITIAL_REVIEWS } from '../data/sampleDesigns';
 
 const STORAGE_KEYS = {
-  DESIGNS: 'wearverse_designs_v6',
+  DESIGNS: 'wearverse_designs_v7',
   USER: 'wearverse_user_v4',
   ORDERS: 'wearverse_orders_v4',
   REVIEWS: 'wearverse_reviews_v4',
@@ -32,6 +32,7 @@ if (typeof window !== 'undefined' && window.localStorage) {
       'wearverse_designs_v3',
       'wearverse_designs_v4',
       'wearverse_designs_v5',
+      'wearverse_designs_v6',
       'wearverse_pending_tryon_design',
       'wearverse_initial_prompt',
       'wearverse_credits',
