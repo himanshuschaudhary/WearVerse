@@ -29,6 +29,120 @@ export interface TShirtAssetMetadata {
 }
 
 export const TSHIRT_ASSET_LIBRARY: TShirtAssetMetadata[] = [
+  // 0.01 USER MASTERPIECE: BLOOD MOON RONIN BUSHIDO TEE
+  {
+    id: 'asset-ronin-blood-moon',
+    name: 'Blood Moon Ronin Bushido',
+    slug: 'blood-moon-ronin-bushido',
+    mockupUrl: '/assets/ronin_blood_moon_tee.jpg',
+    graphicUrl: '/assets/ronin_blood_moon_tee.jpg',
+    defaultGarmentColor: '#0b0c10',
+    availableColors: ['#0b0c10', '#1a1d24', '#ffffff'],
+    price: 1699,
+    originalPrice: 2499,
+    fit: 'Oversized Boxy Drop-Shoulder',
+    gsm: 240,
+    mainSubject: 'Solitary Ronin Samurai atop Mountain with Giant Blood Red Moon',
+    theme: 'Traditional Japanese Bushido & Ukiyo-e Streetwear',
+    style: 'Sumi-e Ink Wash & Vibrant Crimson Graphic',
+    artStyle: 'High-Density Screenprint with Distressed Kanji Brushwork',
+    colorPalette: ['#0b0c10', '#dc2626', '#ef4444', '#ffffff'],
+    typographyStyle: 'Distressed Japanese Kanji (浪人・東京・道はまだ終わらない)',
+    targetAudience: 'Streetwear collectors, anime fans, Japanese culture enthusiasts',
+    niche: 'Japanese Anime & Bushido Streetwear',
+    mood: 'Epic, solitary, stoic, mythical, high-contrast',
+    visualElements: ['ronin', 'samurai', 'kasa hat', 'katana', 'blood moon', 'red moon', 'torii gate', 'waterfall', 'pagoda', 'sakura', 'cherry blossom', 'kanji', 'clouds'],
+    objectsAndCharacters: ['ronin', 'samurai warrior', 'torii', 'shrine', 'pagoda'],
+    keywords: [
+      'ronin', 'samurai', 'blood moon', 'red moon', 'katana', 'sword', 'kasa', 'straw hat', 
+      'pagoda', 'waterfall', 'torii', 'shrine', 'sakura', 'cherry blossom', 'kanji', 'japanese', 
+      'tokyo', 'bushido', 'warrior', '240gsm', 'streetwear', 'oversized'
+    ],
+    promptPhrases: [
+      'black oversized t-shirt with japanese ronin under blood red moon',
+      'ronin with katana and red moon waterfall torii gate',
+      'japanese kanji ronin bushido streetwear tee',
+      'blood moon samurai with cherry blossoms'
+    ],
+    tags: ['#ronin', '#bushido', '#bloodmoon', '#sakura', '#kanji', '#streetwear']
+  },
+
+  // 0.02 USER MASTERPIECE: TENSHI TOKYO LOST SOULS HOODIE
+  {
+    id: 'asset-tenshi-lost-souls',
+    name: 'Tenshi Tokyo Lost Souls Heavyweight Hoodie',
+    slug: 'tenshi-tokyo-lost-souls-hoodie',
+    mockupUrl: '/assets/tenshi_lost_souls_hoodie.jpg',
+    graphicUrl: '/assets/tenshi_lost_souls_hoodie.jpg',
+    defaultGarmentColor: '#0a0b10',
+    availableColors: ['#0a0b10', '#111625', '#18181b'],
+    price: 2699,
+    originalPrice: 3799,
+    fit: 'Oversized Boxy Dropped-Shoulder Hoodie',
+    gsm: 450,
+    mainSubject: 'Winged Fallen Angel with Radiant Halo, Mount Fuji, and Crimson Moon',
+    theme: 'Tenshi Dark Fantasy & Neo-Tokyo Streetwear',
+    style: 'Detailed Manga Noir with Crimson Glow & Floral Sleeves',
+    artStyle: 'All-over Premium DTG with Sleeve Prints and Torii Reflections',
+    colorPalette: ['#0a0b10', '#dc2626', '#f87171', '#ffffff', '#e2e8f0'],
+    typographyStyle: 'Japanese Calligraphy (天使・失われた魂・東京) with English Gothic Typography',
+    targetAudience: 'Streetwear fashion lovers, anime & manga fans, dark aesthetic enthusiasts',
+    niche: 'Dark Tenshi Anime Fleece',
+    mood: 'Emotional, poetic, dramatic, nocturnal, ethereal',
+    visualElements: ['angel', 'winged boy', 'halo', 'mount fuji', 'fuji-san', 'blood moon', 'river town', 'lanterns', 'torii', 'sakura branches', 'sleeve print', 'moon phases'],
+    objectsAndCharacters: ['fallen angel', 'tenshi', 'mount fuji', 'torii gate', 'river'],
+    keywords: [
+      'tenshi', 'angel', 'fallen angel', 'wings', 'halo', 'mount fuji', 'fuji', 'blood moon', 
+      'red moon', 'tokyo', 'lost souls', 'sakura', 'cherry blossoms', 'hoodie', '450gsm', 
+      'heavyweight', 'streetwear', 'fleece', 'torii', 'lanterns'
+    ],
+    promptPhrases: [
+      'heavyweight black hoodie with winged fallen angel and mount fuji blood moon',
+      'tenshi angel hoodie with red cherry blossoms and japanese text',
+      'dark anime angel streetwear hoodie with fuji and crimson moon',
+      'japanese lost souls tenshi hoodie'
+    ],
+    tags: ['#tenshi', '#angel', '#hoodie', '#fujisan', '#bloodmoon', '#tokyo', '#450gsm']
+  },
+
+  // 0.03 USER MASTERPIECE: TENKAI CELESTIAL REALM RENAISSANCE SWEATSHIRT
+  {
+    id: 'asset-tenkai-celestial',
+    name: 'Tenkai Celestial Realm Renaissance Sweatshirt',
+    slug: 'tenkai-celestial-renaissance-sweatshirt',
+    mockupUrl: '/assets/tenkai_celestial_sweatshirt.jpg',
+    graphicUrl: '/assets/tenkai_celestial_sweatshirt.jpg',
+    defaultGarmentColor: '#121316',
+    availableColors: ['#121316', '#1e2024', '#1f162b'],
+    price: 2499,
+    originalPrice: 3499,
+    fit: 'Relaxed Drop-Shoulder Boxy Crewneck',
+    gsm: 400,
+    mainSubject: 'Classical Renaissance Marble Winged Angel Gazing at Purple Cosmic Moon',
+    theme: 'Renaissance Sculpture & Celestial Purple Aesthetics',
+    style: 'Classical Statuary with Ethereal Violet Hues & Cathedral Ruins',
+    artStyle: 'High-Fidelity Photorealistic Graphic with Sleeve Details',
+    colorPalette: ['#121316', '#a855f7', '#c084fc', '#e9d5ff', '#ffffff'],
+    typographyStyle: 'Kanji Brush (天界・まだ終わっていない) & Modernist English Typography',
+    targetAudience: 'Dark academia, fine art streetwear fans, vintage sweatshirt collectors',
+    niche: 'Renaissance Statuary & Celestial Streetwear',
+    mood: 'Transcendent, majestic, celestial, introspective, divine',
+    visualElements: ['marble angel', 'sculpture', 'statue', 'purple moon', 'cathedral ruins', 'waterfall', 'clouds', 'purple sakura', 'fuji polaroid', 'moon phases', 'kanji'],
+    objectsAndCharacters: ['marble angel', 'cathedral arch', 'moon', 'stars'],
+    keywords: [
+      'celestial', 'tenkai', 'marble angel', 'statue', 'sculpture', 'purple moon', 'violet', 
+      'cathedral', 'ruins', 'waterfall', 'sweatshirt', 'crewneck', '400gsm', 'renaissance', 
+      'sakura', 'fuji', 'dark academia', 'streetwear', 'french terry'
+    ],
+    promptPhrases: [
+      'washed black crewneck sweatshirt with renaissance marble angel and purple moon',
+      'tenkai celestial realm angel sweatshirt with cathedral ruins',
+      'purple celestial angel statue streetwear sweatshirt',
+      'classical sculpture winged angel crewneck with purple moon'
+    ],
+    tags: ['#celestial', '#tenkai', '#renaissance', '#sweatshirt', '#purplemoon', '#angel']
+  },
+
   // 0. PRO CREATION: 2077 MECHA GENESIS CYBER SAMURAI
   {
     id: 'asset-pro-mecha-samurai',

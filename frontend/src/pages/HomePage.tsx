@@ -597,6 +597,30 @@ export const HomePage: React.FC = () => {
   // Curated Luxury Heavyweight Hoodies & Sweatshirts
   const hoodieAndSweatList = [
     {
+      id: 'wv-tenshi-hoodie-01',
+      title: 'Tenshi Tokyo Lost Souls Hoodie',
+      badge: '450 GSM HOODIE',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 9280,
+      commentsCount: 462,
+      image: '/assets/tenshi_lost_souls_hoodie.jpg',
+      price: 2699,
+      tags: ['#tenshi', '#angel', '#hoodie', '#tokyo', '#450gsm'],
+      garmentType: 'Hoodie',
+    },
+    {
+      id: 'wv-tenkai-sweat-01',
+      title: 'Tenkai Celestial Realm Sweatshirt',
+      badge: '400 GSM SWEATSHIRT',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 7650,
+      commentsCount: 319,
+      image: '/assets/tenkai_celestial_sweatshirt.jpg',
+      price: 2499,
+      tags: ['#celestial', '#tenkai', '#renaissance', '#sweatshirt', '#400gsm'],
+      garmentType: 'Sweatshirt',
+    },
+    {
       id: 'wv-pro-hoodie-01',
       title: 'Quantum Matrix Techwear Hoodie',
       badge: 'PRO // 450 GSM',
@@ -661,6 +685,18 @@ export const HomePage: React.FC = () => {
   // Curated Luxury Streetwear Graphic Tees (240 GSM)
   const trendingList = [
     {
+      id: 'wv-ronin-moon-01',
+      title: 'Blood Moon Ronin Bushido',
+      badge: 'PRO // 240 GSM',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 8420,
+      commentsCount: 384,
+      image: '/assets/ronin_blood_moon_tee.jpg',
+      price: 1699,
+      category: '🐉 Japanese Ukiyo-e',
+      garmentType: 'T-Shirt',
+    },
+    {
       id: 'wv-pro-tee-01',
       title: '2077 Mecha Genesis Samurai',
       badge: 'PRO // 240 GSM',
@@ -706,18 +742,6 @@ export const HomePage: React.FC = () => {
       image: '/assets/vintage_racing_tee.jpg',
       price: 1549,
       category: '🛹 Streetwear',
-      garmentType: 'T-Shirt',
-    },
-    {
-      id: 'wv-tee-04',
-      title: 'Blood Moon Ronin Bushido',
-      badge: '240 GSM TEE',
-      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-      likesCount: 5120,
-      commentsCount: 230,
-      image: '/assets/sakura_blade_tee.jpg',
-      price: 1599,
-      category: '🐉 Anime & Kanji',
       garmentType: 'T-Shirt',
     },
     {

@@ -56,10 +56,10 @@ export const storageService = {
       const purgedIds = new Set(['wv-010', 'wv-011', 'wv-012']);
       parsed = parsed.filter(d => !purgedIds.has(d.id));
 
-      // Auto-merge any newly added initial designs so user immediately sees them
+      // Auto-merge any newly added initial designs so user immediately sees them at top
       const existingIds = new Set(parsed.map(d => d.id));
       const missing = INITIAL_DESIGNS.filter(d => !existingIds.has(d.id));
-      const finalDesigns = missing.length > 0 ? [...parsed, ...missing] : parsed;
+      const finalDesigns = missing.length > 0 ? [...missing, ...parsed] : parsed;
       localStorage.setItem(STORAGE_KEYS.DESIGNS, JSON.stringify(finalDesigns));
       return finalDesigns;
     } catch {
