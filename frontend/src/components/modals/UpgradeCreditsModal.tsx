@@ -165,17 +165,17 @@ export const UpgradeCreditsModal: React.FC = () => {
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs mt-2 shadow-sm ${
               theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
             }`}>
-              <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>Current Status:</span>
+              <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>Current Status:</span>
               {hasUnlimitedPass ? (
-                <span className="font-extrabold text-emerald-500 flex items-center gap-1">
+                <span className="font-extrabold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                   <Crown className="w-3.5 h-3.5" /> Unlimited Pass Active
                 </span>
               ) : creditsRemaining > 0 ? (
-                <span className="font-bold text-amber-500">
+                <span className="font-bold text-amber-600 dark:text-amber-400">
                   {creditsRemaining} / 3 Free Generations Left
                 </span>
               ) : (
-                <span className="font-bold text-rose-500">
+                <span className="font-bold text-rose-600 dark:text-rose-400">
                   0 Generations Left (Tokens Exhausted)
                 </span>
               )}
@@ -201,7 +201,7 @@ export const UpgradeCreditsModal: React.FC = () => {
                   }`}
                 >
                   {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-white-force badge-light-protect text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md">
                       BEST VALUE
                     </div>
                   )}
@@ -229,18 +229,18 @@ export const UpgradeCreditsModal: React.FC = () => {
                           theme === 'dark' ? 'text-white' : 'text-slate-950'
                         }`}>₹{plan.price}</span>
                         <span className={`text-[11px] font-medium ${
-                          theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                          theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
                         }`}>{plan.unitPrice}</span>
                       </div>
                     </div>
 
                     <ul className={`space-y-2 pt-2 border-t text-xs ${
-                      theme === 'dark' ? 'border-slate-800/80 text-slate-300' : 'border-slate-100 text-slate-600'
+                      theme === 'dark' ? 'border-slate-800/80 text-slate-300' : 'border-slate-100 text-slate-700'
                     }`}>
                       {plan.features.map((feat, i) => (
                         <li key={i} className="flex items-start gap-1.5 text-[11px]">
                           <Check className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                          <span>{feat}</span>
+                          <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700 font-medium'}>{feat}</span>
                         </li>
                       ))}
                     </ul>
@@ -249,8 +249,8 @@ export const UpgradeCreditsModal: React.FC = () => {
                   <div className="pt-4">
                     <div className={`w-full py-2 rounded-xl text-center text-xs font-bold transition shadow-sm ${
                       isSelected 
-                        ? 'bg-indigo-600 text-white shadow-indigo-600/30' 
-                        : (theme === 'dark' ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600')
+                        ? 'bg-indigo-600 text-white text-white-force shadow-indigo-600/30' 
+                        : (theme === 'dark' ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-700 hover:bg-slate-200')
                     }`}>
                       {isSelected ? 'Selected' : 'Select'}
                     </div>

@@ -21,7 +21,7 @@ import { useApp } from '../../context/AppContext';
 import { Order, OrderStatus } from '../../types';
 
 export const AdminOrdersModal: React.FC = () => {
-  const { orders, updateOrderStatus, closeModal, showToast } = useApp();
+  const { orders, updateOrderStatus, closeModal, showToast, theme } = useApp();
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -89,25 +89,45 @@ export const AdminOrdersModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-5xl max-h-[92vh] flex flex-col bg-[#0f131f] border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden text-slate-100">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-md animate-in fade-in duration-200 ${
+      theme === 'dark' ? 'bg-slate-950/80' : 'bg-slate-900/40'
+    }`}>
+      <div className={`relative w-full max-w-5xl max-h-[92vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden border transition-colors ${
+        theme === 'dark' 
+          ? 'bg-[#0f131f] border-slate-700/80 text-slate-100' 
+          : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
+      }`}>
         
         {/* HEADER */}
-        <div className="p-4 sm:p-6 border-b border-slate-800 bg-[#141828] flex items-center justify-between gap-4">
+        <div className={`p-4 sm:p-6 border-b flex items-center justify-between gap-4 transition-colors ${
+          theme === 'dark' ? 'border-slate-800 bg-[#141828]' : 'border-slate-200 bg-slate-50/90'
+        }`}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-orange-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+            <div className={`w-10 h-10 rounded-2xl border flex items-center justify-center ${
+              theme === 'dark'
+                ? 'bg-gradient-to-tr from-amber-500/20 to-orange-500/20 border-amber-500/40 text-amber-400'
+                : 'bg-amber-50 border-amber-200 text-amber-600 shadow-sm'
+            }`}>
               <ShoppingBag className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-xl font-extrabold text-white font-['Space_Grotesk']">
+                <h2 className={`text-base sm:text-xl font-extrabold font-['Space_Grotesk'] ${
+                  theme === 'dark' ? 'text-white' : 'text-slate-950'
+                }`}>
                   WearVerse Store Manager
                 </h2>
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                  theme === 'dark'
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                    : 'bg-amber-100 text-amber-800 border-amber-300'
+                }`}>
                   Solo Founder Portal
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className={`text-xs mt-0.5 ${
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+              }`}>
                 Monitor incoming customer orders, download print graphics, contact buyers & track fulfillment
               </p>
             </div>
@@ -115,37 +135,63 @@ export const AdminOrdersModal: React.FC = () => {
 
           <button
             onClick={closeModal}
-            className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+            className={`p-2 rounded-xl transition ${
+              theme === 'dark'
+                ? 'bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-950'
+            }`}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* METRICS STRIP */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-4 sm:px-6 bg-[#0c0f18] border-b border-slate-800/80">
-          <div className="p-3 rounded-2xl bg-[#151928] border border-slate-800">
-            <span className="text-[11px] font-medium text-slate-400 block">Total Revenue</span>
-            <span className="text-lg font-black text-emerald-400 font-['Space_Grotesk']">₹{totalRevenue.toLocaleString()}</span>
+        <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-4 sm:px-6 border-b transition-colors ${
+          theme === 'dark' ? 'bg-[#0c0f18] border-slate-800/80' : 'bg-slate-50 border-slate-200'
+        }`}>
+          <div className={`p-3 rounded-2xl border ${
+            theme === 'dark' ? 'bg-[#151928] border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+          }`}>
+            <span className={`text-[11px] font-medium block ${
+              theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+            }`}>Total Revenue</span>
+            <span className="text-lg font-black text-emerald-500 font-['Space_Grotesk']">₹{totalRevenue.toLocaleString()}</span>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[#151928] border border-slate-800">
-            <span className="text-[11px] font-medium text-slate-400 block">Active Orders</span>
-            <span className="text-lg font-black text-white font-['Space_Grotesk']">{orders.length}</span>
+          <div className={`p-3 rounded-2xl border ${
+            theme === 'dark' ? 'bg-[#151928] border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+          }`}>
+            <span className={`text-[11px] font-medium block ${
+              theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+            }`}>Active Orders</span>
+            <span className={`text-lg font-black font-['Space_Grotesk'] ${
+              theme === 'dark' ? 'text-white' : 'text-slate-950'
+            }`}>{orders.length}</span>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[#151928] border border-slate-800">
-            <span className="text-[11px] font-medium text-slate-400 block">Needs Printing</span>
-            <span className="text-lg font-black text-amber-400 font-['Space_Grotesk']">{pendingPrintCount}</span>
+          <div className={`p-3 rounded-2xl border ${
+            theme === 'dark' ? 'bg-[#151928] border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+          }`}>
+            <span className={`text-[11px] font-medium block ${
+              theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+            }`}>Needs Printing</span>
+            <span className="text-lg font-black text-amber-500 font-['Space_Grotesk']">{pendingPrintCount}</span>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[#151928] border border-slate-800">
-            <span className="text-[11px] font-medium text-slate-400 block">Handed Over / Done</span>
-            <span className="text-lg font-black text-indigo-400 font-['Space_Grotesk']">{shippedCount + deliveredCount}</span>
+          <div className={`p-3 rounded-2xl border ${
+            theme === 'dark' ? 'bg-[#151928] border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+          }`}>
+            <span className={`text-[11px] font-medium block ${
+              theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+            }`}>Handed Over / Done</span>
+            <span className="text-lg font-black text-indigo-500 font-['Space_Grotesk']">{shippedCount + deliveredCount}</span>
           </div>
         </div>
 
         {/* CONTROLS & SEARCH */}
-        <div className="p-4 sm:px-6 border-b border-slate-800/60 bg-[#121624] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className={`p-4 sm:px-6 border-b flex flex-col sm:flex-row items-center justify-between gap-3 transition-colors ${
+          theme === 'dark' ? 'border-slate-800/60 bg-[#121624]' : 'border-slate-200 bg-white'
+        }`}>
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
             {['All', 'In Production', 'Shipped', 'Delivered'].map(status => (
               <button
@@ -154,7 +200,9 @@ export const AdminOrdersModal: React.FC = () => {
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
                   selectedFilter === status
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                    : 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800'
+                    : theme === 'dark'
+                      ? 'bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800'
+                      : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200'
                 }`}
               >
                 {status === 'In Production' ? 'Needs Printing' : status}
@@ -167,14 +215,20 @@ export const AdminOrdersModal: React.FC = () => {
             placeholder="Search by order #, customer name, phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-64 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className={`w-full sm:w-64 px-3 py-1.5 rounded-xl border text-xs outline-none transition ${
+              theme === 'dark'
+                ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500'
+                : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-indigo-600 focus:bg-white'
+            }`}
           />
         </div>
 
         {/* ORDER LIST STREAM */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {filteredOrders.length === 0 ? (
-            <div className="py-16 text-center text-slate-500 space-y-2">
+            <div className={`py-16 text-center space-y-2 ${
+              theme === 'dark' ? 'text-slate-500' : 'text-slate-500'
+            }`}>
               <Package className="w-10 h-10 mx-auto opacity-40 text-slate-400" />
               <p className="text-sm font-semibold">No orders matching this filter</p>
               <p className="text-xs text-slate-500">New customer orders will appear here automatically.</p>
@@ -188,24 +242,44 @@ export const AdminOrdersModal: React.FC = () => {
               return (
                 <div 
                   key={order.id}
-                  className="rounded-2xl bg-[#141826] border border-slate-800 hover:border-slate-700/80 p-4 sm:p-5 transition shadow-lg space-y-4"
+                  className={`rounded-2xl border p-4 sm:p-5 transition shadow-md space-y-4 ${
+                    theme === 'dark'
+                      ? 'bg-[#141826] border-slate-800 hover:border-slate-700/80'
+                      : 'bg-white border-slate-200 hover:border-indigo-300 shadow-slate-200/50'
+                  }`}
                 >
                   {/* Top Bar: Order ID, Date, Amount & Status */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800/80">
+                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b ${
+                    theme === 'dark' ? 'border-slate-800/80' : 'border-slate-200'
+                  }`}>
                     <div className="flex items-center gap-2.5">
-                      <span className="text-sm font-black text-white font-mono">{order.orderNumber}</span>
-                      <span className="text-[10px] text-slate-400">• {new Date(order.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                      <span className="text-xs font-black text-emerald-400 font-mono bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                      <span className={`text-sm font-black font-mono ${
+                        theme === 'dark' ? 'text-white' : 'text-slate-900'
+                      }`}>{order.orderNumber}</span>
+                      <span className={`text-[10px] ${
+                        theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
+                      }`}>• {new Date(order.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className={`text-xs font-black font-mono px-2 py-0.5 rounded-md border ${
+                        theme === 'dark'
+                          ? 'text-emerald-400 bg-emerald-950/80 border-emerald-500/30'
+                          : 'text-emerald-700 bg-emerald-50 border-emerald-300'
+                      }`}>
                         ₹{order.totalAmount} (PAID)
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-slate-400 font-medium">Fulfillment Status:</span>
+                      <span className={`text-[11px] font-medium ${
+                        theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                      }`}>Fulfillment Status:</span>
                       <select
                         value={order.status}
                         onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
-                        className="bg-slate-900 border border-slate-700 text-xs font-bold text-indigo-300 rounded-xl px-2.5 py-1 focus:outline-none focus:border-indigo-500"
+                        className={`text-xs font-bold rounded-xl px-2.5 py-1 focus:outline-none border ${
+                          theme === 'dark'
+                            ? 'bg-slate-900 border-slate-700 text-indigo-300 focus:border-indigo-500'
+                            : 'bg-white border-slate-300 text-indigo-700 focus:border-indigo-600 shadow-xs'
+                        }`}
                       >
                         <option value="In Production">In Production (Printing)</option>
                         <option value="Shipped">Dispatched (Shipped)</option>
@@ -223,32 +297,48 @@ export const AdminOrdersModal: React.FC = () => {
                       <img 
                         src={order.designImage} 
                         alt={order.designTitle} 
-                        className="w-16 h-16 rounded-xl object-cover bg-slate-950 border border-slate-800 flex-shrink-0"
+                        className={`w-16 h-16 rounded-xl object-cover border flex-shrink-0 ${
+                          theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-100 border-slate-200 shadow-xs'
+                        }`}
                       />
                       <div className="space-y-1 min-w-0">
-                        <p className="text-xs font-bold text-white truncate">{order.designTitle}</p>
-                        <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                          <span className="bg-slate-800 px-1.5 py-0.5 rounded text-white font-bold">Size {order.size}</span>
+                        <p className={`text-xs font-bold truncate ${
+                          theme === 'dark' ? 'text-white' : 'text-slate-900'
+                        }`}>{order.designTitle}</p>
+                        <div className={`flex items-center gap-1.5 text-[11px] ${
+                          theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                        }`}>
+                          <span className={`px-1.5 py-0.5 rounded font-bold ${
+                            theme === 'dark' ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-800'
+                          }`}>Size {order.size}</span>
                           <span>•</span>
                           <span>Qty: {order.quantity}</span>
                           <span>•</span>
                           <span>240 GSM Combed Cotton</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-mono">Payment ID: {order.paymentId}</p>
+                        <p className={`text-[10px] font-mono ${
+                          theme === 'dark' ? 'text-slate-500' : 'text-slate-500'
+                        }`}>Payment ID: {order.paymentId}</p>
                       </div>
                     </div>
 
                     {/* Customer Contact & Delivery Info */}
-                    <div className="md:col-span-4 space-y-1 border-t md:border-t-0 md:border-l border-slate-800/80 pt-2 md:pt-0 md:pl-4">
-                      <p className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <div className={`md:col-span-4 space-y-1 border-t md:border-t-0 md:border-l pt-2 md:pt-0 md:pl-4 ${
+                      theme === 'dark' ? 'border-slate-800/80' : 'border-slate-200'
+                    }`}>
+                      <p className={`text-xs font-bold flex items-center gap-1.5 ${
+                        theme === 'dark' ? 'text-slate-200' : 'text-slate-900'
+                      }`}>
                         <span>{order.customer.fullName}</span>
                       </p>
-                      <p className="text-[11px] text-slate-400 flex items-start gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-slate-500 flex-shrink-0 mt-0.5" />
+                      <p className={`text-[11px] flex items-start gap-1 ${
+                        theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                      }`}>
+                        <MapPin className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0 mt-0.5" />
                         <span className="line-clamp-2">{order.customer.address}, {order.customer.city} - {order.customer.pincode}</span>
                       </p>
-                      <p className="text-[11px] text-indigo-400 font-mono flex items-center gap-1">
-                        <Phone className="w-3 h-3 text-indigo-400" />
+                      <p className="text-[11px] text-indigo-500 font-mono flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-indigo-500" />
                         <span>{order.customer.phoneNumber}</span>
                       </p>
                     </div>
@@ -259,28 +349,42 @@ export const AdminOrdersModal: React.FC = () => {
                         href={waUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3 py-1.5 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95"
+                        className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 ${
+                          theme === 'dark'
+                            ? 'bg-emerald-950/80 hover:bg-emerald-900 border-emerald-500/40 text-emerald-300'
+                            : 'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-800 shadow-xs'
+                        }`}
                         title="Chat with customer on WhatsApp"
                       >
-                        <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                        <MessageCircle className="w-3.5 h-3.5 text-emerald-500" />
                         <span>WhatsApp Buyer</span>
                       </a>
 
                       <button
                         onClick={() => handleDownloadArtwork(order)}
-                        className="px-3 py-1.5 rounded-xl bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95"
+                        className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 ${
+                          theme === 'dark'
+                            ? 'bg-indigo-950/80 hover:bg-indigo-900 border-indigo-500/40 text-indigo-300'
+                            : 'bg-indigo-50 hover:bg-indigo-100 border-indigo-300 text-indigo-800 shadow-xs'
+                        }`}
                         title="Download print-ready graphic for printer"
                       >
-                        <Download className="w-3.5 h-3.5 text-indigo-400" />
+                        <Download className="w-3.5 h-3.5 text-indigo-500" />
                         <span>Get DTG Graphic</span>
                       </button>
 
                       <button
                         onClick={() => handlePrintSlip(order)}
-                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95"
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 border ${
+                          theme === 'dark'
+                            ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-transparent'
+                            : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-200 shadow-xs'
+                        }`}
                         title="Generate shipping slip for packing"
                       >
-                        <Printer className="w-3.5 h-3.5 text-slate-400" />
+                        <Printer className={`w-3.5 h-3.5 ${
+                          theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
+                        }`} />
                         <span>Shipping Slip</span>
                       </button>
                     </div>
@@ -293,11 +397,15 @@ export const AdminOrdersModal: React.FC = () => {
         </div>
 
         {/* FOOTER HELPER */}
-        <div className="p-3 sm:px-6 bg-[#0c0f18] border-t border-slate-800 text-[11px] text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className={`p-3 sm:px-6 border-t text-[11px] flex flex-col sm:flex-row items-center justify-between gap-2 transition-colors ${
+          theme === 'dark' ? 'bg-[#0c0f18] border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-600'
+        }`}>
           <span>💡 Solo Founder Flow: Click <strong>"Get DTG Graphic"</strong> to forward artwork to your DTG printer (or Printrove/Qikink), then ship to customer!</span>
           <button
             onClick={closeModal}
-            className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
+            className={`px-4 py-1.5 rounded-xl font-bold text-xs transition ${
+              theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-900'
+            }`}
           >
             Done
           </button>
