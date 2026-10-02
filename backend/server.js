@@ -29,6 +29,7 @@ const MAX_FREE_GENERATIONS = 3;
  */
 app.post('/api/generate-design', async (req, res) => {
   try {
+    const { prompt, userId, style, clientToken, garmentColor } = req.body || {};
     const sanitizedPrompt = typeof prompt === 'string' 
       ? prompt.replace(/<[^>]*>?/gm, '').replace(/javascript:/gi, '').trim().slice(0, 500)
       : '';
@@ -49,18 +50,51 @@ app.post('/api/generate-design', async (req, res) => {
     userGenerationUsage.set(clientKey, currentUsage + 1);
     console.log(`[WearVerse AI] Generating design for ${clientKey} (${currentUsage + 1}/${MAX_FREE_GENERATIONS}). Prompt: "${sanitizedPrompt}" | Style: ${style}`);
 
-    // If FAL_KEY is present, you can call Fal.ai SDXL / Flux:
-    /*
-    const falResponse = await fetch('https://queue.fal.run/fal-ai/flux/schnell', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${process.env.FAL_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ prompt: `T-shirt graphic design, ${prompt}, vector art, apparel print`, image_size: "square_hd" })
-    });
-    const falData = await falResponse.json();
-    */
+    // If OPENAI_API_KEY is configured, generate with OpenAI DALL-E 3
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        const openAiRes = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'dall-e-3',
+            prompt: `Luxury streetwear apparel graphic design: ${sanitizedPrompt}. Centered vector art on dark background, 1200 DPI direct-to-garment print ready, bold streetwear typography and sharp details, apparel merchandise artwork. ${style ? `Style: ${style}` : ''}`,
+            n: 1,
+            size: '1024x1024',
+            quality: 'standard'
+          })
+        });
+
+        if (openAiRes.ok) {
+          const openAiData = await openAiRes.json();
+          const imgUrl = openAiData?.data?.[0]?.url;
+          if (imgUrl) {
+            const variations = [
+              {
+                id: `var-openai-${Date.now()}-1`,
+                name: `${sanitizedPrompt} (OpenAI DALL-E 3 Drop)`,
+                mockupUrl: imgUrl,
+                graphicUrl: imgUrl,
+                prompt: openAiData?.data?.[0]?.revised_prompt || sanitizedPrompt,
+                color: garmentColor || '#0f0f11',
+                fit: '240 GSM Oversized Heavyweight',
+                aspectRatio: '1:1',
+                tags: ['#openai', '#dalle3', style || 'Streetwear', 'DTG Print'],
+              }
+            ];
+            return res.json({ success: true, variations, provider: 'openai-dalle-3' });
+          }
+        } else {
+          const errData = await openAiRes.json().catch(() => ({}));
+          console.warn('[WearVerse Backend] OpenAI DALL-E 3 error, falling back:', errData);
+        }
+      } catch (openAiErr) {
+        console.warn('[WearVerse Backend] OpenAI DALL-E 3 request failed:', openAiErr);
+      }
+    }
 
     // Return standard WearVerse variation response
     const variations = [

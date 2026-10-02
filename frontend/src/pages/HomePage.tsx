@@ -610,6 +610,20 @@ export const HomePage: React.FC = () => {
   // Curated Luxury Heavyweight Hoodies & Sweatshirts
   const hoodieAndSweatList = [
     {
+      id: 'wv-desi-hitters-hoodie',
+      title: 'Desi Hitters Dual-Sided Hoodie',
+      badge: '450 GSM DUAL-SIDED',
+      creator: { name: 'WearVerse Studio', username: 'wearverse_studio', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+      likesCount: 12450,
+      commentsCount: 684,
+      image: '/assets/desi_hitters_hoodie_front.jpg',
+      frontImage: '/assets/desi_hitters_hoodie_front.jpg',
+      backImage: '/assets/desi_hitters_hoodie_back.jpg',
+      price: 2799,
+      tags: ['#desihitters', '#cricket', '#dualsided', '#hoodie', '#450gsm'],
+      garmentType: 'Hoodie',
+    },
+    {
       id: 'wv-kitsune-ronin-hoodie',
       title: 'Tokyo Kitsune & Ronin Dual Hoodie',
       badge: '450 GSM DUAL-SIDED',

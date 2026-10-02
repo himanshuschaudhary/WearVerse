@@ -29,7 +29,50 @@ export interface TShirtAssetMetadata {
 }
 
 export const TSHIRT_ASSET_LIBRARY: TShirtAssetMetadata[] = [
-  // 0.00 DUAL-SIDED MASTERPIECE: TOKYO KITSUNE & BLOOD MOON RONIN HOODIE
+  // 0.00 DUAL-SIDED MASTERPIECE: DESI HITTERS STADIUM CRICKET HOODIE
+  {
+    id: 'asset-desi-hitters-hoodie',
+    name: 'Desi Hitters Stadium Edition Dual-Sided Hoodie',
+    slug: 'desi-hitters-stadium-edition-hoodie',
+    mockupUrl: '/assets/desi_hitters_hoodie_front.jpg',
+    graphicUrl: '/assets/desi_hitters_hoodie_front.jpg',
+    defaultGarmentColor: '#0a0b10',
+    availableColors: ['#0a0b10', '#18181b', '#1e293b'],
+    price: 2799,
+    originalPrice: 3999,
+    fit: 'Oversized Boxy Dropped-Shoulder Hoodie',
+    gsm: 450,
+    mainSubject: 'Dual-View: Desi Hitters Batter Entering Stadium on Front & Batsman Celebration on Back',
+    theme: 'Cricket Streetwear & Galli to Global Heritage',
+    style: 'Graffiti Streetwear Inks with Royal Blue & Monochrome Accents',
+    artStyle: 'Two-Sided Ultra-HD Direct-To-Garment with Sleeve Prints',
+    colorPalette: ['#0a0b10', '#2563eb', '#3b82f6', '#ffffff'],
+    typographyStyle: 'Distressed Brush Graffiti (DESI HITTERS • GALLI TO GLOBAL • SAME GAME DIFFERENT BREED)',
+    targetAudience: 'Cricket fans, streetwear connoisseurs, athletes, urban culture enthusiasts',
+    niche: 'Dual-Sided Cricket & Sports Streetwear Fleece',
+    mood: 'Triumphant, fearless, energetic, cultural, legendary',
+    visualElements: [
+      'cricket', 'desi hitters', 'batsman', 'batter', 'bat', 'stadium', 'floodlights', 
+      'galli to global', 'same game different breed', 'cricket people culture forever', 
+      'built on galli grounds not just stadiums', 'good players inspire great hitters', 
+      'crown', 'back view', 'front view', 'sleeve prints'
+    ],
+    objectsAndCharacters: ['cricket batsman', 'cricket bat', 'stadium crowd', 'floodlights'],
+    keywords: [
+      'cricket', 'desi hitters', 'desi', 'hitters', 'bat', 'batsman', 'batter', 
+      'stadium', 'galli', 'galli to global', 'hoodie', 'dual sided', 'front and back', 
+      'back view', 'front view', '450gsm', 'streetwear', 'sports', 'fleece'
+    ],
+    promptPhrases: [
+      'desi hitters cricket streetwear hoodie with front and back design',
+      'cricket batter in stadium dual sided hoodie',
+      'galli to global cricket hoodie with front and back view',
+      'desi hitters graffiti hoodie with batsman and floodlit stadium'
+    ],
+    tags: ['#desihitters', '#cricket', '#streetwear', '#hoodie', '#dualsided', '#gallitoglobal', '#450gsm']
+  },
+
+  // 0.01 DUAL-SIDED MASTERPIECE: TOKYO KITSUNE & BLOOD MOON RONIN HOODIE
   {
     id: 'asset-kitsune-ronin-dualsided',
     name: 'Tokyo Kitsune & Blood Moon Ronin Dual-Sided Hoodie',

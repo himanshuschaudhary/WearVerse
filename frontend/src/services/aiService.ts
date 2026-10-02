@@ -2,6 +2,7 @@ import { AIVariation, Design } from '../types';
 import { matchPromptToAsset, isEditRequest, SemanticMatchResult } from './promptMatchingEngine';
 import { TSHIRT_ASSET_LIBRARY } from '../data/tshirtAssetLibrary';
 import { geminiService } from './geminiService';
+import { openaiService } from './openaiService';
 
 export interface GenerateDesignParams {
   prompt: string;
@@ -199,6 +200,30 @@ export const aiService = {
       ...(matchResult.variations || []).slice(0, 1),
     ];
 
+    // 3. If OpenAI API is configured, generate direct bespoke artwork via OpenAI DALL-E 3
+    if (openaiService.isConfigured()) {
+      try {
+        if (onProgress) onProgress('🤖 Synthesizing bespoke artwork with OpenAI DALL-E 3...');
+        const openAiResult = await openaiService.generateDesignImage(cleanPrompt, params.style);
+        if (openAiResult?.url) {
+          const openAiVariation: AIVariation = {
+            id: `var-openai-${Date.now()}`,
+            name: `${promptCap} (OpenAI DALL-E 3 Drop)`,
+            mockupUrl: openAiResult.url,
+            graphicUrl: openAiResult.url,
+            prompt: openAiResult.revisedPrompt || cleanPrompt,
+            color: color,
+            fit: '240 GSM Luxury Streetwear Silhouette',
+            aspectRatio: '1:1',
+            tags: ['#openai', '#dalle3', '#bespoke', '#streetwear', '#dtg'],
+          };
+          return [openAiVariation, ...liveVariations];
+        }
+      } catch (err) {
+        console.warn('[WearVerse AI] OpenAI generation error, falling back to neural engine:', err);
+      }
+    }
+
     return liveVariations;
   },
 
@@ -290,12 +315,24 @@ export const aiService = {
   },
 
   /**
-   * Generates live conversational fashion commentary using Google Gemini
+   * Generates live conversational fashion commentary using OpenAI GPT-4o with Gemini fallback
    */
   async generateFashionDialogue(prompt: string, history?: { role: 'user' | 'model'; text: string }[]): Promise<string> {
+    if (openaiService.isConfigured()) {
+      try {
+        const openAiDialogue = await openaiService.generateFashionDialogue(prompt, history);
+        if (openAiDialogue) {
+          return openAiDialogue;
+        }
+      } catch (err) {
+        console.warn('[WearVerse AI] OpenAI dialogue error, falling back to Gemini:', err);
+      }
+    }
     const res = await geminiService.generateFashionResponse(prompt, history);
     return res.text;
   },
 
+  openaiService,
   geminiService,
 };
+
