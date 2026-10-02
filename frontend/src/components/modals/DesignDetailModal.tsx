@@ -38,7 +38,7 @@ export const DesignDetailModal: React.FC<DesignDetailModalProps> = ({ design }) 
   const [newRating, setNewRating] = useState(5);
   const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
 
-  const hasBackView = Boolean(design.backImage && design.backImage !== design.frontImage && !design.backImage.includes('tryon_model_back'));
+  const hasBackView = Boolean(design.backImage && design.backImage !== design.frontImage && !design.backImage.includes('tryon_model_back') && !design.backImage.includes('tryon_black_back'));
   const currentImage = viewSide === 'front' ? design.frontImage : (design.backImage || design.frontImage);
 
   const designReviews = reviews[design.id] || [];
@@ -112,35 +112,18 @@ export const DesignDetailModal: React.FC<DesignDetailModalProps> = ({ design }) 
                     type="button"
                     onClick={() => setViewSide(prev => prev === 'front' ? 'back' : 'front')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/75 hover:bg-indigo-600 text-white flex items-center justify-center backdrop-blur-md border border-white/25 transition-all hover:scale-110 shadow-2xl z-20"
-                    title={viewSide === 'front' ? 'Click > to see Back view side' : 'Click < to see Front view side'}
+                    title="Toggle view"
                   >
                     {viewSide === 'front' ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
                   </button>
 
-                  {/* Bottom Toggle Pills */}
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1 rounded-full bg-slate-950/85 backdrop-blur-md border border-white/20 z-20 shadow-xl">
-                    <button
-                      type="button"
-                      onClick={() => setViewSide('front')}
-                      className={`px-3 py-1 rounded-full text-[11px] font-bold transition ${
-                        viewSide === 'front' 
-                          ? 'bg-indigo-600 text-white shadow-md' 
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      Front Side
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewSide('back')}
-                      className={`px-3 py-1 rounded-full text-[11px] font-bold transition ${
-                        viewSide === 'back' 
-                          ? 'bg-indigo-600 text-white shadow-md' 
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      Back Side &gt;
-                    </button>
+                  {/* View Indicator Dots (No text labels) */}
+                  <div 
+                    onClick={() => setViewSide(prev => prev === 'front' ? 'back' : 'front')}
+                    className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-950/75 backdrop-blur-md border border-white/20 z-20 shadow-xl cursor-pointer hover:bg-slate-950/90 transition"
+                  >
+                    <span className={`w-2 h-2 rounded-full transition-all ${viewSide === 'front' ? 'bg-indigo-500 w-4' : 'bg-white/40'}`} />
+                    <span className={`w-2 h-2 rounded-full transition-all ${viewSide === 'back' ? 'bg-indigo-500 w-4' : 'bg-white/40'}`} />
                   </div>
                 </>
               )}

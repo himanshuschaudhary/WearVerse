@@ -38,7 +38,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
   const [imgSrc, setImgSrc] = useState(design.frontImage);
   const [viewSide, setViewSide] = useState<'front' | 'back'>('front');
 
-  const hasBackView = Boolean(design.backImage && design.backImage !== design.frontImage && !design.backImage.includes('tryon_model_back'));
+  const hasBackView = Boolean(design.backImage && design.backImage !== design.frontImage && !design.backImage.includes('tryon_model_back') && !design.backImage.includes('tryon_black_back'));
   const currentImg = viewSide === 'front' ? (imgSrc || design.frontImage) : (design.backImage || design.frontImage);
 
   const handleImgError = () => {
@@ -69,7 +69,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
           }`}
         />
 
-        {/* Navigation Button > to see Back View Side */}
+        {/* Navigation Button > to flip side */}
         {hasBackView && (
           <>
             <button
@@ -79,23 +79,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ design, showCategoryBa
                 setViewSide(prev => prev === 'front' ? 'back' : 'front');
               }}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/75 hover:bg-indigo-600 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all hover:scale-110 shadow-xl z-20"
-              title={viewSide === 'front' ? 'Click > to see Back view side' : 'Click < to see Front view side'}
+              title="Toggle view"
             >
               {viewSide === 'front' ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             </button>
 
-            {/* Front / Back Side Badge */}
+            {/* View Indicator Dots (No text labels) */}
             <div 
               onClick={(e) => {
                 e.stopPropagation();
                 setViewSide(prev => prev === 'front' ? 'back' : 'front');
               }}
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-slate-950/85 hover:bg-slate-900 border border-white/20 text-[9px] font-black uppercase tracking-wider text-slate-200 backdrop-blur-md transition cursor-pointer flex items-center gap-1 z-20 shadow-md"
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2 py-1 rounded-full bg-slate-950/70 hover:bg-slate-950/90 border border-white/20 backdrop-blur-md transition cursor-pointer flex items-center gap-1.5 z-20 shadow-md"
             >
-              <span className={viewSide === 'front' ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Front</span>
-              <span className="text-slate-500">•</span>
-              <span className={viewSide === 'back' ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Back</span>
-              <span className="text-indigo-400 ml-0.5 font-bold">&gt;</span>
+              <span className={`w-1.5 h-1.5 rounded-full transition-all ${viewSide === 'front' ? 'bg-indigo-400 w-3' : 'bg-white/40'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full transition-all ${viewSide === 'back' ? 'bg-indigo-400 w-3' : 'bg-white/40'}`} />
             </div>
           </>
         )}

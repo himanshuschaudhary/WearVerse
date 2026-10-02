@@ -324,7 +324,6 @@ export const HomePage: React.FC = () => {
     isLiked: false,
     isSaved: false,
     frontImage: v.mockupUrl,
-    backImage: '/assets/tryon_black_back.jpg',
     graphicImage: v.graphicUrl || v.mockupUrl,
     prompt: v.prompt,
     style: 'Generative Techwear',
@@ -1760,7 +1759,7 @@ export const HomePage: React.FC = () => {
           <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-1">
             {trendingList.map((item) => {
               const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
-              const backImg = fullDesign?.backImage && fullDesign.backImage !== fullDesign.frontImage && !fullDesign.backImage.includes('tryon_model_back') ? fullDesign.backImage : null;
+              const backImg = fullDesign?.backImage && fullDesign.backImage !== fullDesign.frontImage && !fullDesign.backImage.includes('tryon_model_back') && !fullDesign.backImage.includes('tryon_black_back') ? fullDesign.backImage : null;
               const hasBack = Boolean(backImg);
               const isBack = cardSides[item.id] === 'back';
               const currentImg = (isBack && backImg) ? backImg : item.image;
@@ -1805,27 +1804,25 @@ export const HomePage: React.FC = () => {
                       <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
 
-                    {/* Navigation Button > to see Back View Side */}
+                    {/* Navigation Button > to flip side */}
                     {hasBack && (
                       <>
                         <button
                           type="button"
                           onClick={(e) => toggleCardSide(item.id, e)}
                           className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-black/75 hover:bg-indigo-600 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all hover:scale-110 shadow-lg z-20"
-                          title={isBack ? 'Click < to see Front view side' : 'Click > to see Back view side'}
+                          title="Toggle view"
                         >
                           {isBack ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                         </button>
 
-                        {/* Front / Back Indicator Pill */}
+                        {/* View Indicator Dots (No text labels) */}
                         <div 
                           onClick={(e) => toggleCardSide(item.id, e)}
-                          className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-950/85 hover:bg-slate-900 border border-white/20 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-slate-200 backdrop-blur-md transition cursor-pointer flex items-center gap-0.5 z-20 shadow-md"
+                          className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-slate-950/70 hover:bg-slate-950/90 border border-white/20 backdrop-blur-md transition cursor-pointer flex items-center gap-1 z-20 shadow-md"
                         >
-                          <span className={!isBack ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Front</span>
-                          <span className="text-slate-500">•</span>
-                          <span className={isBack ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Back</span>
-                          <span className="text-indigo-400 font-bold">&gt;</span>
+                          <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all ${!isBack ? 'bg-indigo-400 w-2.5 sm:w-3' : 'bg-white/40'}`} />
+                          <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all ${isBack ? 'bg-indigo-400 w-2.5 sm:w-3' : 'bg-white/40'}`} />
                         </div>
                       </>
                     )}
@@ -1892,7 +1889,7 @@ export const HomePage: React.FC = () => {
           <div className="flex gap-4 overflow-x-auto pb-3 pt-1 scrollbar-none touch-pan-x -mx-4 px-4 sm:mx-0 sm:px-0">
             {hoodieAndSweatList.map((item) => {
               const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
-              const backImg = item.backImage || (fullDesign?.backImage && fullDesign.backImage !== fullDesign.frontImage && !fullDesign.backImage.includes('tryon_model_back') ? fullDesign.backImage : null);
+              const backImg = item.backImage || (fullDesign?.backImage && fullDesign.backImage !== fullDesign.frontImage && !fullDesign.backImage.includes('tryon_model_back') && !fullDesign.backImage.includes('tryon_black_back') ? fullDesign.backImage : null);
               const hasBack = Boolean(backImg);
               const isBack = cardSides[item.id] === 'back';
               const currentImg = (isBack && backImg) ? backImg : (item.frontImage || item.image);
@@ -1937,27 +1934,25 @@ export const HomePage: React.FC = () => {
                       <Heart className="w-3.5 h-3.5" />
                     </button>
 
-                    {/* Navigation Button > to see Back View Side */}
+                    {/* Navigation Button > to flip side */}
                     {hasBack && (
                       <>
                         <button
                           type="button"
                           onClick={(e) => toggleCardSide(item.id, e)}
                           className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/75 hover:bg-indigo-600 text-white flex items-center justify-center backdrop-blur-md border border-white/25 transition-all hover:scale-110 shadow-xl z-20"
-                          title={isBack ? 'Click < to see Front view side' : 'Click > to see Back view side'}
+                          title="Toggle view"
                         >
                           {isBack ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                         </button>
 
-                        {/* Front / Back Indicator Pill */}
+                        {/* View Indicator Dots (No text labels) */}
                         <div 
                           onClick={(e) => toggleCardSide(item.id, e)}
-                          className="absolute bottom-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-slate-950/85 hover:bg-slate-900 border border-white/20 text-[9px] font-black uppercase tracking-wider text-slate-200 backdrop-blur-md transition cursor-pointer flex items-center gap-1 z-20 shadow-md"
+                          className="absolute bottom-2.5 left-1/2 -translate-x-1/2 px-2 py-1 rounded-full bg-slate-950/70 hover:bg-slate-950/90 border border-white/20 backdrop-blur-md transition cursor-pointer flex items-center gap-1.5 z-20 shadow-md"
                         >
-                          <span className={!isBack ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Front</span>
-                          <span className="text-slate-500">•</span>
-                          <span className={isBack ? 'text-indigo-400 font-extrabold' : 'text-slate-400'}>Back</span>
-                          <span className="text-indigo-400 ml-0.5 font-bold">&gt;</span>
+                          <span className={`w-1.5 h-1.5 rounded-full transition-all ${!isBack ? 'bg-indigo-400 w-3' : 'bg-white/40'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full transition-all ${isBack ? 'bg-indigo-400 w-3' : 'bg-white/40'}`} />
                         </div>
                       </>
                     )}
