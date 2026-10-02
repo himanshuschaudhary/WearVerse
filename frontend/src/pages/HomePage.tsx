@@ -1694,8 +1694,108 @@ export const HomePage: React.FC = () => {
           )}
         </div>
 
-        {/* 6. SECTION 1: HEAVYWEIGHT HOODIES & FRENCH TERRY SWEATSHIRTS */}
+        {/* 6. SECTION 1: CURATED LUXURY GRAPHIC TEES (240 GSM) */}
         <div className="space-y-3 pt-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
+              <h2 className={`text-lg sm:text-xl font-extrabold font-['Space_Grotesk'] ${
+                theme === 'dark' ? 'text-white' : 'text-slate-950'
+              }`}>
+                Curated Luxury Graphic Tees (240 GSM)
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCurrentPage('explore')}
+              className="text-xs font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1 transition"
+            >
+              <span>See all</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* 3 IN ONE LINE AND NEXT 3 AT ANOTHER LINE (GRID-COLS-3 ON MOBILE) */}
+          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-1">
+            {trendingList.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
+                  if (fullDesign) openDetailModal(fullDesign);
+                }}
+                className={`rounded-2xl sm:rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer group flex flex-col justify-between ${
+                  theme === 'dark'
+                    ? 'bg-[#121624] border-slate-800 hover:border-indigo-500/50'
+                    : 'bg-white border-slate-200 hover:border-indigo-400 shadow-sm'
+                }`}
+              >
+                <div className="relative aspect-square overflow-hidden bg-slate-900">
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className={`absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 px-1.5 sm:px-2.5 py-0.5 rounded-md sm:rounded-full backdrop-blur-md text-[8px] sm:text-[10px] font-black uppercase tracking-wider border shadow-sm ${
+                    theme === 'dark' 
+                      ? 'bg-slate-950/85 border-violet-500/40 text-violet-300' 
+                      : 'bg-white/95 border-violet-200 text-violet-700'
+                  }`}>
+                    {item.badge}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLikeDesign(item.id);
+                    }}
+                    className={`absolute top-1.5 sm:top-2.5 right-1.5 sm:right-2.5 p-1 sm:p-1.5 rounded-full backdrop-blur-md border transition ${
+                      theme === 'dark' 
+                        ? 'bg-slate-950/60 border-slate-700/60 text-white hover:text-rose-500' 
+                        : 'bg-white/90 border-slate-200 text-slate-700 hover:text-rose-500 shadow-sm'
+                    }`}
+                  >
+                    <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  </button>
+                </div>
+
+                <div className="p-2 sm:p-3.5 space-y-1 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className={`font-bold text-[10px] sm:text-sm line-clamp-1 ${
+                      theme === 'dark' ? 'text-white' : 'text-slate-950'
+                    }`}>
+                      {item.title}
+                    </h3>
+                    <p className={`text-[9px] sm:text-[11px] truncate ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                      @{item.creator.username}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
+                    <span className="font-extrabold text-[11px] sm:text-sm text-indigo-500">
+                      ₹{item.price.toLocaleString()}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
+                        if (fullDesign) openTryOnModal(fullDesign);
+                      }}
+                      className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-indigo-600/10 hover:bg-indigo-600 text-indigo-500 hover:text-white text-[9px] sm:text-[11px] font-bold transition flex items-center gap-0.5"
+                    >
+                      <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                      <span className="hidden sm:inline">Try</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 7. SECTION 2: HEAVYWEIGHT HOODIES & FRENCH TERRY SWEATSHIRTS */}
+        <div className="space-y-3 pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse" />
@@ -1787,106 +1887,6 @@ export const HomePage: React.FC = () => {
                       className="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold transition shadow-sm flex items-center gap-1"
                     >
                       <Eye className="w-3 h-3" /> Try On
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 7. SECTION 2: CURATED GRAPHIC TEES */}
-        <div className="space-y-3 pt-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
-              <h2 className={`text-lg sm:text-xl font-extrabold font-['Space_Grotesk'] ${
-                theme === 'dark' ? 'text-white' : 'text-slate-950'
-              }`}>
-                Curated Luxury Graphic Tees (240 GSM)
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setCurrentPage('explore')}
-              className="text-xs font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1 transition"
-            >
-              <span>See all</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* 3 IN ONE LINE AND NEXT 3 AT ANOTHER LINE (GRID-COLS-3 ON MOBILE) */}
-          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4 pt-1">
-            {trendingList.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => {
-                  const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
-                  if (fullDesign) openDetailModal(fullDesign);
-                }}
-                className={`rounded-2xl sm:rounded-3xl border overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer group flex flex-col justify-between ${
-                  theme === 'dark'
-                    ? 'bg-[#121624] border-slate-800 hover:border-indigo-500/50'
-                    : 'bg-white border-slate-200 hover:border-indigo-400 shadow-sm'
-                }`}
-              >
-                <div className="relative aspect-square overflow-hidden bg-slate-900">
-                  <img 
-                    src={item.image} 
-                    alt={item.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className={`absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 px-1.5 sm:px-2.5 py-0.5 rounded-md sm:rounded-full backdrop-blur-md text-[8px] sm:text-[10px] font-black uppercase tracking-wider border shadow-sm ${
-                    theme === 'dark' 
-                      ? 'bg-slate-950/85 border-violet-500/40 text-violet-300' 
-                      : 'bg-white/95 border-violet-200 text-violet-700'
-                  }`}>
-                    {item.badge}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLikeDesign(item.id);
-                    }}
-                    className={`absolute top-1.5 sm:top-2.5 right-1.5 sm:right-2.5 p-1 sm:p-1.5 rounded-full backdrop-blur-md border transition ${
-                      theme === 'dark' 
-                        ? 'bg-slate-950/60 border-slate-700/60 text-white hover:text-rose-500' 
-                        : 'bg-white/90 border-slate-200 text-slate-700 hover:text-rose-500 shadow-sm'
-                    }`}
-                  >
-                    <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  </button>
-                </div>
-
-                <div className="p-2 sm:p-3.5 space-y-1 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className={`font-bold text-[10px] sm:text-sm line-clamp-1 ${
-                      theme === 'dark' ? 'text-white' : 'text-slate-950'
-                    }`}>
-                      {item.title}
-                    </h3>
-                    <p className={`text-[9px] sm:text-[11px] truncate ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                      @{item.creator.username}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80">
-                    <span className="font-extrabold text-[11px] sm:text-sm text-indigo-500">
-                      ₹{item.price.toLocaleString()}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const fullDesign = designs.find(d => d.id === item.id) || INITIAL_DESIGNS.find(d => d.id === item.id);
-                        if (fullDesign) openTryOnModal(fullDesign);
-                      }}
-                      className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-indigo-600/10 hover:bg-indigo-600 text-indigo-500 hover:text-white text-[9px] sm:text-[11px] font-bold transition flex items-center gap-0.5"
-                    >
-                      <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                      <span className="hidden sm:inline">Try</span>
                     </button>
                   </div>
                 </div>
